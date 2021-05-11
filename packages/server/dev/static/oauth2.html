@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OAuth2</title>
+  <script src="./util.js"></script>
+</head>
+<body>
+  <h1>Github</h1>
+  <a id="github-login-btn">Login</a>
+
+  <div>
+    <div>Login State: </span><span id="login-state">Loading</div>
+    <div>Local JWT: </span><textarea id="local-jwt">Loading</textarea>
+  </div>
+
+  <script>
+    (async () => {
+      $('#github-login-btn').href = getLink('/auth/login', { provider: 'github' });
+
+      var payload = localStorage.getItem('keekijanai-jwt');
+      if (payload) {
+        const { jwt, expire } = JSON.parse(payload);
+        
+        $('#local-jwt').innerText = jwt;
+
+        var rsp = await fetch(getLink('/auth/current'), {
+          headers: {
+            Authorization: jwt,
+          },
+        });
+        if (rsp.ok) {
+          $('#login-state').innerText = await rsp.text();
+        } else {
+          $('#login-state').innerText = 'error with response:' + rsp.text();
+        }
+      } else {
+        $('#login-state').innerText = 'not login';
+        $('#local-jwt').innerText = 'null';
+      }
+    })()
+  </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+import { Comment, Grouping } from 'keekijanai-type';
+import { Observable } from "rxjs/internal/Observable";
+import { ajax } from 'rxjs/ajax';
+import { map } from 'rxjs/operators';
+import { Client } from "../core/client";
+import { Service, serviceFactory } from "../core/service";
+
+class CommentServiceImpl extends Service {
+  routes = {
+    create: '/comment/post',
+    list: '/comment/get',
+    delete: '/comment/delete',
+  };
+  
+  create = (scope: string, comment: Comment.Create): Observable<Comment.Get> => {
+    const result = this.client.requester.request({
+      route: this.routes.create,
+      method: 'POST',
+      query: {
+        scope,
+      },
+      body: {
+        comment,
+      }
+    }).pipe(
+      map(value => value.response as any)
+    );
+    return result;
+  }
+
+  list = (scope: string, parentId: number | undefined, grouping: Grouping): Observable<Comment.List> => {
+    const result = this.client.requester.request({
+      route: this.routes.create,
+      query: {
+        scope,
+        parentId,
+        grouping: `${grouping.skip},${grouping.take}`,
+      }
+    }).pipe(
+      map(value => value.response as any)
+    );
+    return result;
+  }
+
+  delete = (commentId: number) => {
+    const result = this.client.requester.request({
+      route: this.routes.create,
+      method: 'DELETE',
+      query: {
+        commentId,
+      }
+    }).pipe(
+      map(value => value.response)
+    );
+    return result;
+  }
+}
+
+export const comment = serviceFactory(CommentServiceImpl);

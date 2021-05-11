@@ -1,0 +1,16 @@
+{
+  "NOT_LOGIN": "Not Login",
+  "LOGIN": "Login",
+  "LOGOUT": "Logout",
+  "CHOOSE_ONE_OF_LOGIN_METHOD": "Choose one of login method",
+  
+  "CONFIRM": "Confirm",
+  "CANCEL": "Cancel",
+  "REMOVE": "Remove",
+  "READY_TO_REMOVE": "Are you sure remove the comment?",
+  "REPLY": "Reply",
+  "POST_COMMENT": "Post",
+  "POST_COMMENT_USERNAME": "Username（email as default）",
+  "POST_COMMENT_CONTENT": "Comment",
+  "NO_COMMENT": "Nothing here"
+}

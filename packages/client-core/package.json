@@ -1,0 +1,10 @@
+{
+  "name": "keekijanai-client-core",
+  "version": "0.0.1",
+  "main": "index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "keekijanai-type": "^0.0.1",
+    "rxjs": "^7.0.0"
+  }
+}
