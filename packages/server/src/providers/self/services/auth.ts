@@ -101,7 +101,7 @@ export class AuthImpl extends Service<SelfClient> implements AuthService {
   }
 
   oauth2GetCode: AuthService['oauth2GetCode'] = async (provider) => {
-    const { appID, appSecret } =  this.manager.configReader.getOAuth2Info(provider);
+    const { appID, appSecret } =  this.internalConfig.oauth2.platform(provider);
     const service = this.getOAuth2Service(provider);
 
     /* Redirect, don't need to process response */

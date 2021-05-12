@@ -1,19 +1,21 @@
-import { Auth } from 'keekijanai-type';
+import { User } from 'keekijanai-type';
+
+import './Avatar.css';
 
 
 export interface AvatarProps {
-  user: Auth.CurrentUser;
+  user: User.User | undefined;
+  size?: string;
 }
 
 export function Avatar(props: AvatarProps) {
+  const { user, size = '50px' } = props;
 
-  const { user } = props;
-
-  if (!user.isLogin) {
-    throw Error('user should login');
+  if (!user) {
+    return null;
   }
 
   return (
-    <img width="50px" height="50px" src={user.avatarUrl}></img>
+    <img className='__Keekijanai__User__Avatar' width={size} height={size} src={user.avatarUrl}></img>
   )
 }

@@ -16,6 +16,11 @@ export const argsError = {
     comment: {
       toBeObjectInReqBody: () => new ResponseError('"comment" should be an object in request body', 400),
     }
+  },
+  user: {
+    id: {
+      notString: () => new ResponseError('"id" should be a string', 400)
+    }
   }
 }
 

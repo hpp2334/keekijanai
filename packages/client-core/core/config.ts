@@ -7,7 +7,7 @@ type InternalConfigType = ConfigType;
 
 const INIT_CONFIG: ConfigType = {
   route: {
-    root: '/api/blog-common',
+    root: '/api/keekijanai',
   },
 }
 

@@ -38,14 +38,6 @@ export class ConfigReader {
     throw Error(`Cannot find clientFactory for service "${serviceName}".`);
   }
 
-  getOAuth2Info(provider: string): OAuth2Item {
-    const target = this.internalConfig.oauth2?.[provider];
-    if (!target) {
-      throw Error(`Cannot find oauth2 item for provider "${provider}"`);
-    }
-    return target;
-  }
-
   getPlatform() {
     const platformConstructor = this.internalConfig.platform;
     return platformFactory(platformConstructor);

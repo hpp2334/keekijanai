@@ -4,12 +4,12 @@ import { useView } from './controller';
 import { EyeOutlined } from '@ant-design/icons';
 
 interface ViewProps {
-  slug: string;
+  scope: string;
 }
 
 export function View(props: ViewProps) {
-  const { slug } = props;
-  const viewHookObject = useView(slug);
+  const { scope } = props;
+  const viewHookObject = useView(scope);
 
   return (
     <div>

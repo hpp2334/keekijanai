@@ -5,9 +5,12 @@ import { useForceUpdate, useMemoExports, useSwitch } from '../../util';
 import { useAuth } from './controller';
 import { auth as authService } from 'keekijanai-client-core';
 import { Auth } from 'keekijanai-type';
-import { Button } from 'antd';
+import { Button, Popconfirm, Typography } from 'antd';
 import { GithubOutlined } from '@ant-design/icons';
 import { BehaviorSubject } from 'rxjs';
+
+import './Auth.css';
+import { Avatar } from '../User';
 
 
 export interface LoginProps {
@@ -56,11 +59,11 @@ export function SingletonAuthComponent() {
   }
 
   return !open ? null : (
-    <div className="fixed z-50 w-screen h-screen bg-gray-500 bg-opacity-70" onClick={hide}>
-      <div className="relative w-96 inset-2/4 transform -translate-x-2/4 -translate-y-2/4 shadow-lg bg-white p-5" onClick={handleStopPropagation}>
-        <h2 className="text-xl text-center">{t("CHOOSE_ONE_OF_LOGIN_METHOD")}</h2>
-        <div className="flex my-8 justify-center">
-          <Button onClick={handleLogin('github')}>Continue with Github <GithubOutlined /></Button>
+    <div className='__Keekijanai__Auth__singleton-auth' onClick={hide}>
+      <div className='__Keekijanai__Auth__singleton-auth-inner' onClick={handleStopPropagation}>
+        <Typography.Title level={3}>{t("CHOOSE_ONE_OF_LOGIN_METHOD")}</Typography.Title>
+        <div>
+          <Button size='large' onClick={handleLogin('github')}>Continue with Github <GithubOutlined /></Button>
         </div>
       </div>
     </div>
@@ -81,9 +84,20 @@ function HaveLogined(props: HaveLoginedProps) {
   }
 
   return (
-    <div>
-      {user.name}
-      <button className="ml-3 text-primary" onClick={handleLogout}>{t("LOGOUT")}</button>
+    <div className='__Keekijanai__Auth__logined_container'>
+      <div className='__Keekijanai__Auth__logined_user_indicator'>
+        <Avatar user={user} size='30px' />
+        <Typography.Text>{user.name}</Typography.Text>
+      </div>
+      <Popconfirm
+        placement="top"
+        title={t("CONFIRM_LOGOUT")}
+        onConfirm={handleLogout}
+        okText={t("YES")}
+        cancelText={t("NO")}
+      >
+        <Button size='small'>{t("LOGOUT")}</Button>
+      </Popconfirm>
     </div>
   );
 }
@@ -94,8 +108,7 @@ function HaveLogouted(props: HaveLogoutedProps) {
 
   return (
     <div>
-      {t("NOT_LOGIN")}
-      <button className="ml-3 text-primary" onClick={show}>{t("LOGIN")}</button>
+      <Button size='small' onClick={show}>{t("LOGIN")}</Button>
     </div>
   );
 }

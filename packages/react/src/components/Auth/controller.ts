@@ -1,6 +1,6 @@
 import { auth as authService } from 'keekijanai-client-core';
 import { Auth } from 'keekijanai-type';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useMemoExports } from '../../util';
 
 export function useAuth() {
@@ -12,8 +12,10 @@ export function useAuth() {
     });
   }, []);
 
+
   const exports = useMemoExports({
     user,
+    onCallback: authService.onCallback,
   });
 
   return exports;

@@ -1,7 +1,11 @@
 {
+  "YES": "Yes",
+  "NO": "No",
+
   "NOT_LOGIN": "Not Login",
   "LOGIN": "Login",
   "LOGOUT": "Logout",
+  "CONFIRM_LOGOUT": "Confirm to logout?",
   "CHOOSE_ONE_OF_LOGIN_METHOD": "Choose one of login method",
   
   "CONFIRM": "Confirm",
@@ -12,5 +16,6 @@
   "POST_COMMENT": "Post",
   "POST_COMMENT_USERNAME": "Username（email as default）",
   "POST_COMMENT_CONTENT": "Comment",
+  "COMMENT_PLACEHOLDER": "Comment something...",
   "NO_COMMENT": "Nothing here"
 }

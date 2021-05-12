@@ -1,3 +1,4 @@
+import './style.css';
 
 export * from './src/components/Auth';
 export * from './src/components/Comment';

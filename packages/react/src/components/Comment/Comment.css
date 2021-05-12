@@ -1,0 +1,31 @@
+@import 'draft-js/dist/Draft.css';
+@import '@draft-js-plugins/emoji/lib/plugin.css';
+
+.__Keekijanai__Comment-post-editor-container {
+  border: 1px solid rgb(233, 233, 233);
+  border-radius: 4px;
+  padding: 10px;
+  min-height: 6em;
+  margin: 5px 0;
+}
+
+.__Keekijanai__Comment_post-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 5px 0;
+}
+
+.__Keekijanai__Comment_empty-list-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.__Keekijanai__Comment_empty-list-icon {
+  font-size: 3rem;
+}
+
+.__Keekijanai__Comment_empty-list-text {
+  font-size: 4rem;
+}

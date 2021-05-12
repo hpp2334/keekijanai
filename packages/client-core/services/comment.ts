@@ -7,8 +7,8 @@ import { Service, serviceFactory } from "../core/service";
 
 class CommentServiceImpl extends Service {
   routes = {
-    create: '/comment/post',
-    list: '/comment/get',
+    create: '/comment/create',
+    list: '/comment/list',
     delete: '/comment/delete',
   };
   
@@ -30,7 +30,7 @@ class CommentServiceImpl extends Service {
 
   list = (scope: string, parentId: number | undefined, grouping: Grouping): Observable<Comment.List> => {
     const result = this.client.requester.request({
-      route: this.routes.create,
+      route: this.routes.list,
       query: {
         scope,
         parentId,

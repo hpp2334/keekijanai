@@ -21,6 +21,7 @@ class Client {
 }
 
 const client = new Client();
+client.initialize();
 
 export {
   client,

@@ -6,11 +6,13 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { tap } from 'rxjs/operators';
 import { useMemoExports } from '../../util';
 
-export function useComment(scope: string, parentId: number | undefined, take: number = 5) {
+export function useCommentList(scope: string, parentId: number | undefined, take: number = 5) {
   const [list, setResult] = useState<TypeComment.List>();
   const [page, changePage] = useState(1);
-  const [loadingState, setLoadingState] = useState<'loading' | 'creating' | 'removing' | 'error' | 'done'>('loading');
+  const [pageSize, setPageSize] = useState(take);
+  const [loadingState, setLoadingState] = useState<'loading' | 'error' | 'done'>('loading');
   const [lastError, setLastError] = useState<string | null>(null);
+  const [lastActCnt, setLastActCnt] = useState(0);
 
   const query = useCallback(() => {
     setLoadingState('loading');
@@ -30,32 +32,37 @@ export function useComment(scope: string, parentId: number | undefined, take: nu
   }, [page, take]);
 
   const remove = useCallback((id: number) => {
-    setLoadingState('removing');
     const rsp = commentService
       .delete(id)
-      .subscribe({
-        next: () => { changePage(1); }
-      });
+      .pipe(
+        tap(() => {
+          changePage(1);
+          setLastActCnt(x => x + 1);
+        })
+      )
     return rsp;
   }, []);
 
   const create = useCallback((scope: string, comment: TypeComment.Create) => {
-    setLoadingState('creating');
     const rsp = commentService
       .create(scope, comment)
-      .subscribe({
-        next: () => { changePage(1); }
-      });
+      .pipe(
+        tap(() => {
+          changePage(1);
+          setLastActCnt(x => x + 1);
+        }),
+      )
     return rsp;
   }, []);
   
   useEffect(() => {
     query();
-  }, [page, take]);
+  }, [page, lastActCnt, take]);
 
   const exports = useMemoExports({
     list,
     page,
+    pageSize,
     loadingState,
     lastError,
     changePage,
@@ -66,4 +73,4 @@ export function useComment(scope: string, parentId: number | undefined, take: nu
   return exports;
 }
 
-export type CommentHookObject = ReturnType<typeof useComment>;
+export type CommentListHookObject = ReturnType<typeof useCommentList>;

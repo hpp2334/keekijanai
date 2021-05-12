@@ -5,6 +5,7 @@ import { map, tap } from 'rxjs/operators';
 import { Service, serviceFactory } from "../core/service";
 import { createLocalStorageEntry } from "../util";
 import { Auth } from "keekijanai-type";
+import processNextTick from 'next-tick';
 
 interface JwtInfo {
   jwt: string;
@@ -12,6 +13,7 @@ interface JwtInfo {
 }
 
 const keekijanaiJwtEntry = createLocalStorageEntry('keekijanai-jwt');
+const lastPageEntry = createLocalStorageEntry('keekijanai-last-page');
 
 class AuthServiceImpl extends Service {
   private routes = {
@@ -25,7 +27,10 @@ class AuthServiceImpl extends Service {
     super(client);
 
     this.jwtInfo = this.readLocalJwtInfo();
-    this.updateCurrent().subscribe();
+
+    processNextTick(() => {
+      this.updateCurrent().subscribe();
+    });
   }
 
   get jwt() {
@@ -42,17 +47,22 @@ class AuthServiceImpl extends Service {
   }
 
   oauth = (provider: string) => {
-    return this.client.requester.request({
-      route: this.routes.login,
-      query: {
-        provider,
-      }
-    });
+    if (typeof window !== 'undefined') {
+      lastPageEntry.setItem(window.location.pathname);
+      const url = this.client.requester.getURI({
+        route: this.routes.login,
+        query: {
+          provider,
+        }
+      });
+      window.location = url as any;
+    }
   }
 
   logout = () => {
     this.jwtInfo = undefined;
     keekijanaiJwtEntry.removeItem();
+    this.user$.next({ isLogin: false });
   }
 
   updateCurrent = () => {
@@ -66,7 +76,7 @@ class AuthServiceImpl extends Service {
     );
   }
 
-  onCallback = (redirect: string, timeoutMs: number) => {
+  onCallback = (callback: (redirect?: string) => void) => {
     if (typeof window !== 'undefined') {
       const url = new URL(window.location.href);
       const jwt = url.searchParams.get('jwt');
@@ -77,9 +87,9 @@ class AuthServiceImpl extends Service {
   
       this.jwtInfo = { jwt, expire: maxAge + Date.now() };
       keekijanaiJwtEntry.setItem(JSON.stringify(this.jwtInfo));
-      setTimeout(() => {
-        window.location = redirect as any;
-      }, timeoutMs);
+
+      const lastPage = lastPageEntry.getItem();
+      callback(lastPage ?? undefined);
     }
   }
 
