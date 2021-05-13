@@ -28,6 +28,7 @@ export function setupRoutes(router: Router, manager: Manager) {
   router.add('/star/post', starController.post);
   router.add('/star/get', starController.get);
 
+  router.add('/comment/get', commentController.get);
   router.add('/comment/create', commentController.create);
   router.add('/comment/list', commentController.list);
   router.add('/comment/delete', commentController.delete);

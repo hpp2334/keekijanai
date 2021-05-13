@@ -10,6 +10,15 @@ import * as _ from 'lodash';
 const debug = createDebugger('keekijanai:controller:comment');
 
 export class CommentController extends Controller {
+  get: ControllerHandler = async (ctx) => {
+    const { id } = ctx.req.query || {};
+    debug('get: id="%s"', id);
+
+    const commentService = await ctx.getService('comment');
+    const res = await commentService.get(id);
+    ctx.res.body = res;
+  }
+
   list: ControllerHandler = async (ctx) => {
     const { scope, parentId } = ctx.req.query || {};
     const grouping = parseGrouping(ctx.req.query);
@@ -36,12 +45,12 @@ export class CommentController extends Controller {
   }
 
   delete: ControllerHandler = async (ctx) => {
-    const { scope, commentId } = ctx.req.query || {};
+    const { commentId } = ctx.req.query || {};
 
-    debug('create: scope="%s", id="%d"', scope, commentId);
+    debug('delete: id="%d"', commentId);
 
     const commentService = await ctx.getService('comment');
-    const res = await commentService.delete(scope, commentId);
+    const res = await commentService.delete(commentId);
     ctx.res.body = res;
   }
 

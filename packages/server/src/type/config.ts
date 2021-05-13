@@ -20,9 +20,10 @@ export type OAuth2 = Record<string, OAuth2Item>;
 export type Preset = Config;
 
 export interface Config {
+  maxAgeInSec?: number;
   preset?: Preset | Array<Preset>;
   clientFactory?: ClientFactory;
-  platform: PlatformConstructor,
+  platform: PlatformConstructor;
 }
 
 export interface ConfigInternal {

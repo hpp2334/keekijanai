@@ -8,9 +8,10 @@ export interface StarService extends Core.Service {
 }
 
 export interface CommentService extends Core.Service {
+  get(id: Comment.Get['id']): Promise<Comment.Get>;
   create(scope: string, comment: Comment.Create): Promise<Comment.Get>;
   list(scope: string, parentId: number | undefined, grouping: Grouping): Promise<Comment.List>;
-  delete(scope: string, commentId: Comment.Get['id']): Promise<Comment.Delete>;
+  delete(commentId: Comment.Get['id']): Promise<Comment.Delete>;
 }
 
 export interface ViewService extends Core.Service {

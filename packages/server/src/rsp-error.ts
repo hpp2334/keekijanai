@@ -27,5 +27,8 @@ export const argsError = {
 export const commonError = {
   auth: {
     userNeedLogin: () => new ResponseError('user need login', 401),
+  },
+  comment: {
+    notExists: () => new ResponseError('comment not exists', 404),
   }
 }

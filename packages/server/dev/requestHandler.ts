@@ -7,4 +7,5 @@ export const requestHandler = setup({
   preset: getVercelSupabasePreset(config),
   // DEV only
   platform: Vercel,
+  maxAgeInSec: 2,
 })

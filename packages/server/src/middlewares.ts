@@ -15,4 +15,9 @@ export const ensureClientIDInCookie: Middleware<ContextState> = async (ctx, next
   await next();
 };
 
+export const maxAge = (sec: number): Middleware<ContextState> => async (ctx, next) => {
+  await next();
+  ctx.res.setHeader('Cache-Control', `max-age=${sec}`);
+}
+
 export { mountGetService, mountManager, mountUser } from './core/context';

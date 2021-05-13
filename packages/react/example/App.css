@@ -1,3 +1,6 @@
-html {
-  padding: 0 20px;
+#root-container {
+  width: 768px;
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
 }

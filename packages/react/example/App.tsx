@@ -8,7 +8,8 @@ function Main() {
   const ref = useRef<HTMLInputElement>(null);
 
   return (
-    <div>
+    <div id="root-container">
+      <h1>Keekijanai Demo</h1>
       <div>
         <div>current: {scope}</div>
         <input ref={ref} />
@@ -16,13 +17,13 @@ function Main() {
       </div>
 
       <Context>
-        <h1>Login</h1>
+        <h2>Login</h2>
         <Login />
-        <h1>Comment</h1>
+        <h2>Comment</h2>
         <Comment scope={scope} />
-        <h1>View</h1>
+        <h2>View</h2>
         <View scope={scope} />
-        <h1>Star</h1>
+        <h2>Star</h2>
         <Star scope={scope}></Star>
       </Context>
     </div>

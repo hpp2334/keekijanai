@@ -16,6 +16,24 @@ type CommentDB = CommentDBCreate & {
 }
 
 export class CommentServiceImpl extends Service<Supabase> implements CommentService {
+  get: CommentService['get'] = async (id) => {
+    const result = await this.provider.client
+      .from('comment')
+      .select('*', { count: 'exact' })
+      .eq('id', id);
+
+    if (result.error || !Array.isArray(result.body)) {
+      throw Error(`Get comments fail.` + result.error?.message);
+    }
+    if (_.isNil(result.body[0])) {
+      throw commonError.comment.notExists();
+    }
+    
+    const comment: Comment.Get = convert(result.body[0], 'from-db');
+
+    return comment;
+  }
+
   create: CommentService['create'] = async (scope, rawComment) => {
     const { user } = this.context;
     if (!user.isLogin) {
@@ -38,21 +56,7 @@ export class CommentServiceImpl extends Service<Supabase> implements CommentServ
     }
 
     if (comment.parentId) {
-      const result = await this.provider.client
-        .from('comment')
-        .select('*')
-        .eq('id', comment.parentId)
-        .single();
-
-      if (!result.error) {
-        const { child_counts } = result.body[0];
-        
-        await this.provider.client
-          .from('client')
-          .upsert({
-            child_counts: child_counts + 1,
-          });
-      }
+      await this.updateChildCounts(comment.parentId, 1);
     }
 
     if (notifyService.shouldNotify()) {
@@ -70,7 +74,9 @@ export class CommentServiceImpl extends Service<Supabase> implements CommentServ
       .select('*', { count: 'exact' })
       .eq('scope', scope);
     if (parentId !== undefined) {
-      request = request.eq('parent_id', parentId ?? null);
+      request = request.eq('parent_id', parentId);
+    } else {
+      request = request.is('parent_id', null);
     }
     request = request
       .order('c_time', { ascending: false })
@@ -90,7 +96,7 @@ export class CommentServiceImpl extends Service<Supabase> implements CommentServ
     return { comments, total: result.count };
   }
 
-  delete: CommentService['delete'] = async (scope, commentId) => {
+  delete: CommentService['delete'] = async (commentId) => {
     const { user } = this.context;
     if (!user.isLogin) {
       throw commonError.auth.userNeedLogin();
@@ -99,12 +105,40 @@ export class CommentServiceImpl extends Service<Supabase> implements CommentServ
     const result = await this.provider.client
       .from('comment')
       .delete()
-      .match({ id: commentId.toString(), scope, user_id: user.id });
+      .match({ id: commentId.toString(), user_id: user.id });
     if (result.error || result.body?.length !== 1) {
-      throw Error(`Delete comment ${commentId} fail.`);
+      throw Error(`Delete comment ${commentId} fail. ` + result.error);
+    }
+
+    const comment = result.body[0];
+    if (comment.parent_id) {
+      await this.updateChildCounts(comment.parent_id, -1);
     }
 
     return { id: result.body[0].id };
+  }
+
+  private async updateChildCounts(id: number, delta: number = 1) {
+    if (id) {
+      const result = await this.provider.client
+        .from('comment')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (!result.error) {
+        const { child_counts } = result.body;
+
+        const rsp = await this.provider.client
+          .from('comment')
+          .update({
+            child_counts: child_counts + delta,
+          })
+          .match({
+            id: id.toString(),
+          });
+      }
+    }
   }
 
   async TEST__clear() {

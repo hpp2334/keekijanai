@@ -1,11 +1,11 @@
 import { ConfigReader } from "./src/config";
 import { setupRoutes } from "./src/routes";
-import { Config } from "./src/type";
-import { App, Router } from './src/_framework';
+import { Config, ContextState } from "./src/type";
+import { App, Middleware, Router } from './src/_framework';
 
 import Debugger from 'debug';
 import { Manager } from "./src/core/manager";
-import { ensureClientIDInCookie, mountGetService, mountManager, mountUser } from "./src/middlewares";
+import { ensureClientIDInCookie, maxAge, mountGetService, mountManager, mountUser } from "./src/middlewares";
 
 const devDebug = Debugger('keekijanai:setup');
 
@@ -23,10 +23,13 @@ export function setup(config: Config.Config) {
 
   app.use(...platform.getMiddlewares());
   app.use(
-    ensureClientIDInCookie,
-    mountManager(manager),
-    mountGetService,
-    mountUser,
+    ...[
+      ensureClientIDInCookie,
+      config.maxAgeInSec !== undefined && maxAge(config.maxAgeInSec),
+      mountManager(manager),
+      mountGetService,
+      mountUser,
+    ].filter((x): x is Middleware<ContextState> => { return !!x })
   );
   app.use(router.toMiddleware());
 

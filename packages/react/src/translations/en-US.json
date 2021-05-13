@@ -16,6 +16,10 @@
   "POST_COMMENT": "Post",
   "POST_COMMENT_USERNAME": "Username（email as default）",
   "POST_COMMENT_CONTENT": "Comment",
+  "COMMENT_LIST": "Comment List",
+  "REPLY_COMMENT_TO_USER": "Reply to user \"%s\": \"%s\"",
+  "DELETE_COMMENT_SUCESS": "Delete comment successfully",
+  "DELETE_COMMENT_ERROR": "Error occur when deleting comment",
   "COMMENT_PLACEHOLDER": "Comment something...",
   "NO_COMMENT": "Nothing here"
 }

@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
 
+export const noop: (...args: any[]) => any = () => {};
+
 export function toSearch(obj: any) {
   for (const key in obj) {
     obj[key] = encodeURIComponent(obj[key]);
@@ -34,11 +36,13 @@ export function useSwitch(defaultValue = false) {
   const [open, setOpen] = useState(defaultValue);
   const on = useCallback(() => { setOpen(true) }, []);
   const off = useCallback(() => { setOpen(false) }, []);
+  const switchOpen = useCallback(() => { setOpen(x => !x) }, []);
 
   return useMemoExports({
     open,
     on,
     off,
+    switchOpen,
   })
 }
 

@@ -16,6 +16,10 @@
   "POST_COMMENT": "评论",
   "POST_COMMENT_USERNAME": "用户名（如果不写默认取邮箱）",
   "POST_COMMENT_CONTENT": "评论内容",
+  "COMMENT_LIST": "评论列表",
+  "REPLY_COMMENT_TO_USER": "回复用户 \"%s\" 的评论: \"%s\"",
+  "DELETE_COMMENT_SUCESS": "删除评论成功",
+  "DELETE_COMMENT_ERROR": "删除评论失败",
   "COMMENT_PLACEHOLDER": "评论一些话...",
   "NO_COMMENT": "空空如也"
 }
