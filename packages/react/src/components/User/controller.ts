@@ -1,9 +1,9 @@
 import { user as userService } from 'keekijanai-client-core';
 import { User } from 'keekijanai-type';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { forkJoin, of } from 'rxjs';
 import { map, switchMapTo, tap } from 'rxjs/operators';
-import { useMemoExports } from '../../util';
+import { useMemoExports, useRequestState } from '../../util';
 
 const userMap = new Map<string, User.User>();
 
@@ -30,10 +30,12 @@ export function batchUsers(ids: string[]) {
   )
 }
 
-export function useUser(id: string) {
+export function useUser(id?: string) {
   const [user, setUser] = useState<User.User>();
+  const reqState = useRequestState();
+  const { loading, lastError } = reqState;
 
-  useEffect(() => {
+  const update = useCallback((id: string) => {
     batchUsers([id])
       .pipe(
         map(userMap => {
@@ -44,9 +46,26 @@ export function useUser(id: string) {
           return user;
         })
       )
-      .subscribe(setUser)
+      .subscribe({
+        next: user => {
+          setUser(user);
+          reqState.toDone();
+        },
+        error: err => {
+          reqState.toError(err);
+        }
+      })
+  }, []);
+
+  useEffect(() => {
+    if (id !== undefined) {
+      update(id);
+    }
   }, [id]);
 
-  const exports = useMemoExports({ user });
+  const exports = useMemoExports({ user, loading, lastError, update });
   return exports;
 }
+
+export type UserHookObject = ReturnType<typeof useUser>;
+

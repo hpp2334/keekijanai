@@ -4,6 +4,7 @@ export interface Get {
   id: number;
   scope: string;
   content: string;
+  plainText: string;
   cTime: number;
   referenceId?: number;
   parentId?: number;

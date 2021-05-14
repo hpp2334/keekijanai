@@ -16,6 +16,7 @@ CREATE TABLE comment (
   scope varchar(150) NOT NULL,
   user_id varchar(50) NOT NULL,
   content text NOT NULL,
+  plain_text text NOT NULL,
   c_time bigint NOT NULL,
   reference_id bigint,
   parent_id bigint,

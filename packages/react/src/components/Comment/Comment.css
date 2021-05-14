@@ -6,7 +6,6 @@
 }
 
 .__Keekijanai__Comment-reference-editor-container {
-  background-color: rgb(243, 242, 242);
   max-height: 10rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -81,9 +80,13 @@
   font-size: 4rem;
 }
 
-.__Keekijanai__Comment_item-header {
+.__Keekijanai__Comment_CommentHeader-container {
   display: flex;
   align-items: center;
+}
+
+.__Keekijanai__Comment_ReferenceComment-container {
+  min-width: 200px;
 }
 
 .__Keekijanai__Comment_item-text {

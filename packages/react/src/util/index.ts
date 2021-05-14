@@ -51,3 +51,24 @@ export function useMemoExports<T extends {}>(obj: T) {
 
   return memozied;
 }
+
+export function useRequestState() {
+  const [loading, setLoading] = useState<'loading' | 'done' | 'error'>('loading');
+  const [lastError, setLastError] = useState();
+
+  const toDone = useCallback(() => {
+    setLoading('done');
+  }, []);
+
+  const toloading = useCallback(() => {
+    setLoading('loading')
+  }, []);
+
+  const toError = useCallback((err: any) => {
+    setLoading('error');
+    setLastError(err?.message || err);
+  }, []);
+
+  const exports = useMemoExports({ loading, lastError, toDone, toloading, toError });
+  return exports;
+}

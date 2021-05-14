@@ -60,7 +60,7 @@ export class CommentServiceImpl extends Service<Supabase> implements CommentServ
     }
 
     if (notifyService.shouldNotify()) {
-      const message = `"${user.name}" comment in scope "${scope}": ${comment.content}`;
+      const message = `"${user.name}" comment in scope "${scope}":\n${comment.plainText}`;
       await notifyService.notify(message);
     }
     

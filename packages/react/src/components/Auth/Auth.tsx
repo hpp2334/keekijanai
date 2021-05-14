@@ -5,12 +5,13 @@ import { useForceUpdate, useMemoExports, useSwitch } from '../../util';
 import { useAuth } from './controller';
 import { auth as authService } from 'keekijanai-client-core';
 import { Auth } from 'keekijanai-type';
-import { Button, Popconfirm, Typography } from 'antd';
+import { Button, Popconfirm, Skeleton, Typography } from 'antd';
 import { GithubOutlined } from '@ant-design/icons';
 import { BehaviorSubject } from 'rxjs';
 
 import './Auth.css';
 import { Avatar } from '../User';
+import { authModal, SingletonAuthModal } from './AuthModal';
 
 
 export interface LoginProps {
@@ -25,54 +26,21 @@ interface HaveLoginedProps {
   forceUpdate: () => void;
 }
 
-const authComponentOpen$ = new BehaviorSubject<boolean>(false);
-export function useAuthComponent() {
-  const [open, setOpen] = useState(authComponentOpen$.value);
-
-  const show = useCallback(() => { authComponentOpen$.next(true) }, []);
-  const hide = useCallback(() => { authComponentOpen$.next(false) }, []);
-
-  useEffect(() => {
-    authComponentOpen$.subscribe({
-      next: setOpen
-    });
-  }, []);
-
-  const exports = useMemoExports({
-    open,
-    show,
-    hide,
-  });
-  return exports;
-}
-
-export function SingletonAuthComponent() {
-  const { t } = useTranslation();
-  const { open, hide } = useAuthComponent();
-
-  const handleLogin = (provider: string) => () => {
-    authService.oauth(provider);
-  }
-
-  const handleStopPropagation = (ev: any) => {
-    ev.stopPropagation();
-  }
-
-  return !open ? null : (
-    <div className='__Keekijanai__Auth__singleton-auth' onClick={hide}>
-      <div className='__Keekijanai__Auth__singleton-auth-inner' onClick={handleStopPropagation}>
-        <Typography.Title level={3}>{t("CHOOSE_ONE_OF_LOGIN_METHOD")}</Typography.Title>
-        <div>
-          <Button size='large' onClick={handleLogin('github')}>Continue with Github <GithubOutlined /></Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function HaveLogined(props: HaveLoginedProps) {
   const { t } = useTranslation();
   const { user, forceUpdate } = props;
+  const composedUserHO = useMemo(() => {
+    if (!user.isLogin) {
+      return {
+        loading: 'loading' as const,
+        user: undefined,
+      }
+    }
+    return {
+      loading: 'done' as const,
+      user,
+    }
+  }, [user]);
 
   const handleLogout = () => {
     authService.logout();
@@ -86,7 +54,7 @@ function HaveLogined(props: HaveLoginedProps) {
   return (
     <div className='__Keekijanai__Auth__logined_container'>
       <div className='__Keekijanai__Auth__logined_user_indicator'>
-        <Avatar user={user} size='30px' />
+        <Avatar userHookObject={composedUserHO} size={30} />
         <Typography.Text>{user.name}</Typography.Text>
       </div>
       <Popconfirm
@@ -104,11 +72,11 @@ function HaveLogined(props: HaveLoginedProps) {
 
 function HaveLogouted(props: HaveLogoutedProps) {
   const { t } = useTranslation();
-  const { show } = useAuthComponent();
 
   return (
     <div>
-      <Button size='small' onClick={show}>{t("LOGIN")}</Button>
+      <Button size='small' onClick={authModal.open}>{t("LOGIN")}</Button>
+      <SingletonAuthModal />
     </div>
   );
 }
@@ -116,14 +84,15 @@ function HaveLogouted(props: HaveLogoutedProps) {
 export function Login(props: LoginProps) {
   const { className } = props;
   const forceUpdate = useForceUpdate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
 
   return (
     <div className={className}>
+      {loading === 'loading' && <Skeleton.Input style={{ width: '200px' }} size='small' active />}
       {
-        user.isLogin
+        loading === 'done' && (user.isLogin
           ? <HaveLogined user={user} forceUpdate={forceUpdate} />
-          : <HaveLogouted user={user} />
+          : <HaveLogouted user={user} />)
       }
     </div>
   )

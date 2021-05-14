@@ -5,11 +5,13 @@ import { Comment as TypeComment } from 'keekijanai-type';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { of } from 'rxjs';
 import { map, mergeAll, switchMapTo, tap } from 'rxjs/operators';
-import { useMemoExports } from '../../util';
+import { useMemoExports, useRequestState } from '../../util';
 import { batchUsers } from '../User/controller';
 
 export function useCommentList(scope: string, parentId: number | undefined, take: number = 5) {
-  const [list, setResult] = useState<TypeComment.List>();
+  const [comments, setComments] = useState<TypeComment.List['comments']>();
+  const [total, setTotal] = useState<number>();
+
   const [page, changePage] = useState(1);
   const [pageSize, setPageSize] = useState(take);
   const [loadingState, setLoadingState] = useState<'init-loading' | 'loading' | 'error' | 'done'>('init-loading');
@@ -17,7 +19,7 @@ export function useCommentList(scope: string, parentId: number | undefined, take
   const [lastActCnt, setLastActCnt] = useState(0);
 
   const query = useCallback(() => {
-    setLoadingState('loading');
+    setLoadingState(prev => prev === 'init-loading' ? prev : 'loading');
     const rsp = commentService
       .list(scope, parentId, { skip: page - 1, take })
       .pipe(
@@ -37,7 +39,8 @@ export function useCommentList(scope: string, parentId: number | undefined, take
         },
         next: res => {
           setLoadingState('done');
-          setResult(res);
+          setComments(res.comments);
+          setTotal(res.total);
         },
       });
     return rsp;
@@ -72,10 +75,11 @@ export function useCommentList(scope: string, parentId: number | undefined, take
   }, [query, page, lastActCnt, take]);
 
   const exports = useMemoExports({
-    list,
+    comments,
+    total,
     page,
     pageSize,
-    loadingState,
+    loading: loadingState,
     lastError,
     changePage,
     remove,
@@ -85,13 +89,14 @@ export function useCommentList(scope: string, parentId: number | undefined, take
   return exports;
 }
 
-export function useComment(id: number | undefined) {
+export function useComment(id: number) {
+  const reqState = useRequestState();
+  const { loading } = reqState;
+
   const [comment, setComment] = useState<TypeComment.Get>();
 
   const query = useCallback(() => {
-    if (typeof id === 'undefined') {
-      return;
-    }
+    reqState.toloading();
     const rsp = commentService
       .get(id)
       .pipe(
@@ -107,7 +112,11 @@ export function useComment(id: number | undefined) {
       .subscribe({
         next: c => {
           setComment(c);
+          reqState.toDone();
         },
+        error: err => {
+          reqState.toError(err?.message);
+        }
       });
     return rsp;
   }, [id]);
@@ -119,9 +128,11 @@ export function useComment(id: number | undefined) {
   const exports = useMemoExports({
     query,
     comment,
+    loading,
   });
 
   return exports;
 }
 
 export type CommentListHookObject = ReturnType<typeof useCommentList>;
+export type CommentHookObject = ReturnType<typeof useComment>;

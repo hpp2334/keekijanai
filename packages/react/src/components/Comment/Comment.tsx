@@ -1,14 +1,14 @@
 import React, { useState, useContext, useCallback, useEffect, useRef, useMemo } from 'react'
-import { Popover, Button, Pagination, Typography, Empty, List, ConfigProvider, Popconfirm, notification, Badge, Space } from 'antd';
+import { Popover, Button, Pagination, Typography, Empty, List, ConfigProvider, Popconfirm, notification, Badge, Space, Skeleton } from 'antd';
 import moment from 'moment';
 import { Translation, useTranslation } from 'react-i18next';
-import { CommentListHookObject, useComment, useCommentList } from './controller';
+import { CommentHookObject, CommentListHookObject, useComment, useCommentList } from './controller';
 import { useAuth } from '../Auth/controller';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import { Comment as TypeComment } from 'keekijanai-type';
 import { sprintf } from 'sprintf-js';
-import { CommentOutlined, DeleteOutlined, SmileOutlined } from '@ant-design/icons';
+import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOutlined } from '@ant-design/icons';
 import { noop, useMemoExports, useSwitch } from '../../util';
 import { useUser } from '../User/controller';
 import { Avatar } from '../User';
@@ -16,10 +16,18 @@ import { format } from 'date-fns';
 
 import './Comment.css';
 import clsx from 'clsx';
+import { UserComponent } from '../User/UserComponent';
+import { comment } from 'keekijanai-client-core';
+import { authModal, SingletonAuthModal } from '../Auth/AuthModal';
 
 export interface CommentProps {
   scope: string;
   className?: string;
+}
+
+interface CommentHeaderProps {
+  commentHookObject: Pick<CommentHookObject, 'comment' | 'loading'>;
+  showReference?: boolean;
 }
 
 interface CommentItemProps {
@@ -55,17 +63,19 @@ interface CommentPostProps {
   commentListHookObj: CommentListHookObject;
   placeholder?: string;
   onCancel?: () => any;
-  parentCommentlevel: number;
+}
+
+interface ReferenceCommentProps {
+  id: number;
 }
 
 interface ReadonlyEditorProps {
-  id: number;
+  commentHookObject: CommentHookObject;
   className?: string;
 }
 
 function ReadonlyEditor(props: ReadonlyEditorProps) {
-  const { id, className } = props;
-  const referenceComment = useComment(id);
+  const { commentHookObject: referenceComment, className } = props;
   const editorState = useMemo(() => {
     if (!referenceComment.comment) {
       return EditorState.createEmpty();
@@ -76,7 +86,7 @@ function ReadonlyEditor(props: ReadonlyEditorProps) {
     return EditorState.createWithContent(contentState);
   }, [referenceComment]);
   
-  return !!referenceComment.comment && (
+  return !referenceComment.comment ? null : (
     <Editor
       readOnly={true}
       toolbarHidden={true}
@@ -84,6 +94,61 @@ function ReadonlyEditor(props: ReadonlyEditorProps) {
       onChange={noop}
       editorClassName={clsx("__Keekijanai__Comment_item-content", className)}
     />
+  )
+}
+
+function CommentHeader(props: CommentHeaderProps) {
+  const { commentHookObject, showReference = false } = props;
+  const { comment, loading } = commentHookObject;
+  const userHookObject = useUser();
+
+  useEffect(() => {
+    if (comment) {
+      userHookObject.update(comment.userId);
+    }
+  }, [comment]);
+  
+  return (
+    <div className="__Keekijanai__Comment_CommentHeader-container">
+      <UserComponent userHookObject={userHookObject} avatarSize={20} />
+      {loading === 'loading' && <Skeleton.Input style={{ width: '150px' }} size='small' />}
+      {loading === 'done' && comment && (
+        <Typography.Text className="__Keekijanai__Comment_item-date">{format(comment.cTime, 'yyyy-MM-dd hh:mm:ss')}</Typography.Text>
+      )}
+      {showReference && !!comment?.referenceId && (
+        <Popover
+          trigger='hover'
+          content={<ReferenceComment id={comment.referenceId} />}
+        >
+          <Button type='link' icon={<RetweetOutlined />}></Button>
+        </Popover>
+      )}
+    </div>
+  )
+}
+
+function ReferenceComment(props: ReferenceCommentProps) {
+  const { id } = props;
+  const commentHookObject = useComment(id);
+  const { comment, loading } = commentHookObject;
+  const userHookObject = useUser();
+
+  useEffect(() => {
+    if (loading === 'done' && comment) {
+      userHookObject.update(comment.userId);
+    }
+  }, [comment, loading]);
+
+  return (
+    <div className="__Keekijanai__Comment_ReferenceComment-container">
+      {loading === 'loading' && <Skeleton />}
+      {loading === 'done' && comment && (
+        <div>
+          <CommentHeader commentHookObject={commentHookObject} />
+          <ReadonlyEditor commentHookObject={commentHookObject} className="__Keekijanai__Comment-reference-editor-container" />
+        </div>
+      )}
+    </div>
   )
 }
 
@@ -100,6 +165,7 @@ function CommentPost(props: CommentPostProps) {
     const comment = {
       scope: scope,
       content: JSON.stringify(raw),
+      plainText: contentState.getPlainText(),
       parentId,
       referenceId,
     };
@@ -132,8 +198,16 @@ function CommentPost(props: CommentPostProps) {
       />
       <div className='__Keekijanai__Comment_post-panel'>
         <Space>
-          {onCancel && <Button onClick={onCancel}>{t("CANCEL")}</Button>}
-          <Button disabled={!editorState.getCurrentContent().hasText()} loading={creating} type='primary' onClick={handleSubmit}>{t("POST_COMMENT")}</Button>
+          {onCancel && <Button disabled={creating} onClick={onCancel}>{t("CANCEL")}</Button>}
+          <Button
+            disabled={!editorState.getCurrentContent().hasText()}
+            loading={creating}
+            type='primary'
+            onClick={handleSubmit}
+            icon={<SendOutlined />}
+          >
+            {t("POST_COMMENT")}
+          </Button>
         </Space>
       </div>
     </div>
@@ -143,7 +217,11 @@ function CommentPost(props: CommentPostProps) {
 function CommentItem(props: CommentItemProps) {
   const { scope, comment, commentListHookObj, level, showCommentCounts = true } = props;
   const { t } = useTranslation();
-  const { user } = useUser(comment.userId);
+  const { user: currentUser } = useAuth();
+
+  const userHookObject = useUser(comment.userId);
+  const { user } = userHookObject;
+
   const [editorState] = useState(() => {
     const raw = JSON.parse(comment.content);
     const contentState = convertFromRaw(raw);
@@ -157,6 +235,21 @@ function CommentItem(props: CommentItemProps) {
   }, [user, editorState]);
 
   const switchShowReply = useSwitch();
+
+  const composedCommentHO = useMemo(() => {
+    return {
+      comment,
+      loading: 'done' as const,
+    }
+  }, []);
+
+  const handleReply = useCallback(() => {
+    if (currentUser.isLogin) {
+      switchShowReply.switchOpen();
+    } else {
+      authModal.open();
+    }
+  }, [currentUser, switchShowReply]);
 
   const handleRemoveComment = (id: number) => (ev: any) => {
     setRemoving(true);
@@ -174,21 +267,10 @@ function CommentItem(props: CommentItemProps) {
         }
       })
   };
-
-  if (!user) {
-    return null;
-  }
   
   return (
     <div>
-      <div className="__Keekijanai__Comment_item-header">
-        <Avatar size='20px' user={user} />
-        <Typography.Text className="__Keekijanai__Comment_item-text">{user.name}</Typography.Text>
-        <Typography.Text className="__Keekijanai__Comment_item-date">{format(comment.cTime, 'yyyy-MM-dd hh:mm:ss')}</Typography.Text>
-      </div>
-      {comment.referenceId && (
-        <ReadonlyEditor id={comment.referenceId} className="__Keekijanai__Comment-reference-editor-container" />
-      )}
+      <CommentHeader commentHookObject={composedCommentHO} showReference={true} />
       <Editor
         readOnly={true}
         toolbarHidden={true}
@@ -197,31 +279,32 @@ function CommentItem(props: CommentItemProps) {
         editorClassName="__Keekijanai__Comment_item-content"
       />
       <div className="__Keekijanai__Comment_item-panel">
-        <Popconfirm
-          title={t("READY_TO_REMOVE")}
-          placement='top'
-          onConfirm={handleRemoveComment(comment.id)}
-          okText={t("YES")}
-          cancelText={t("NO")}
-        >
-          <Button loading={removing} danger={true} type='text' shape='circle' size='small' icon={<DeleteOutlined />}></Button>
-        </Popconfirm>
+        {currentUser.isLogin && currentUser.id === comment.userId && (
+          <Popconfirm
+            title={t("READY_TO_REMOVE")}
+            placement='top'
+            onConfirm={handleRemoveComment(comment.id)}
+            okText={t("YES")}
+            cancelText={t("NO")}
+          >
+            <Button loading={removing} danger={true} type='text' shape='circle' size='small' icon={<DeleteOutlined />}></Button>
+          </Popconfirm>
+        )}
         <Button
           disabled={removing}
           type={switchShowReply.open ? 'primary' : 'text'}
           size='small'
           icon={<CommentOutlined />}
-          onClick={switchShowReply.switchOpen}  
+          onClick={handleReply}  
         >{!!showCommentCounts && ' ' + comment.childCounts}</Button>
       </div>
-      {switchShowReply.open && <CommentPost
+      {switchShowReply.open && currentUser.isLogin && <CommentPost
         scope={scope}
         commentListHookObj={commentListHookObj}
         parentId={level <= 1 ? comment.id : comment.parentId}
         referenceId={level <= 1 ? undefined : comment.id}
         onCancel={switchShowReply.off}
         placeholder={replyPlaceHolder}
-        parentCommentlevel={level}
       />}
       {level <= 1 && comment.childCounts > 0 && <SubCommentList scope={scope} parentId={comment.id} level={level + 1} />}
     </div>
@@ -235,10 +318,6 @@ function SubCommentList(props: SubCommentListProps) {
   const style = useMemo((): React.CSSProperties => ({
     marginLeft: level * 20 + 'px',
   }), []);
-
-  if (!commentListHookObj.list?.total) {
-    return null;
-  }
 
   return (
     <CommentList
@@ -269,7 +348,6 @@ function EmptyCommentList() {
 function CommentList(props: CommentListProps) {
   const { scope, commentListHookObj, level, showCommentsCounts = true, showCommentListHeader = true, className, style } = props;
   const { t } = useTranslation();
-  const { user } = useAuth();
 
   const handleChangePage = useCallback((page: number) => {
     commentListHookObj.changePage(page);
@@ -277,55 +355,55 @@ function CommentList(props: CommentListProps) {
   const pagination = useMemo(() => ({
     simple: true,
     pageSize: commentListHookObj.pageSize,
-    total: commentListHookObj.list?.total ?? 0,
+    total: commentListHookObj.total ?? 0,
     current: commentListHookObj.page,
     onChange: handleChangePage
-  }), [handleChangePage, commentListHookObj.page, commentListHookObj.list?.total, commentListHookObj.pageSize]);
+  }), [handleChangePage, commentListHookObj.page, commentListHookObj.total, commentListHookObj.pageSize]);
 
   return (
     <div className={className} style={style}>
       {showCommentListHeader && (
         <div className="__Keekijanai__Comment_empty-list-header">
           <span className="__Keekijanai__Comment_empty-list-header-title">{t("COMMENT_LIST")}</span>
-          <Badge count={commentListHookObj.list?.total ?? 0}></Badge>
+          {commentListHookObj.total !== undefined && <Badge count={commentListHookObj.total}></Badge>}
         </div>
       )}
-      <ConfigProvider renderEmpty={EmptyCommentList}>
-        <List
-          split={false}
-          itemLayout='vertical'
-          pagination={pagination}
-          dataSource={commentListHookObj.list?.comments ?? []}
-          renderItem={item => (
-            <List.Item
-              key={item.id}
-            >
-              <CommentItem scope={scope} comment={item} commentListHookObj={commentListHookObj} level={level} showCommentCounts={showCommentsCounts} />
-            </List.Item>
-          )}
-        />
-      </ConfigProvider>
+      {commentListHookObj.loading === 'init-loading' && (
+        <Skeleton active />
+      )}
+      {(commentListHookObj.loading === 'done' || commentListHookObj.loading === 'loading') && (
+        <ConfigProvider renderEmpty={EmptyCommentList}>
+          <List
+            size='small'
+            split={false}
+            loading={commentListHookObj.loading === 'loading'}
+            itemLayout='vertical'
+            pagination={pagination}
+            dataSource={commentListHookObj.comments ?? []}
+            renderItem={item => (
+              <List.Item
+                key={item.id + '$' + item.childCounts}
+              >
+                <CommentItem scope={scope} comment={item} commentListHookObj={commentListHookObj} level={level} showCommentCounts={showCommentsCounts} />
+              </List.Item>
+            )}
+          />
+        </ConfigProvider>
+      )}
     </div>
   )
 }
 
 export function Comment(props: CommentProps) {
   const { scope, className } = props;
-  const commentHookObj = useCommentList(scope, undefined);
+  const commentListHookObj = useCommentList(scope, undefined);
   const { user } = useAuth();
 
   return (
     <div className={className}>
-      <div>
-      {
-        commentHookObj.loadingState === 'init-loading'
-          ? "loading comments"
-          : commentHookObj.loadingState === 'error'
-            ? "error when loading comments: " + commentHookObj.lastError
-            : <CommentList scope={scope} commentListHookObj={commentHookObj} level={1} />
-      }
-      </div>
-      {user.isLogin && <CommentPost scope={scope} commentListHookObj={commentHookObj} parentCommentlevel={0} />}
+      <CommentList scope={scope} commentListHookObj={commentListHookObj} level={1} />
+      {user.isLogin && <CommentPost scope={scope} commentListHookObj={commentListHookObj} />}
+      <SingletonAuthModal />
     </div>
   )
 }

@@ -1,0 +1,10 @@
+.__Keekijanai__User_UserComponent-container {
+  display: inline-flex;
+  align-items: center;
+}
+
+.__Keekijanai__User_UserComponent-username {
+  color: #bbb;
+  font-weight: bold;
+  margin: 0 5px;
+}

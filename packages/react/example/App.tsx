@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Route, BrowserRouter as Router, useHistory } from 'react-router-dom';
+import { Route, BrowserRouter as Router, useHistory, Switch } from 'react-router-dom';
 import { Login, Comment, View, Star, Context, useAuth } from '../';
 import './App.css';
 
@@ -53,8 +53,10 @@ function Callback() {
 export default function App() {
   return (
     <Router>
-      <Route exact path='/callback' component={Callback} />
-      <Route path='/' component={Main}></Route>
+      <Switch>
+        <Route exact path='/callback' component={Callback} />
+        <Route path='/' component={Main}></Route>
+      </Switch>
     </Router>
   )
 }

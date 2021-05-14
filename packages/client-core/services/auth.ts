@@ -1,6 +1,6 @@
 
 import { Client } from "../core/client";
-import { Observable, Subject, of } from 'rxjs';
+import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { Service, serviceFactory } from "../core/service";
 import { createLocalStorageEntry } from "../util";
@@ -21,7 +21,7 @@ class AuthServiceImpl extends Service {
     login: '/auth/login',
   };
   private jwtInfo: JwtInfo | undefined;
-  user$: Subject<Auth.CurrentUser> = new Subject();
+  user$ = new BehaviorSubject<Auth.CurrentUser | undefined>(undefined);
 
   constructor(client: Client) {
     super(client);
@@ -29,7 +29,7 @@ class AuthServiceImpl extends Service {
     this.jwtInfo = this.readLocalJwtInfo();
 
     processNextTick(() => {
-      this.updateCurrent().subscribe();
+      this.getCurrent().subscribe(user => this.user$.next(user));
     });
   }
 
@@ -65,14 +65,15 @@ class AuthServiceImpl extends Service {
     this.user$.next({ isLogin: false });
   }
 
-  updateCurrent = () => {
+  getCurrent = () => {
+    if (this.jwt === null) {
+      return of({ isLogin: false });
+    }
+
     return this.client.requester.request({
       route: this.routes.current,
     }).pipe(
       map(value => value.response as any),
-      tap(current => {
-        this.user$.next(current);
-      }),
     );
   }
 
