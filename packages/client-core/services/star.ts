@@ -23,13 +23,13 @@ class StarServiceImpl extends Service {
 
   post = (scope: string, star: Star.StarType): Observable<Star.Get> => {
     const result = this.client.requester.request({
-      route: this.routes.get,
+      route: this.routes.post,
       method: 'POST',
       query: {
         scope,
       },
       body: {
-        star,
+        current: star,
       }
     }).pipe(
       map(value => value.response as any)

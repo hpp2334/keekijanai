@@ -22,7 +22,7 @@ export function setupRoutes(router: Router, manager: Manager) {
 
   router.add('/user/get', userController.get);
 
-  router.add('/view/put', viewController.get);
+  router.add('/view/get', viewController.get);
 
   router.add('/star/clear', starController.clear);
   router.add('/star/post', starController.post);

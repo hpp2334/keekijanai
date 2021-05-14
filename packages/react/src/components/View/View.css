@@ -1,0 +1,9 @@
+.__Keekijanai__View_view-container {
+  display: flex;
+  align-items: center;
+}
+
+.__Keekijanai__View_view-count {
+  margin-left: 5px;
+  display: inline-block;
+}

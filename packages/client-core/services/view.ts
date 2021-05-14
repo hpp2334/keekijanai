@@ -1,24 +1,22 @@
 import { map } from 'rxjs/operators';
-import { throwError } from "rxjs";
+import { Observable, throwError } from "rxjs";
 import { Service, serviceFactory } from "../core/service";
+import { View } from 'keekijanai-type';
 
 export class ViewServiceImpl extends Service {
   routes = {
-    get: '/view',
+    get: '/view/get',
   };
 
-  get = (scope: string) => {
+  get = (scope: string): Observable<View.Get> => {
     const result = this.client.requester.request({
       route: this.routes.get,
-      method: 'POST',
+      method: 'GET',
       query: {
         scope,
       },
     }).pipe(
-      map(value => typeof (value.response as any).count === 'number'
-        ? (value.response as any).count
-        : throwError(() => new Error('"count" is undefined in response.'))
-      )
+      map(value => value.response as any)
     );
     return result; 
   }

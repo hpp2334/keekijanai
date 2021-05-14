@@ -1,15 +1,21 @@
 import { view as viewService } from 'keekijanai-client-core';
 import { useCallback, useEffect, useState } from 'react';
-import { useMemoExports } from '../../util';
+import { useMemoExports, useRequestState } from '../../util';
 
 export function useView(scope: string) {
   const [view, setView] = useState<number>();
+  const reqState = useRequestState();
+  const { loading } = reqState;
 
   const update = useCallback(() => {
+    reqState.toloading();
     viewService
       .get(scope)
       .subscribe({
-        next: setView
+        next: res => {
+          setView(res.view);
+          reqState.toDone();
+        }
       })
   }, [scope]);
 
@@ -19,6 +25,7 @@ export function useView(scope: string) {
 
   const exports = useMemoExports({
     view,
+    loading,
     update,
   });
   return exports;

@@ -1,0 +1,17 @@
+.__Keekijanai__Star_container {
+  display: flex;
+  align-items: center;
+}
+
+.__Keekijanai__Star_stat {
+  margin-right: 40px;
+}
+
+.__Keekijanai__Star_star-btn-unactivated {
+
+}
+
+
+.__Keekijanai__Star_star-btn-activated {
+  color: #22a7f0;
+}
