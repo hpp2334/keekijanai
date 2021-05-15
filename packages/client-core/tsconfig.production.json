@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig",
+  "compilerOptions": {
+    "outDir": "../../dist/keekijanai-client-core"
+  },
+  "include": [
+    "./src",
+    "index.ts"
+  ]
+}
