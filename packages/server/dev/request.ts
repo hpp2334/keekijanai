@@ -1,6 +1,7 @@
 import fetch from "node-fetch";
 import { apiUrl } from "./server";
 import { CookieJar, Cookie, CookieAccessInfo } from 'cookiejar';
+import { URLSearchParams } from 'url';
 
 const jar = new CookieJar();
 

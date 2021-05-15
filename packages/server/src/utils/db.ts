@@ -1,5 +1,3 @@
-import { Comment } from "../type";
-
 export function convert(entity: any, direction: 'to-db'): any;
 export function convert(entity: any, direction: 'from-db'): any;
 export function convert(entity: any, direction: 'to-db' | 'from-db'): any {
