@@ -1,2 +1,2 @@
-export * from './services';
-export * from './util';
+export * from './src/services';
+export * from './src/util';
