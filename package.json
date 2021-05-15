@@ -2,6 +2,10 @@
   "name": "root",
   "private": true,
   "devDependencies": {
+    "fs-jetpack": "^4.1.0",
     "lerna": "^4.0.0"
+  },
+  "scripts": {
+    "generate-local-pkgs": "node ./tools/prepare-local-packages.mjs"
   }
 }
