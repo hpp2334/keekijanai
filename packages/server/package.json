@@ -45,6 +45,6 @@
   "scripts": {
     "test": "cross-env DEBUG=keekijanai:* jest",
     "dev": "cross-env DEBUG=keekijanai:* nodemon --watch 'src/**' --ext 'ts,json' --exec 'ts-node ./dev'",
-    "build": "ts-node ./build/production.ts"
+    "build": "tsc"
   }
 }

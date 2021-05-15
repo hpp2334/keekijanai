@@ -1,4 +1,3 @@
-import { Observable } from "rxjs/internal/Observable";
 import { ajax } from 'rxjs/ajax';
 import { Client } from "./client";
 import { auth } from "../services/auth";

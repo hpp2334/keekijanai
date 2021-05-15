@@ -1,8 +1,6 @@
 import { Comment, Grouping } from 'keekijanai-type';
-import { Observable } from "rxjs/internal/Observable";
-import { ajax } from 'rxjs/ajax';
+import { Observable } from "rxjs";
 import { map, tap } from 'rxjs/operators';
-import { Client } from "../core/client";
 import { Service, serviceFactory } from "../core/service";
 
 class CommentServiceImpl extends Service {

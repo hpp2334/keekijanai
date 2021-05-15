@@ -1,11 +1,11 @@
-import { ConfigReader } from "./src/config";
-import { setupRoutes } from "./src/routes";
-import { Config, ContextState } from "./src/type";
-import { App, Middleware, Router } from './src/_framework';
+import { ConfigReader } from "./config";
+import { setupRoutes } from "./routes";
+import { Config, ContextState } from "./type";
+import { App, Middleware, Router } from './_framework';
 
 import Debugger from 'debug';
-import { Manager } from "./src/core/manager";
-import { ensureClientIDInCookie, maxAge, mountGetService, mountManager, mountUser } from "./src/middlewares";
+import { Manager } from "./core/manager";
+import { ensureClientIDInCookie, maxAge, mountGetService, mountManager, mountUser } from "./middlewares";
 
 const devDebug = Debugger('keekijanai:setup');
 

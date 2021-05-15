@@ -23,7 +23,7 @@ export function useCommentList(scope: string, parentId: number | undefined, take
     const rsp = commentService
       .list(scope, parentId, { skip: page - 1, take })
       .pipe(
-        map(list => {
+        map((list: TypeComment.List) => {
           const ids = list.comments.map(c => c.userId);
 
           return batchUsers(ids).pipe(

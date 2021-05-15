@@ -2,10 +2,10 @@
   "name": "keekijanai-type",
   "version": "0.0.1",
   "description": "",
-  "main": "index.ts",
+  "main": "./dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf ./dist && ts-node ./build/production.ts"
+    "build": "rimraf ./dist && tsc"
   },
   "keywords": [],
   "author": "",
