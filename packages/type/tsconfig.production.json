@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig",
   "compilerOptions": {
-    "outDir": "../../dist/type",
+    "outDir": "../../dist/keekijanai-type"
   },
   "include": ["./src", "index.ts"]
 }
