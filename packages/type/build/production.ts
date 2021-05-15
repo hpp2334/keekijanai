@@ -3,17 +3,16 @@ import jetpack from 'fs-jetpack';
 import * as _ from 'lodash';
 
 async function clearOutputDir() {
-  execSync('rimraf ../../dist/keekijanai-server', { stdio: 'inherit' });
+  execSync('rimraf ../../dist/type', { stdio: 'inherit' });
 }
 
 async function generatePkgJson() {
   const from = './package.json';
-  const to = '../../dist/keekijanai-server/package.json';
+  const to = '../../dist/type/package.json';
 
   const pkgJson = await jetpack.readAsync(from, 'json');
 
   const updatedPkgJson = _.merge({
-    main: 'index.js',
     types: 'index.d.ts',
   }, pkgJson);
 
