@@ -8,7 +8,7 @@ import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import { Comment as TypeComment } from 'keekijanai-type';
 import { sprintf } from 'sprintf-js';
-import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOutlined } from '@ant-design/icons';
+import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOutlined, WarningOutlined } from '@ant-design/icons';
 import { noop, useMemoExports, useSwitch } from '../../util';
 import { useUser } from '../User/controller';
 import { Avatar } from '../User';
@@ -18,7 +18,7 @@ import './Comment.css';
 import clsx from 'clsx';
 import { UserComponent } from '../User/UserComponent';
 import { comment } from 'keekijanai-client-core';
-import { authModal, SingletonAuthModal } from '../Auth/AuthModal';
+import { authModal } from '../Auth/AuthModal';
 
 export interface CommentProps {
   scope: string;
@@ -130,7 +130,7 @@ function CommentHeader(props: CommentHeaderProps) {
 function ReferenceComment(props: ReferenceCommentProps) {
   const { id } = props;
   const commentHookObject = useComment(id);
-  const { comment, loading } = commentHookObject;
+  const { comment, loading, lastError } = commentHookObject;
   const userHookObject = useUser();
 
   useEffect(() => {
@@ -141,12 +141,18 @@ function ReferenceComment(props: ReferenceCommentProps) {
 
   return (
     <div className="__Keekijanai__Comment_ReferenceComment-container">
-      {loading === 'loading' && <Skeleton />}
+      {loading === 'loading' && <Skeleton active />}
       {loading === 'done' && comment && (
         <div>
           <CommentHeader commentHookObject={commentHookObject} />
           <ReadonlyEditor commentHookObject={commentHookObject} className="__Keekijanai__Comment-reference-editor-container" />
         </div>
+      )}
+      {loading === 'error' && (
+        <Space direction='horizontal'>
+          <WarningOutlined />
+          <Typography.Text>{lastError}</Typography.Text>
+        </Space>
       )}
     </div>
   )
@@ -198,13 +204,14 @@ function CommentPost(props: CommentPostProps) {
       />
       <div className='__Keekijanai__Comment_post-panel'>
         <Space>
-          {onCancel && <Button disabled={creating} onClick={onCancel}>{t("CANCEL")}</Button>}
+          {onCancel && <Button disabled={creating} onClick={onCancel} size='small'>{t("CANCEL")}</Button>}
           <Button
             disabled={!editorState.getCurrentContent().hasText()}
             loading={creating}
             type='primary'
             onClick={handleSubmit}
             icon={<SendOutlined />}
+            size='small'
           >
             {t("POST_COMMENT")}
           </Button>
@@ -292,7 +299,11 @@ function CommentItem(props: CommentItemProps) {
         )}
         <Button
           disabled={removing}
-          type={switchShowReply.open ? 'primary' : 'text'}
+          type='text'
+          className={clsx(
+            '__Keekijanai__Comment_item-comment-button',
+            switchShowReply.open ? '__Keekijanai__Comment_item-comment-button-activated' : ''
+          )}
           size='small'
           icon={<CommentOutlined />}
           onClick={handleReply}  
@@ -354,6 +365,7 @@ function CommentList(props: CommentListProps) {
   }, [commentListHookObj]);
   const pagination = useMemo(() => ({
     simple: true,
+    size: 'small' as const,
     pageSize: commentListHookObj.pageSize,
     total: commentListHookObj.total ?? 0,
     current: commentListHookObj.page,
@@ -403,7 +415,6 @@ export function Comment(props: CommentProps) {
     <div className={className}>
       <CommentList scope={scope} commentListHookObj={commentListHookObj} level={1} />
       {user.isLogin && <CommentPost scope={scope} commentListHookObj={commentListHookObj} />}
-      <SingletonAuthModal />
     </div>
   )
 }

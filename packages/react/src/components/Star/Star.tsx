@@ -1,11 +1,13 @@
 import clsx from 'clsx';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Button, Statistic } from 'antd';
 import { MehOutlined, LikeOutlined, UnlockOutlined, DislikeOutlined } from '@ant-design/icons';
 import { useStar } from './controller';
 import { useCallback } from 'react';
 
 import './Star.css';
+import { useAuth } from '../Auth';
+import { authModal } from '../Auth/AuthModal';
 
 export interface StarProps {
   scope: string;
@@ -14,18 +16,36 @@ export interface StarProps {
 export function Star(props: StarProps) {
   const { scope } = props;
   const star = useStar(scope);
+  const { user } = useAuth();
+
 
   const getButtonClassName = useCallback((val: any) => {
     return star.current === val ? '__Keekijanai__Star_star-btn-activated' : '__Keekijanai__Star_star-btn-unactivated';
   }, [star]);
 
+  const getProps = useCallback((value: number, icon: React.ReactNode, handleClick: () => void) => ({
+    disabled: star.loading === 'loading',
+    shape: 'round' as const,
+    size: 'large' as const,
+    type: 'text' as const,
+    icon,
+    className: getButtonClassName(value),
+    onClick: () => {
+      if (user.isLogin) {
+        handleClick();
+      } else {
+        authModal.open();
+      }
+    },
+  }), [user, getButtonClassName]);
+
   return (
     <div className="__Keekijanai__Star_container">
       <Statistic className="__Keekijanai__Star_stat" value={star.total} />
       <div>
-        <Button disabled={star.loading === 'loading'} className={getButtonClassName(1)} shape='round' size='large' type='text' icon={<LikeOutlined />} onClick={star.handlePostLike} />
-        <Button disabled={star.loading === 'loading'} className={getButtonClassName(0)} shape='round' size='large' type='text' icon={<MehOutlined />} onClick={star.handlePostMama} />
-        <Button disabled={star.loading === 'loading'} className={getButtonClassName(-1)} shape='round' size='large' type='text' icon={<DislikeOutlined  />} onClick={star.handlePostUnlike} />
+        <Button {...getProps(1, <LikeOutlined />, star.handlePostLike)} />
+        <Button {...getProps(0, <MehOutlined />, star.handlePostMama)} />
+        <Button {...getProps(-1, <DislikeOutlined />, star.handlePostUnlike)} />
       </div>
     </div>
   )

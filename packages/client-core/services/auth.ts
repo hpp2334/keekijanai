@@ -1,7 +1,7 @@
 
 import { Client } from "../core/client";
 import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, switchMapTo, tap } from 'rxjs/operators';
 import { Service, serviceFactory } from "../core/service";
 import { createLocalStorageEntry } from "../util";
 import { Auth } from "keekijanai-type";
@@ -21,7 +21,7 @@ class AuthServiceImpl extends Service {
     login: '/auth/login',
   };
   private jwtInfo: JwtInfo | undefined;
-  user$ = new BehaviorSubject<Auth.CurrentUser | undefined>(undefined);
+  user$ = new BehaviorSubject<Auth.CurrentUser>({ isLogin: false });
 
   constructor(client: Client) {
     super(client);
@@ -29,7 +29,7 @@ class AuthServiceImpl extends Service {
     this.jwtInfo = this.readLocalJwtInfo();
 
     processNextTick(() => {
-      this.getCurrent().subscribe(user => this.user$.next(user));
+      this.updateCurrent().subscribe({});
     });
   }
 
@@ -65,15 +65,18 @@ class AuthServiceImpl extends Service {
     this.user$.next({ isLogin: false });
   }
 
-  getCurrent = () => {
-    if (this.jwt === null) {
-      return of({ isLogin: false });
+  updateCurrent = () => {
+    if (!this.jwt) {
+      this.user$.next({ isLogin: false });
+      return of(null);
     }
 
     return this.client.requester.request({
       route: this.routes.current,
     }).pipe(
       map(value => value.response as any),
+      tap(user => { this.user$.next(user) }),
+      switchMapTo(of(null)),
     );
   }
 
@@ -88,6 +91,8 @@ class AuthServiceImpl extends Service {
   
       this.jwtInfo = { jwt, expire: maxAge + Date.now() };
       keekijanaiJwtEntry.setItem(JSON.stringify(this.jwtInfo));
+
+      this.updateCurrent().subscribe({});
 
       const lastPage = lastPageEntry.getItem();
       callback(lastPage ?? undefined);

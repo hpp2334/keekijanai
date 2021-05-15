@@ -1,5 +1,10 @@
 import './style.css';
 
+import { singletonModalManager } from './src/components/Base/SingletonModal';
+import { authModalID, AuthComponent } from './src/components/Auth/AuthModal';
+
+singletonModalManager.register(authModalID, AuthComponent)
+
 export * from './src/components/Auth';
 export * from './src/components/Comment';
 export * from './src/components/User';

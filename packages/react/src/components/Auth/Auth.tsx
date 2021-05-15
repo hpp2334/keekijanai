@@ -11,7 +11,8 @@ import { BehaviorSubject } from 'rxjs';
 
 import './Auth.css';
 import { Avatar } from '../User';
-import { authModal, SingletonAuthModal } from './AuthModal';
+import { authModal } from './AuthModal';
+import { UserComponent } from '../User/UserComponent';
 
 
 export interface LoginProps {
@@ -23,21 +24,22 @@ interface HaveLogoutedProps {
 }
 interface HaveLoginedProps {
   user: Auth.CurrentUser;
+  loading: 'loading' | 'done' | 'error';
   forceUpdate: () => void;
 }
 
 function HaveLogined(props: HaveLoginedProps) {
   const { t } = useTranslation();
-  const { user, forceUpdate } = props;
+  const { user, loading, forceUpdate } = props;
   const composedUserHO = useMemo(() => {
     if (!user.isLogin) {
       return {
-        loading: 'loading' as const,
+        loading,
         user: undefined,
       }
     }
     return {
-      loading: 'done' as const,
+      loading,
       user,
     }
   }, [user]);
@@ -47,16 +49,9 @@ function HaveLogined(props: HaveLoginedProps) {
     forceUpdate();
   };
 
-  if (!user.isLogin) {
-    throw Error('User need login. It may be a bug.');
-  }
-
   return (
     <div className='__Keekijanai__Auth__logined_container'>
-      <div className='__Keekijanai__Auth__logined_user_indicator'>
-        <Avatar userHookObject={composedUserHO} size={30} />
-        <Typography.Text>{user.name}</Typography.Text>
-      </div>
+      <UserComponent userHookObject={composedUserHO} avatarSize={30} containerClassName="__Keekijanai__Auth__logined_user_indicator" />
       <Popconfirm
         placement="top"
         title={t("CONFIRM_LOGOUT")}
@@ -64,7 +59,7 @@ function HaveLogined(props: HaveLoginedProps) {
         okText={t("YES")}
         cancelText={t("NO")}
       >
-        <Button size='small'>{t("LOGOUT")}</Button>
+        <Button disabled={loading === 'loading'} size='small'>{t("LOGOUT")}</Button>
       </Popconfirm>
     </div>
   );
@@ -76,7 +71,6 @@ function HaveLogouted(props: HaveLogoutedProps) {
   return (
     <div>
       <Button size='small' onClick={authModal.open}>{t("LOGIN")}</Button>
-      <SingletonAuthModal />
     </div>
   );
 }
@@ -88,11 +82,10 @@ export function Login(props: LoginProps) {
 
   return (
     <div className={className}>
-      {loading === 'loading' && <Skeleton.Input style={{ width: '200px' }} size='small' active />}
       {
-        loading === 'done' && (user.isLogin
-          ? <HaveLogined user={user} forceUpdate={forceUpdate} />
-          : <HaveLogouted user={user} />)
+        (user.isLogin || loading === 'loading')
+          ? <HaveLogined user={user} loading={loading} forceUpdate={forceUpdate} />
+          : <HaveLogouted user={user} />
       }
     </div>
   )

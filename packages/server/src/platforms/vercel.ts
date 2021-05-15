@@ -1,4 +1,4 @@
-import { NowRequest, NowResponse } from "@vercel/node";
+import type { NowRequest, NowResponse } from "@vercel/node";
 import { ServerlessPlatform } from "../type/serveless-platform";
 import { MiddlewareManager } from "../_framework/middleware-manager";
 import { Middleware, ServerlessContext } from "../_framework/type";
@@ -61,15 +61,16 @@ const handleResponse: Middleware<VercelContextState> = async (ctx, next) => {
   } catch (err) {
     if (err instanceof ResponseError) {
       ctx._res.status(err.code);
-      ctx._res.send(err.message);
+      ctx._res.send({
+        error: err.message
+      });
     } else {
       ctx._res.status(500);
       ctx._res.send({
         error: err instanceof Error ? err.message : err,
       });
+      console.error(err);
     }
-
-    console.error(err);
   }
 }
 

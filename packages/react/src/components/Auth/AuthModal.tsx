@@ -5,9 +5,9 @@ import { GithubOutlined } from '@ant-design/icons';
 import { Typography, Button } from 'antd';
 
 import './AuthModal.css'
-import { openHandlerFactory, withSingletonModal } from '../Base/SingletonModal';
+import { openHandlerFactory } from '../Base/SingletonModal';
 
-function AuthComponent() {
+export function AuthComponent() {
   const { t } = useTranslation();
   const handleLogin = (provider: string) => () => {
     authService.oauth(provider);
@@ -17,7 +17,7 @@ function AuthComponent() {
   return (
     <div className='__Keekijanai__Auth_AuthModal_container' onClick={authModal.close}>
       <div className='__Keekijanai__Auth_AuthModal_container-inner' onClick={handleStopPropagation}>
-        <Typography.Title level={3}>{t("CHOOSE_ONE_OF_LOGIN_METHOD")}</Typography.Title>
+        <Typography.Text className="header-text">{t("CHOOSE_ONE_OF_LOGIN_METHOD")}</Typography.Text>
         <div>
           <Button size='large' onClick={handleLogin('github')}>Continue with Github <GithubOutlined /></Button>
         </div>
@@ -26,8 +26,7 @@ function AuthComponent() {
   )
 }
 
-const authModalID = 'keekijanai-auth-modal';
-export const SingletonAuthModal = withSingletonModal(authModalID, <AuthComponent />, true)
+export const authModalID = 'keekijanai-auth-modal';
 
 /** @description open auth modal (rely on browser) */
 export const authModal = openHandlerFactory(authModalID);

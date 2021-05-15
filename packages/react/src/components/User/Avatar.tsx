@@ -19,7 +19,7 @@ export function Avatar(props: AvatarProps) {
 
   return (
     <>
-      {userHookObject.loading === 'loading' && <Skeleton.Avatar size={size} active />}
+      {userHookObject.loading === 'loading' && <Skeleton.Avatar shape='circle' size={size} active />}
       {userHookObject.loading === 'done' && userHookObject.user && (
         <img className={clsx('__Keekijanai__User__Avatar', className)} style={style} width={size + 'px'} height={size + 'px'} src={userHookObject.user.avatarUrl}></img>
       )}

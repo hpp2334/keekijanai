@@ -10,6 +10,10 @@ const userMap = new Map<string, User.User>();
 export function batchUsers(ids: string[]) {
   const uniquedIds = Array.from(new Set(ids));
 
+  if (ids.length === 0) {
+    return of(userMap);
+  }
+
   return forkJoin(
     uniquedIds.map(id => {
       const cached = userMap.get(id);

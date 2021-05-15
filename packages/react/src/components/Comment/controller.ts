@@ -14,7 +14,7 @@ export function useCommentList(scope: string, parentId: number | undefined, take
 
   const [page, changePage] = useState(1);
   const [pageSize, setPageSize] = useState(take);
-  const [loadingState, setLoadingState] = useState<'init-loading' | 'loading' | 'error' | 'done'>('init-loading');
+  const [loading, setLoadingState] = useState<'init-loading' | 'loading' | 'error' | 'done'>('init-loading');
   const [lastError, setLastError] = useState<string | null>(null);
   const [lastActCnt, setLastActCnt] = useState(0);
 
@@ -25,7 +25,7 @@ export function useCommentList(scope: string, parentId: number | undefined, take
       .pipe(
         map(list => {
           const ids = list.comments.map(c => c.userId);
-          
+
           return batchUsers(ids).pipe(
             switchMapTo(of(list))
           )
@@ -44,7 +44,7 @@ export function useCommentList(scope: string, parentId: number | undefined, take
         },
       });
     return rsp;
-  }, [scope, page, take]);
+  }, [scope, page, take, parentId]);
 
   const remove = useCallback((id: number) => {
     const rsp = commentService
@@ -79,7 +79,7 @@ export function useCommentList(scope: string, parentId: number | undefined, take
     total,
     page,
     pageSize,
-    loading: loadingState,
+    loading,
     lastError,
     changePage,
     remove,
@@ -91,7 +91,7 @@ export function useCommentList(scope: string, parentId: number | undefined, take
 
 export function useComment(id: number) {
   const reqState = useRequestState();
-  const { loading } = reqState;
+  const { loading, lastError } = reqState;
 
   const [comment, setComment] = useState<TypeComment.Get>();
 
@@ -115,7 +115,11 @@ export function useComment(id: number) {
           reqState.toDone();
         },
         error: err => {
-          reqState.toError(err?.message);
+          if (err?.status < 500) {
+            reqState.toError(err?.response?.error);
+          } else {
+            reqState.toError(err?.message || err);
+          }
         }
       });
     return rsp;
@@ -129,6 +133,7 @@ export function useComment(id: number) {
     query,
     comment,
     loading,
+    lastError,
   });
 
   return exports;

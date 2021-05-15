@@ -1,9 +1,6 @@
 @import 'draft-js/dist/Draft.css';
 @import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 
-.__Keekijanai__Comment-post-editor-container {
-  margin-top: 20px;
-}
 
 .__Keekijanai__Comment-reference-editor-container {
   max-height: 10rem;
@@ -11,6 +8,9 @@
   text-overflow: ellipsis;
 }
 
+.__Keekijanai__Comment-post-editor-container {
+  margin-top: 20px;
+}
 
 .__Keekijanai__Comment-post-editor {
   border: 1px solid rgb(233, 233, 233);
@@ -101,11 +101,18 @@
 }
 
 .__Keekijanai__Comment_item-content {
-  margin: 4px 0;
-  padding-left: 25px;
+  margin: 2px 0;
+  padding-left: 25px; 
+  line-height: 0.5rem;
 }
 
 .__Keekijanai__Comment_item-panel {
   display: flex;
   justify-content: flex-end;
+}
+
+.__Keekijanai__Comment_item-comment-button {}
+
+.__Keekijanai__Comment_item-comment-button-activated {
+  color: #22a7f0;
 }
