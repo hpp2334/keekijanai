@@ -1,3 +1,8 @@
+const localStorageMemory = require('localstorage-memory');
+
+// FOR SSR
+const localStorage = typeof window === 'undefined' ? localStorageMemory : window.localStorage;
+
 export function createLocalStorageEntry(key: string) {
   const exports = {
     setItem: (value: string) => {

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "keekijanai-type": "^0.0.1",
+    "localstorage-memory": "^1.0.3",
     "lodash": "^4.17.21",
     "next-tick": "^1.1.0",
     "rxjs": "^7.0.1"

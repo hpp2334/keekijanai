@@ -1,4 +1,4 @@
-{
+export default {
   "YES": "是",
   "NO": "否",
 

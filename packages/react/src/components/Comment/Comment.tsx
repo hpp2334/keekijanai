@@ -5,7 +5,7 @@ import { Translation, useTranslation } from 'react-i18next';
 import { CommentHookObject, CommentListHookObject, useComment, useCommentList } from './controller';
 import { useAuth } from '../Auth/controller';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
-import { Editor } from 'react-draft-wysiwyg';
+import loadable from '@loadable/component';
 import { Comment as TypeComment } from 'keekijanai-type';
 import { sprintf } from 'sprintf-js';
 import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOutlined, WarningOutlined } from '@ant-design/icons';
@@ -19,6 +19,8 @@ import clsx from 'clsx';
 import { UserComponent } from '../User/UserComponent';
 import { comment } from 'keekijanai-client-core';
 import { authModal } from '../Auth/AuthModal';
+
+const Editor = loadable(() => import('react-draft-wysiwyg' as any).then(v => v.Editor));
 
 export interface CommentProps {
   scope: string;

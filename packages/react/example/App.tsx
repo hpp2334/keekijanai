@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Route, BrowserRouter as Router, useHistory, Switch } from 'react-router-dom';
-import { Login, Comment, View, Star, Context, useAuth } from '../';
+import { Login, Comment, View, Star, Context, useAuth } from '@';
 import './App.css';
 
-function Main() {
+function Demo() {
   const [scope, setScope] = useState('page1');
   const ref = useRef<HTMLInputElement>(null);
 
@@ -49,14 +49,18 @@ function Callback() {
   )
 }
 
+export function Main() {
+  return (
+    <Switch>
+      <Route exact path='/callback' component={Callback} />
+      <Route path='/' component={Demo}></Route>
+    </Switch>
+  )
+}
 
 export default function App() {
   return (
     <Router>
-      <Switch>
-        <Route exact path='/callback' component={Callback} />
-        <Route path='/' component={Main}></Route>
-      </Switch>
     </Router>
   )
 }

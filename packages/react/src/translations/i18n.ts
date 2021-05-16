@@ -3,8 +3,8 @@ import { initReactI18next } from 'react-i18next';
 
 import LanguageDetector from 'i18next-browser-languagedetector';
 
-import tEnUS from './en-US.json';
-import tZhCN from './zh-CN.json';
+import tEnUS from './en-US';
+import tZhCN from './zh-CN';
 
 const resources = {
   en: {
