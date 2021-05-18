@@ -7,10 +7,10 @@ import tEnUS from './en-US';
 import tZhCN from './zh-CN';
 
 const resources = {
-  en: {
+  'en-US': {
     translation: tEnUS,
   },
-  cn: {
+  'zh-CN': {
     translation: tZhCN,
   }
 }
@@ -20,8 +20,8 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en',
-    debug: false,
+    fallbackLng: 'en-US',
+    debug: true,
   });
 
 export default i18n;
