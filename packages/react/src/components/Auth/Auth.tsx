@@ -13,6 +13,7 @@ import './Auth.css';
 import { Avatar } from '../User';
 import { authModal } from './AuthModal';
 import { UserComponent } from '../User/UserComponent';
+import clsx from 'clsx';
 
 
 export interface LoginProps {
@@ -50,8 +51,8 @@ function HaveLogined(props: HaveLoginedProps) {
   };
 
   return (
-    <div className='__Keekijanai__Auth__logined_container'>
-      <UserComponent userHookObject={composedUserHO} avatarSize={30} containerClassName="__Keekijanai__Auth__logined_user_indicator" />
+    <div className='kkjn__logined'>
+      <UserComponent userHookObject={composedUserHO} avatarSize={30} containerClassName="kkjn__user-indicator" />
       <Popconfirm
         placement="top"
         title={t("CONFIRM_LOGOUT")}
@@ -81,7 +82,7 @@ export function Login(props: LoginProps) {
   const { user, loading } = useAuth();
 
   return (
-    <div className={className}>
+    <div className={clsx('kkjn__auth', className)}>
       {
         (user.isLogin || loading === 'loading')
           ? <HaveLogined user={user} loading={loading} forceUpdate={forceUpdate} />

@@ -4,4 +4,4 @@ export { star } from './services/star';
 export { view } from './services/view';
 export { user } from './services/user';
 
-export { setupConfig } from './core/config';
+export { client } from './core/client';

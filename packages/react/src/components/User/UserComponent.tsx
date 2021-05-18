@@ -26,11 +26,11 @@ export function UserComponent(props: UserComponentProps) {
   const { user, loading } = userHookObject;
 
   return (
-    <span className={clsx('__Keekijanai__User_UserComponent-container', containerClassName)} style={containerStyle}>
+    <span className={clsx('kkjn__user-component', containerClassName)} style={containerStyle}>
       {showAvatar && <Avatar userHookObject={userHookObject} size={avatarSize} className={clsx(avatarClassName)} style={avatarStyle} />}
-      {loading === 'loading' && <Skeleton.Input className={clsx("__Keekijanai__User_UserComponent-username", userNameClassName)} style={{ width: '50px' }} size='small' active />}
+      {loading === 'loading' && <Skeleton.Input className={clsx("kkjn__username", userNameClassName)} style={{ width: '50px' }} size='small' active />}
       {loading === 'done' && user && (
-        <Typography.Text className={clsx("__Keekijanai__User_UserComponent-username", userNameClassName)} style={userNameStyle}>{user.name}</Typography.Text>
+        <Typography.Text className={clsx("kkjn__username", userNameClassName)} style={userNameStyle}>{user.name}</Typography.Text>
       )}
     </span>
   )

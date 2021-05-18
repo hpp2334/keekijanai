@@ -1,4 +1,4 @@
-import { ConfigReader, getConfig } from "./config";
+import { ConfigReader, ConfigType, INIT_CONFIG } from "./config";
 import { Requester } from "./request";
 
 class Client {
@@ -12,7 +12,11 @@ class Client {
   }
 
   initialize() {
-    this.configReader.read(getConfig());
+    this.configReader.read(INIT_CONFIG);
+  }
+
+  updateConfig(config: ConfigType) {
+    this.configReader.read(config);
   }
 
   get config() {

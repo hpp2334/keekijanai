@@ -1,14 +1,14 @@
-.__Keekijanai__Auth_AuthModal_container {
+.kkjn__auth_auth-modal {
   position: fixed;
   left: 0;
   top: 0;
-  z-index: 20;
+  z-index: 99;
   width: 100%;
   height: 100vh;
   background-color: rgba(0, 0, 0, 0.7);
 }
 
-.__Keekijanai__Auth_AuthModal_container-inner {
+.kkjn__auth_auth-modal .kkjn__container-inner {
   position: relative;
   background-color: white;
   width: 500px;
@@ -22,7 +22,7 @@
   align-items: center;
 }
 
-.__Keekijanai__Auth_AuthModal_container .header-text {
+.kkjn__auth_auth-modal .kkjn__container-inner .kkjn__header .kkjn__text {
   font-size: 1.5rem;
   font-weight: 500;
   margin: 1rem 0;

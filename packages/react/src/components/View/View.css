@@ -1,9 +1,9 @@
-.__Keekijanai__View_view-container {
+.kkjn__view {
   display: flex;
   align-items: center;
 }
 
-.__Keekijanai__View_view-count {
+.kkjn__view .kkjn__count {
   margin-left: 5px;
   display: inline-block;
 }

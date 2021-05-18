@@ -15,9 +15,9 @@ export function View(props: ViewProps) {
   const viewHookObject = useView(scope);
 
   return (
-    <div className="__Keekijanai__View_view-container">
+    <div className="kkjn__view">
       <EyeOutlined />
-      <div className="__Keekijanai__View_view-count">
+      <div className="kkjn__count">
         {viewHookObject.loading === 'loading' && <Skeleton.Input active style={{ width: '50px' }} size='small' />}
         {viewHookObject.loading === 'done' && viewHookObject.view !== undefined && (
           <Typography.Text>

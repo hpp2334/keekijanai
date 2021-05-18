@@ -3,9 +3,10 @@
   "private": true,
   "devDependencies": {
     "fs-jetpack": "^4.1.0",
-    "lerna": "^4.0.0"
+    "lerna": "^4.0.0",
+    "yargs": "^17.0.1"
   },
   "scripts": {
-    "generate-local-pkgs": "node ./tools/prepare-local-packages.mjs"
+    "generate-pkgs": "lerna bootstrap && node ./tools/generate-packages.mjs"
   }
 }

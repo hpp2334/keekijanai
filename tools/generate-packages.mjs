@@ -1,11 +1,15 @@
 import { execSync } from 'child_process';
 import jetpack from 'fs-jetpack';
 import path from 'path';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
+
+const argv = yargs(hideBin(process.argv)).argv;
 
 async function main() {
-  // execSync('lerna run build');
+  const { outDir = './dist' } = argv;
 
-  execSync('rimraf ./dist');
+  execSync('lerna run build');
 
   const pkgs = jetpack.list('./packages');
 
@@ -13,8 +17,6 @@ async function main() {
     const gp = (s) => path.resolve('./packages', pkgDir, s);
 
     const pkgJsonPath = gp('./package.json');
-
-    console.log(pkgJsonPath);
 
     const pkgJson = await jetpack.readAsync(pkgJsonPath, 'json');
     const name = pkgJson.name;
@@ -26,15 +28,17 @@ async function main() {
       const obj = pkgJson[field];
       for (const key in obj) {
         if (key.startsWith('keekijanai-')) {
-          obj[key] = '../' + key;
+          obj[key] = 'file:../' + key;
         }
       }
     });
 
+    const outDirWithName = path.join(outDir, name);
+    execSync(`rimraf ${outDirWithName}`);
     const cpDirs = [
-      [gp('./dist'), `./dist/${name}/dist`],
-      [gp('./package.json'), `./dist/${name}/package.json`],
-      [gp('./tsconfig.json'), `./dist/${name}/tsconfig.json`],
+      [gp('./dist'), `${outDirWithName}/dist`],
+      [gp('./package.json'), `${outDirWithName}/package.json`],
+      [gp('./tsconfig.json'), `${outDirWithName}/tsconfig.json`],
     ];
     for (const [from, to] of cpDirs) {
       await jetpack.copyAsync(from, to);
@@ -49,7 +53,7 @@ async function main() {
     //   }
     // );
     await jetpack.writeAsync(
-      `./dist/${name}/package.json`,
+      `${outDirWithName}/package.json`,
       pkgJson,
     );
   }

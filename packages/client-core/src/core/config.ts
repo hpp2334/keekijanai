@@ -5,20 +5,10 @@ export interface ConfigType {
 }
 type InternalConfigType = ConfigType;
 
-const INIT_CONFIG: ConfigType = {
+export const INIT_CONFIG: ConfigType = {
   route: {
     root: '/api/keekijanai',
   },
-}
-
-let config = INIT_CONFIG;
-
-export function setupConfig(nextConfig: ConfigType) {
-  config = nextConfig;
-}
-
-export function getConfig() {
-  return config;
 }
 
 export class ConfigReader {

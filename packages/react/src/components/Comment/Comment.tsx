@@ -72,7 +72,7 @@ interface ReferenceCommentProps {
 }
 
 interface ReadonlyEditorProps {
-  commentHookObject: CommentHookObject;
+  commentHookObject: Pick<CommentHookObject, 'comment'>;
   className?: string;
 }
 
@@ -94,7 +94,7 @@ function ReadonlyEditor(props: ReadonlyEditorProps) {
       toolbarHidden={true}
       editorState={editorState}
       onChange={noop}
-      editorClassName={clsx("__Keekijanai__Comment_item-content", className)}
+      editorClassName={clsx("kkjn__content", className)}
     />
   )
 }
@@ -111,11 +111,11 @@ function CommentHeader(props: CommentHeaderProps) {
   }, [comment]);
   
   return (
-    <div className="__Keekijanai__Comment_CommentHeader-container">
+    <div className="kkjn__header">
       <UserComponent userHookObject={userHookObject} avatarSize={20} />
       {loading === 'loading' && <Skeleton.Input style={{ width: '150px' }} size='small' />}
       {loading === 'done' && comment && (
-        <Typography.Text className="__Keekijanai__Comment_item-date">{format(comment.cTime, 'yyyy-MM-dd hh:mm:ss')}</Typography.Text>
+        <Typography.Text className="kkjn__date">{format(comment.cTime, 'yyyy-MM-dd hh:mm:ss')}</Typography.Text>
       )}
       {showReference && !!comment?.referenceId && (
         <Popover
@@ -142,20 +142,22 @@ function ReferenceComment(props: ReferenceCommentProps) {
   }, [comment, loading]);
 
   return (
-    <div className="__Keekijanai__Comment_ReferenceComment-container">
-      {loading === 'loading' && <Skeleton active />}
-      {loading === 'done' && comment && (
-        <div>
-          <CommentHeader commentHookObject={commentHookObject} />
-          <ReadonlyEditor commentHookObject={commentHookObject} className="__Keekijanai__Comment-reference-editor-container" />
-        </div>
-      )}
-      {loading === 'error' && (
-        <Space direction='horizontal'>
-          <WarningOutlined />
-          <Typography.Text>{lastError}</Typography.Text>
-        </Space>
-      )}
+    <div className="kkjn__comment">
+      <div className="kkjn__reference-comment">
+        {loading === 'loading' && <Skeleton active />}
+        {loading === 'done' && comment && (
+          <div className="kkjn__comment-item">
+            <CommentHeader commentHookObject={commentHookObject} />
+            <ReadonlyEditor commentHookObject={commentHookObject} />
+          </div>
+        )}
+        {loading === 'error' && (
+          <Space direction='horizontal'>
+            <WarningOutlined />
+            <Typography.Text>{lastError}</Typography.Text>
+          </Space>
+        )}
+      </div>
     </div>
   )
 }
@@ -195,16 +197,16 @@ function CommentPost(props: CommentPostProps) {
   };
 
   return (
-    <div className="__Keekijanai__Comment-post-editor-container">
+    <div className="kkjn__comment-post">
       <Editor
         // ref={refEditor}
-        editorClassName="__Keekijanai__Comment-post-editor"
-        toolbarClassName="__Keekijanai__Comment-post-editor-toolbar"
+        editorClassName="kkjn__editor"
+        toolbarClassName="kkjn__toolbar"
         editorState={editorState}
         onEditorStateChange={setEditorState}
         placeholder={placeholder ?? t("COMMENT_PLACEHOLDER")}
       />
-      <div className='__Keekijanai__Comment_post-panel'>
+      <div className='kkjn__panel'>
         <Space>
           {onCancel && <Button disabled={creating} onClick={onCancel} size='small'>{t("CANCEL")}</Button>}
           <Button
@@ -278,16 +280,10 @@ function CommentItem(props: CommentItemProps) {
   };
   
   return (
-    <div>
+    <div className="kkjn__comment-item">
       <CommentHeader commentHookObject={composedCommentHO} showReference={true} />
-      <Editor
-        readOnly={true}
-        toolbarHidden={true}
-        editorState={editorState}
-        onChange={noop}
-        editorClassName="__Keekijanai__Comment_item-content"
-      />
-      <div className="__Keekijanai__Comment_item-panel">
+      <ReadonlyEditor commentHookObject={composedCommentHO} />
+      <div className="kkjn__panel">
         {currentUser.isLogin && currentUser.id === comment.userId && (
           <Popconfirm
             title={t("READY_TO_REMOVE")}
@@ -303,8 +299,8 @@ function CommentItem(props: CommentItemProps) {
           disabled={removing}
           type='text'
           className={clsx(
-            '__Keekijanai__Comment_item-comment-button',
-            switchShowReply.open ? '__Keekijanai__Comment_item-comment-button-activated' : ''
+            'kkjn__button',
+            switchShowReply.open ? 'kkjn__button-activated' : ''
           )}
           size='small'
           icon={<CommentOutlined />}
@@ -334,7 +330,7 @@ function SubCommentList(props: SubCommentListProps) {
 
   return (
     <CommentList
-      className="__Keekijanai__Comment_sub-list-container"
+      className="kkjn__sub-list"
       scope={scope}
       commentListHookObj={commentListHookObj}
       style={style}
@@ -347,9 +343,9 @@ function SubCommentList(props: SubCommentListProps) {
 
 function EmptyCommentList() {
   return (
-    <div className="__Keekijanai__Comment_empty-list-container">
-      <SmileOutlined className="__Keekijanai__Comment_empty-list-icon" />
-      <Typography.Title className="__Keekijanai__Comment_empty-list-text" level={5}>
+    <div className="kkjn__empty-list">
+      <SmileOutlined className="kkjn__icon" />
+      <Typography.Title className="kkjn__text" level={5}>
         <Translation>
           {(t) => t("NO_COMMENT")}
         </Translation>
@@ -375,10 +371,10 @@ function CommentList(props: CommentListProps) {
   }), [handleChangePage, commentListHookObj.page, commentListHookObj.total, commentListHookObj.pageSize]);
 
   return (
-    <div className={className} style={style}>
+    <div className={clsx('kkjn__list', className)} style={style}>
       {showCommentListHeader && (
-        <div className="__Keekijanai__Comment_empty-list-header">
-          <span className="__Keekijanai__Comment_empty-list-header-title">{t("COMMENT_LIST")}</span>
+        <div className="kkjn__header">
+          <span className="kkjn__title">{t("COMMENT_LIST")}</span>
           {commentListHookObj.total !== undefined && <Badge count={commentListHookObj.total}></Badge>}
         </div>
       )}
@@ -414,7 +410,7 @@ export function Comment(props: CommentProps) {
   const { user } = useAuth();
 
   return (
-    <div className={className}>
+    <div className={clsx('kkjn__comment', className)}>
       <CommentList scope={scope} commentListHookObj={commentListHookObj} level={1} />
       {user.isLogin && <CommentPost scope={scope} commentListHookObj={commentListHookObj} />}
     </div>

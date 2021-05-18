@@ -20,7 +20,7 @@ export function Star(props: StarProps) {
 
 
   const getButtonClassName = useCallback((val: any) => {
-    return star.current === val ? '__Keekijanai__Star_star-btn-activated' : '__Keekijanai__Star_star-btn-unactivated';
+    return star.current === val ? 'kkjn__btn-activated' : 'kkjn__btn-unactivated';
   }, [star]);
 
   const getProps = useCallback((value: number, icon: React.ReactNode, handleClick: () => void) => ({
@@ -40,8 +40,8 @@ export function Star(props: StarProps) {
   }), [user, getButtonClassName]);
 
   return (
-    <div className="__Keekijanai__Star_container">
-      <Statistic className="__Keekijanai__Star_stat" value={star.total} />
+    <div className="kkjn__star">
+      <Statistic className="kkjn__stat" value={star.total} />
       <div>
         <Button {...getProps(1, <LikeOutlined />, star.handlePostLike)} />
         <Button {...getProps(0, <MehOutlined />, star.handlePostMama)} />

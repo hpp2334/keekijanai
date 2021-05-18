@@ -61,6 +61,7 @@ export function Main() {
 export default function App() {
   return (
     <Router>
+      <Main />
     </Router>
   )
 }

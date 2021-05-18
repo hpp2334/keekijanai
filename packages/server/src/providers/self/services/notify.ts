@@ -7,7 +7,7 @@ import TelegramBot from 'node-telegram-bot-api';
 import { Service } from "../../../core/service";
 import _ from "lodash";
 import { forEachParallel } from "../../../utils/asyncs";
-import { getProxy } from "../../../utils/fns";
+import { getProxy, memoFunc } from "../../../utils/fns";
 
 interface TelegramNotify {
   type: 'telegram',
@@ -27,6 +27,8 @@ export class NotifyImpl extends Service<SelfClient> implements NotifyService {
   constructor(...args: ConstructorParameters<Core.ServiceConstructor<SelfClient>>) {
     super(...args);
 
+    this.getTelegramBot = memoFunc(this.getTelegramBot);
+
     this.setInternalConfig(this.provider?.config?.services?.notify);
   }
 
@@ -38,7 +40,7 @@ export class NotifyImpl extends Service<SelfClient> implements NotifyService {
     await forEachParallel(notifiers, async ntf => {
       switch (ntf.type) {
         case 'telegram':
-          await this.telegramNotify(ntf, msg);
+          await this.telegramNotify(ntf.token, ntf.chatID, msg);
           break;
         default:
           throw Error(`not supported notifier type "${ntf.type}"`);
@@ -50,14 +52,19 @@ export class NotifyImpl extends Service<SelfClient> implements NotifyService {
     return this.internalConfig.notifiers.length > 0;
   }
 
-  private async telegramNotify(ntfConfig: TelegramNotify, msg: string) {
+  private getTelegramBot = (token: string): TelegramBot => {
     const proxy = getProxy();
-    const bot = new TelegramBot(ntfConfig.token, {
+    const bot = new TelegramBot(token, {
       request: proxy ? {
         proxy,
       } as any : undefined,
     });
-    await bot.sendMessage(ntfConfig.chatID, msg);
+    return bot;
+  }
+
+  private async telegramNotify(token: string, chatID: string, msg: string) {
+    const bot = this.getTelegramBot(token);
+    await bot.sendMessage(chatID, msg);
   }
 
   private setInternalConfig(config: any) {

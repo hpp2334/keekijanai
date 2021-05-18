@@ -1,7 +1,5 @@
-import { setup } from '../src';
-import { getVercelSupabasePreset } from '../src/config/presets/vercel-supabase';
+import { getVercelSupabasePreset, setup, Vercel } from '../src';
 import config from './config';
-import { Vercel } from '../src/platforms/vercel';
 
 export const requestHandler = setup({
   preset: getVercelSupabasePreset(config),

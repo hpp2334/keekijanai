@@ -39,7 +39,7 @@ class SingletonModalManager {
 
   Components = () => {
     return (
-      <div>
+      <div className="__Keekijanai__global-style">
         {this.list.map(({ id, Component }) => <Component key={id} />)}
       </div>
     )

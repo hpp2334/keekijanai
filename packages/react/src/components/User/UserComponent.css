@@ -1,10 +1,11 @@
-.__Keekijanai__User_UserComponent-container {
+.kkjn__user-component {
   display: inline-flex;
   align-items: center;
 }
 
-.__Keekijanai__User_UserComponent-username {
+.kkjn__user-component .kkjn__username {
   color: #bbb;
   font-weight: bold;
   margin: 0 5px;
+  font-family: Arial, Helvetica, sans-serif;
 }

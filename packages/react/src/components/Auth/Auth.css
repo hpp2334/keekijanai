@@ -1,10 +1,10 @@
-.__Keekijanai__Auth__logined_user_indicator {
+.kkjn__auth .kkjn__user-indicator {
   display: flex;
   align-items: center;
   margin-right: 15px;
 }
 
-.__Keekijanai__Auth__logined_container {
+.kkjn__auth .kkjn__logined {
   display: flex;
   align-items: center;
 }

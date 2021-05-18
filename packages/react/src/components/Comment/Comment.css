@@ -1,118 +1,120 @@
 @import 'draft-js/dist/Draft.css';
 @import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 
+.kkjn__comment {
 
-.__Keekijanai__Comment-reference-editor-container {
+}
+
+.kkjn__comment .kkjn__reference-comment {
   max-height: 10rem;
+  min-width: 200px;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.__Keekijanai__Comment-post-editor-container {
+.kkjn__comment .kkjn__comment-post {
   margin-top: 20px;
 }
 
-.__Keekijanai__Comment-post-editor {
+.kkjn__comment .kkjn__comment-post .kkjn__editor {
   border: 1px solid rgb(233, 233, 233);
   padding: 10px;
   min-height: 10rem;
 }
 
-.__Keekijanai__Comment-post-editor-toolbar {
+.kkjn__comment .kkjn__comment-post .kkjn__toolbar {
   color: black;
   margin-bottom: 0;
 }
 
-.__Keekijanai__Comment-post-editor-toolbar .rdw-option-wrapper {
+.kkjn__comment .kkjn__comment-post .kkjn__toolbar .rdw-option-wrapper {
   border: none;
 }
 
-.__Keekijanai__Comment-post-editor-toolbar .rdw-option-wrapper img {
+.kkjn__comment .kkjn__comment-post .kkjn__toolbar .rdw-option-wrapper .rdw-option-wrapper img {
 }
 
-.__Keekijanai__Comment-post-editor-toolbar .rdw-option-wrapper:hover {
+.kkjn__comment .kkjn__comment-post .kkjn__toolbar .rdw-option-wrapper:hover {
   border: none;
   outline: none;
   background-color: #eee;
   box-shadow: none;
 }
 
-.__Keekijanai__Comment-post-editor-toolbar .rdw-dropdown-wrapper a {
+.kkjn__comment .kkjn__comment-post .kkjn__toolbar .rdw-dropdown-wrapper a {
   color: black;
 }
 
-.__Keekijanai__Comment_post-panel {
+.kkjn__comment .kkjn__comment-post .kkjn__panel {
   display: flex;
   align-items: center;
   justify-content: flex-end;
   margin: 5px 0;
 }
 
-.__Keekijanai__Comment_sub-list-container {
+.kkjn__comment .kkjn__sub-list {
   border: 1px solid rgb(226, 226, 226);
   border-radius: 2px;
   margin-top: 10px;
   padding: 15px;
 }
 
-.__Keekijanai__Comment_empty-list-container {
+.kkjn__comment .kkjn__empty-list {
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
 
-.__Keekijanai__Comment_empty-list-header {
+.kkjn__comment .kkjn__empty-list .kkjn__icon {
+  font-size: 3rem;
+}
+
+.kkjn__comment .kkjn__empty-list .kkjn__text {
+  font-size: 4rem;
+}
+
+
+
+.kkjn__comment .kkjn__list .kkjn__header {
   display: flex;
   align-items: center;
 }
 
-.__Keekijanai__Comment_empty-list-header-title {
+.kkjn__comment .kkjn__list .kkjn__header .kkjn__title {
   margin-right: 5px;
   font-size: 20px;
   font-weight: 400;
 }
 
-.__Keekijanai__Comment_empty-list-icon {
-  font-size: 3rem;
-}
-
-.__Keekijanai__Comment_empty-list-text {
-  font-size: 4rem;
-}
-
-.__Keekijanai__Comment_CommentHeader-container {
+.kkjn__comment .kkjn__comment-item .kkjn__header {
   display: flex;
   align-items: center;
 }
 
-.__Keekijanai__Comment_ReferenceComment-container {
-  min-width: 200px;
-}
-
-.__Keekijanai__Comment_item-text {
+.kkjn__comment .kkjn__comment-item .kkjn__header .kkjn__text {
   color: #bbb;
   font-weight: bold;
   margin: 0 5px;
 }
 
-.__Keekijanai__Comment_item-date {
+.kkjn__comment .kkjn__comment-item .kkjn__header .kkjn__date {
   color: #bbb;
   margin: 0 5px;
 }
 
-.__Keekijanai__Comment_item-content {
+.kkjn__comment .kkjn__comment-item .kkjn__content {
   margin: 2px 0;
   padding-left: 25px; 
   line-height: 0.5rem;
 }
 
-.__Keekijanai__Comment_item-panel {
+.kkjn__comment .kkjn__comment-item .kkjn__panel {
   display: flex;
   justify-content: flex-end;
 }
 
-.__Keekijanai__Comment_item-comment-button {}
+.kkjn__comment .kkjn__comment-item .kkjn__button {}
 
-.__Keekijanai__Comment_item-comment-button-activated {
+.kkjn__comment .kkjn__comment-item .kkjn__button-activated {
   color: #22a7f0;
 }

@@ -36,3 +36,6 @@ export function setup(config: Config.Config) {
   devDebug('before exports platform handler');
   return app.toAPI.bind(app);
 }
+
+export { Vercel } from './platforms/vercel';
+export { getVercelSupabasePreset } from './config/presets/vercel-supabase';

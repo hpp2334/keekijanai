@@ -1,17 +1,15 @@
-.__Keekijanai__Star_container {
+.kkjn__star {
   display: flex;
   align-items: center;
 }
 
-.__Keekijanai__Star_stat {
+.kkjn__star .kkjn__stat {
   margin-right: 40px;
 }
 
-.__Keekijanai__Star_star-btn-unactivated {
-
+.kkjn__star .kkjn__btn-unactivated {
 }
 
-
-.__Keekijanai__Star_star-btn-activated {
+.kkjn__star .kkjn__btn-activated {
   color: #22a7f0;
 }
