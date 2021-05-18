@@ -7,9 +7,14 @@
   margin-right: 40px;
 }
 
-.kkjn__star .kkjn__btn-unactivated {
+.kkjn__star .kkjn__btn-unactivated,
+.kkjn__star .kkjn__btn-unactivated:active,
+.kkjn__star .kkjn__btn-unactivated:focus {
+  color: rgb(56, 56, 56);
 }
 
-.kkjn__star .kkjn__btn-activated {
+.kkjn__star .kkjn__btn-activated,
+.kkjn__star .kkjn__btn-activated:active,
+.kkjn__star .kkjn__btn-activated:focus {
   color: #22a7f0;
 }

@@ -33,7 +33,7 @@ export function useStar(scope: string) {
       .subscribe({
         next: update
       })
-  }, [scope]);
+  }, [scope, current]);
 
   const handlePostLike = useCallback(() => { post(1) }, [post]);
   const handlePostMama = useCallback(() => { post(0) }, [post]);
