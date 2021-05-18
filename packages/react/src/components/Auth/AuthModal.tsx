@@ -15,9 +15,11 @@ export function AuthComponent() {
   const handleStopPropagation = (ev: any) => { ev.stopPropagation(); }
 
   return (
-    <div className='kkjn__auth_auth-modal' onClick={authModal.close}>
+    <div className='kkjn__auth-modal' onClick={authModal.close}>
       <div className='kkjn__container-inner' onClick={handleStopPropagation}>
-        <Typography.Text className="kkjn__header kkjn__text">{t("CHOOSE_ONE_OF_LOGIN_METHOD")}</Typography.Text>
+        <div className="kkjn__header">
+          <Typography.Text className="kkjn__text">{t("CHOOSE_ONE_OF_LOGIN_METHOD")}</Typography.Text>
+        </div>
         <div>
           <Button size='large' onClick={handleLogin('github')}>Continue with Github <GithubOutlined /></Button>
         </div>
