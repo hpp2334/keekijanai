@@ -10,6 +10,7 @@ export * from './components/Comment';
 export * from './components/User';
 export * from './components/Star';
 export * from './components/View';
+export * from './components/CodeShow';
 
 export { Context } from './context';
 export { client } from 'keekijanai-client-core';

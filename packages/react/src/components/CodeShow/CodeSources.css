@@ -1,0 +1,13 @@
+.kkjn__code-sources {
+}
+
+.kkjn__code-sources .ant-tabs-nav {
+  padding: 0px 10px;
+  margin: 0 !important;
+}
+
+.kkjn__code-sources pre {
+  max-height: 500px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}

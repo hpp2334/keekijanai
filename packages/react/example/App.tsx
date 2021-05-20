@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Route, BrowserRouter as Router, useHistory, Switch } from 'react-router-dom';
 import { Login, Comment, View, Star, Context, useAuth } from '@';
+import { CodeShow } from './code-show-sources';
 import './App.css';
 
 function Demo() {
@@ -17,14 +18,38 @@ function Demo() {
           <button onClick={() => setScope(ref.current?.value || '')}>Change scope</button>
         </div>
 
-          <h2>Login</h2>
-          <Login />
-          <h2>Comment</h2>
-          <Comment scope={scope} />
-          <h2>View</h2>
-          <View scope={scope} />
-          <h2>Star</h2>
-          <Star scope={scope}></Star>
+        <h2>Login</h2>
+        <Login />
+        <h2>Comment</h2>
+        <Comment scope={scope} />
+        <h2>View</h2>
+        <View scope={scope} />
+        <h2>Star</h2>
+        <Star scope={scope}></Star>
+        <h2>CodeShow (Native)</h2>
+        <CodeShow
+          type='native'
+          sourceList={[
+            './drag-to-show-innerText.js',
+            './drag-to-show-innerText.html',
+            './drag-to-show-innerText.css',
+          ]}
+          entry='./drag-to-show-innerText.native-html.js'
+          nameMap={{
+            './drag-to-show-innerText.js': 'JS',
+            './drag-to-show-innerText.html': 'HTML',
+            './drag-to-show-innerText.css': 'CSS',
+          }}
+        />
+        <h2>CodeShow (React)</h2>
+        <CodeShow
+          sourceList={[
+            './simple-drag-list/demo.js',
+            './simple-drag-list/drag-list.js',
+            './simple-drag-list/drag-line.js',
+          ]}
+          entry='./simple-drag-list/demo.js'
+        />
       </div>
     </Context>
   )

@@ -18,7 +18,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.[jt]sx?$/,
         loader: 'esbuild-loader',
         options: {
           loader: 'tsx', // Remove this if you're not using JSX

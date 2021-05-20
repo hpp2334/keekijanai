@@ -21,5 +21,9 @@ export default {
   "DELETE_COMMENT_SUCESS": "Delete comment successfully",
   "DELETE_COMMENT_ERROR": "Error occur when deleting comment",
   "COMMENT_PLACEHOLDER": "Comment something...",
-  "NO_COMMENT": "Nothing here"
+  "NO_COMMENT": "Nothing here",
+
+  "COPY_CODE": "Copy code",
+  "SHOW_CODE": "Show the code",
+  "HIDE_CODE": "Hide the code"
 }

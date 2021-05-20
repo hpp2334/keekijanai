@@ -21,5 +21,9 @@ export default {
   "DELETE_COMMENT_SUCESS": "删除评论成功",
   "DELETE_COMMENT_ERROR": "删除评论失败",
   "COMMENT_PLACEHOLDER": "评论一些话...",
-  "NO_COMMENT": "空空如也"
+  "NO_COMMENT": "空空如也",
+
+  "COPY_CODE": "复制代码",
+  "SHOW_CODE": "显示代码",
+  "HIDE_CODE": "隐藏代码"
 }
