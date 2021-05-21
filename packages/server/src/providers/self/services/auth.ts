@@ -121,19 +121,19 @@ export class AuthImpl extends Service<SelfClient> implements AuthService {
     });
     debug('get accessToken "%s"', accessToken);
 
-    const res = await service.getUserProfile({ accessToken });
-    debug('get user profile %j', res);
+    const userProfile = await service.getUserProfile({ accessToken });
+    const userID = `${provider}____${userProfile.id}`;
+    debug('get user profile %j', userProfile);
 
     const maxAge = this.internalConfig.maxAge;
 
     const timeService = await this.context.getService('time');
     const currentTime = await timeService.getTime();
   
-    const computedUser = this.getUserFromOAuth2(provider, res);
     const jwtString: string = await jwt.sign(
       {
         data: JSON.stringify({
-          id: computedUser.id,
+          id: userID,
           accessToken,
           provider,
         }),
@@ -144,7 +144,9 @@ export class AuthImpl extends Service<SelfClient> implements AuthService {
 
     const userService = await this.context.getService('user');
     await userService.upsert({
-      ...computedUser,
+      id: userID,
+      avatarUrl: userProfile.avatarUrl,
+      email: userProfile.email,
       lastLogin: currentTime,
     });
 
@@ -152,14 +154,6 @@ export class AuthImpl extends Service<SelfClient> implements AuthService {
       jwt: jwtString,
       maxAge: maxAge.toString(),
     })
-  }
-
-  private getUserFromOAuth2(provider: string, userProfile: OAuth2UserProfile) {
-    const created: User.User = {
-      ...userProfile,
-      id: `${provider}____${userProfile.id}`,
-    };
-    return created;
   }
 
   private getOAuth2Service(provider: string) {

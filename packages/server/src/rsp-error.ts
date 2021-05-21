@@ -30,5 +30,6 @@ export const commonError = {
   },
   comment: {
     notExists: () => new ResponseError('comment not exists', 404),
+    forbidden: () => new ResponseError('you cannot delete the comment', 403),
   }
 }

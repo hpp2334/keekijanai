@@ -37,6 +37,7 @@ export const mountUser: Middleware<ContextState> = async (ctx, next) => {
         isLogin: true,
         id: id,
         name: id,
+        role: id === 'test__userA' ? 0b11 : 1,
       }
 
       await services.user.upsert({ id, lastLogin: Date.now() });

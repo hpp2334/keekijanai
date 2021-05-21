@@ -39,3 +39,4 @@ export function setup(config: Config.Config) {
 
 export { Vercel } from './platforms/vercel';
 export { getVercelSupabasePreset } from './config/presets/vercel-supabase';
+export type { VercelSupabasePresetOptions } from './config/presets/vercel-supabase';

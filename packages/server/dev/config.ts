@@ -1,5 +1,6 @@
+import { getVercelSupabasePreset, setup, Vercel, VercelSupabasePresetOptions  } from '../src';
 
-export default {
+const config: VercelSupabasePresetOptions = {
   supabase: {
     url: 'https://irsaiuoawxhaytjrwjfq.supabase.co',
     appKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjE5Mjc4NjU2LCJleHAiOjE5MzQ4NTQ2NTZ9.UgiklrSQJOd5j2GbT_V1_ZKna0oaa2hqvcXomFh6J4w',
@@ -27,7 +28,8 @@ export default {
             chatID: '710497038',
           }
         ]
-      }
+      },
     }
   }
 }
+export default config;

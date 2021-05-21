@@ -3,7 +3,7 @@ import { SelfFactory } from "../../providers/self";
 import { SupabaseFactory } from "../../providers/supabase";
 import { Config } from "../../type";
 
-interface VercelSupabasePresetOptions {
+export interface VercelSupabasePresetOptions {
   supabase: {
     url: string;
     appKey: string;
@@ -21,6 +21,9 @@ interface VercelSupabasePresetOptions {
       notify?: {
         notifiers: Array<any>;
       },
+      user?: {
+        roles?: Record<string, string[] | string | number>;
+      }
     }
   }
 }

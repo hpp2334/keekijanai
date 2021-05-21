@@ -26,6 +26,7 @@ CREATE TABLE comment (
 CREATE TABLE keekijanai_user (
   id varchar(50) PRIMARY KEY,
   name varchar(50),
+  role int DEFAULT 1,
   password varchar(50),
   provider varchar(50),
   last_login bigint,

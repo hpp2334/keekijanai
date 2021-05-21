@@ -32,6 +32,8 @@ export interface NotifyService extends Core.Service {
 }
 
 export interface UserService extends Core.Service {
+  matchRole(user: User.User, role: Array<'admin' | 'normal' | 'ban'>): boolean;
+
   upsert(params: {
     id: string;
     password?: string;

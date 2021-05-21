@@ -4,7 +4,9 @@ import { convert } from "../../../utils/db";
 import { Service } from '../../../core/service';
 import * as _ from 'lodash';
 import { commonError } from '../../../rsp-error';
+import createDebugger from 'debug';
 
+const debug = createDebugger('keekijanai:service:comment');
 
 type CommentDBCreate = Comment.Create & Pick<Comment.Get, 'cTime'> & {
   userId: string;
@@ -97,25 +99,32 @@ export class CommentServiceImpl extends Service<Supabase> implements CommentServ
   }
 
   delete: CommentService['delete'] = async (commentId) => {
+    const userService = await this.context.getService('user');
+
     const { user } = this.context;
     if (!user.isLogin) {
       throw commonError.auth.userNeedLogin();
     }
 
+    const comment = await this.get(commentId);
+    debug('delete comment %s, role=%s', comment.id, user.role);
+    if (!(user.id === comment.userId || userService.matchRole(user, ['admin']))) {
+      throw commonError.comment.forbidden();
+    }
+
     const result = await this.provider.client
       .from('comment')
       .delete()
-      .match({ id: commentId.toString(), user_id: user.id });
+      .match({ id: commentId.toString() });
     if (result.error || result.body?.length !== 1) {
       throw Error(`Delete comment ${commentId} fail. ` + result.error);
     }
 
-    const comment = result.body[0];
-    if (comment.parent_id) {
-      await this.updateChildCounts(comment.parent_id, -1);
+    if (comment.parentId) {
+      await this.updateChildCounts(comment.parentId, -1);
     }
 
-    return { id: result.body[0].id };
+    return { id: comment.id };
   }
 
   private async updateChildCounts(id: number, delta: number = 1) {

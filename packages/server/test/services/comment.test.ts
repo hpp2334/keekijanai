@@ -21,22 +21,28 @@ const reqFactory = (userId: string) => {
 }
 const reqs = [reqFactory('userA'), reqFactory('userB')];
 const userIdMap = ['test__userA', 'test__userB'];
-const crComment = (scopeIndex: number, content: string) => ({ scope: scopes[scopeIndex], content });
+const crComment = (scopeIndex: number, content: string, par?: number, ref?: number) => ({
+  scope: scopes[scopeIndex],
+  content,
+  plainText: content,
+  referenceId: ref,
+  parentId: par,
+});
 const crAndExpect = (userIndex: number, scopeIndex: number, comment: any) =>
   reqs[userIndex]('/comment/create', { scope: scopes[scopeIndex] }, { comment }, 'POST')
     .then(rsp => {
       expect(rsp.ok).toBeTruthy();
       return rsp.json()
     })
-    .then(rsp => rsp.json())
     .then(result => {
       expect(result.content).toBe(comment.content);
       expect(result.userId).toBe(userIdMap[userIndex]);
+      return result;
     })
 type Comment = any;
 type UserIndex = number;
-const listAndExpect = (userIndex: number, scopeIndex: number, target: { total: number; list: Array<[Comment, UserIndex]> }, grouping: string = '0,999') =>
-  reqs[userIndex]('/comment/list', { scope: scopes[scopeIndex], grouping })
+const listAndExpect = (userIndex: number, scopeIndex: number, parIndex: number | undefined, grouping: string = '0,999', target: { total: number; list: Array<[Comment, UserIndex]> }) =>
+  reqs[userIndex]('/comment/list', { scope: scopes[scopeIndex], parentId: parIndex, grouping })
     .then(rsp => {
       expect(rsp.ok).toBeTruthy();
       return rsp.json()
@@ -57,11 +63,14 @@ const delAndExpect = (userIndex: number, scopeIndex: number, comment: any) =>
       expect(rsp.ok).toBeTruthy();
       return rsp.json()
     })
-    .then(rsp => rsp.json())
     .then(result => {
       expect(result.id).toBe(comment.id);
     })
-
+  const delAndExpectError = (userIndex: number, scopeIndex: number, comment: any) =>
+    reqs[userIndex]('/comment/delete', { scope: scopes[scopeIndex], commentId: comment.id }, undefined, 'DELETE')
+      .then(rsp => {
+        expect(rsp.ok).toBeFalsy();
+      });
 
 beforeEach(async () => {
   await reqs[0]('/comment/test__clear')
@@ -74,6 +83,7 @@ it('reject when not login', async () => {
       comment: {
         scope: 'A',
         content: 'A',
+        plainText: 'A',
       }
     }
   })
@@ -89,6 +99,7 @@ it('post for each user', async () => {
       const comment = {
         scope,
         content,
+        plainText: content,
       }
       const result = await req('/comment/create', { scope }, { comment }, 'POST')
         .then(rsp => {
@@ -112,31 +123,31 @@ it('post, delete, get on scope[0], without pagination', async () => {
   await crAndExpect(0, 0, comments[0]);
   await crAndExpect(0, 0, comments[1]);
   await crAndExpect(1, 0, comments[2]);
-  await listAndExpect(0, 0, {
+  await listAndExpect(0, 0, undefined, '0,999', {
     total: 3,
     list: [
       [comments[2], 1],
       [comments[1], 0],
       [comments[0], 0],
     ],
-  }, '0,999');
+  });
   await delAndExpect(0, 0, comments[1]);
-  await listAndExpect(0, 0, {
+  await listAndExpect(0, 0, undefined, '0,999', {
     total: 2,
     list: [
       [comments[2], 1],
       [comments[0], 0],
     ],
-  }, '0,999');
+  });
   await crAndExpect(0, 0, comments[3]);
-  await listAndExpect(0, 0, {
+  await listAndExpect(0, 0, undefined, '0,999', {
     total: 3,
     list: [
       [comments[3], 0],
       [comments[2], 1],
       [comments[0], 0],
     ],
-  }, '0,999');
+  });
 });
 
 
@@ -150,81 +161,68 @@ it('post, delete, get on scope[0], with pagination', async () => {
   await crAndExpect(0, 0, comments[0]);
   await crAndExpect(0, 0, comments[1]);
   await crAndExpect(1, 0, comments[2]);
-  await listAndExpect(0, 0, {
+  await listAndExpect(0, 0, undefined, '0,2', {
     total: 3,
     list: [
       [comments[2], 1],
       [comments[1], 0],
     ],
-  }, '0,2');
-  await listAndExpect(1, 0, {
+  });
+  await listAndExpect(1, 0, undefined, '1,2', {
     total: 3,
     list: [
       [comments[0], 0],
     ],
-  }, '1,2');
+  });
   await delAndExpect(0, 0, comments[1]);
-  await listAndExpect(0, 0, {
+  await listAndExpect(0, 0, undefined, '0,2', {
     total: 2,
     list: [
       [comments[2], 1],
       [comments[0], 0],
     ],
-  }, '0,2');
+  });
 });
 
 
-it('post, delete, get on scope[0], scope[1], without pagination', async () => {
-  const comments0 = [
+it('post, post in parent', async () => {
+  const commentPar = await crAndExpect(
+    0,
+    0,
     crComment(0, Math.random().toString()),
-    crComment(0, Math.random().toString()),
-    crComment(0, Math.random().toString()),
-    crComment(0, Math.random().toString()),
-  ];
-  const comments1 = [
-    crComment(0, Math.random().toString()),
-  ];
+  );
+  const commentChild = crComment(0, Math.random().toString(), commentPar.id, undefined);
+  await crAndExpect(0, 0, commentChild);
 
-  await crAndExpect(0, 0, comments0[0]);
-  await crAndExpect(0, 0, comments0[1]);
-  await crAndExpect(1, 0, comments0[2]);
-  await crAndExpect(0, 1, comments1[0]);
-  await listAndExpect(0, 0, {
-    total: 3,
-    list: [
-      [comments0[2], 1],
-      [comments0[1], 0],
-      [comments0[0], 0],
-    ],
-  });
-  await listAndExpect(1, 1, {
+  await listAndExpect(0, 0, commentPar.id, '0,999', {
     total: 1,
     list: [
-      [comments1[0], 0]
-    ],
+      [commentChild, 0],
+    ]
   });
+});
 
-  await delAndExpect(0, 0, comments0[1]);
-  await delAndExpect(0, 1, comments1[0]);
-  await listAndExpect(0, 0, {
-    total: 2,
-    list: [
-      [comments0[2], 1],
-      [comments0[0], 0],
-    ],
-  });
-  await listAndExpect(0, 1, {
-    total: 0,
-    list: [],
-  });
-  
-  await crAndExpect(0, 0, comments0[3]);
-  await listAndExpect(0, 0, {
-    total: 3,
-    list: [
-      [comments0[3], 0],
-      [comments0[2], 1],
-      [comments0[0], 0],
-    ],
-  });
+it('post, post and ref', async () => {
+  const commentPar = await crAndExpect(
+    0,
+    0,
+    crComment(0, Math.random().toString()),
+  );
+  const commentChild = crComment(0, Math.random().toString(), undefined, commentPar.id);
+  await crAndExpect(0, 0, commentChild);
+});
+
+it('del owner comment', async () => {
+  const comment = await crAndExpect(1, 0, crComment(0, Math.random().toString()));
+  await delAndExpect(1, 0, comment);
+});
+
+it('del other user\'s comment, expect error', async () => {
+  const comment = await crAndExpect(0, 0, crComment(0, Math.random().toString()));
+  await delAndExpectError(1, 0, comment);
+});
+
+it('admin del other user\'s comment, expect success', async () => {
+  const comment = await crAndExpect(1, 0, crComment(0, Math.random().toString()));
+  await delAndExpect(0, 0, comment);
 });

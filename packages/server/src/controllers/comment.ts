@@ -20,8 +20,9 @@ export class CommentController extends Controller {
   }
 
   list: ControllerHandler = async (ctx) => {
-    const { scope, parentId } = ctx.req.query || {};
+    const { scope, parentId: rawParentId } = ctx.req.query || {};
     const grouping = parseGrouping(ctx.req.query);
+    const parentId = /\d+/.test(rawParentId) ? parseInt(rawParentId) : undefined;
     debug('list: scope="%s", parentId="%s", grouping="%o"', scope, parentId, grouping);
 
     const commentService = await ctx.getService('comment');
