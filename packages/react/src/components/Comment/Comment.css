@@ -70,7 +70,10 @@
 }
 
 .kkjn__comment .kkjn__empty-list .kkjn__text {
-  font-size: 4rem;
+  margin: 10px 0;
+  font-size: 1rem;
+  font-weight: normal;
+  color: #bbb;
 }
 
 
