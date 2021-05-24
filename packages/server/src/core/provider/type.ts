@@ -1,13 +1,27 @@
 import { ClassType } from '@/type/util';
-import type { ProviderBase } from './base';
 
 export type ProviderConstructor = ClassType<ProviderBase>;
+
+export interface ProviderBase {
+  select<T = any>(params: SelectParams): Promise<Response<T>>;
+  insert<T = any>(params: InsertParams): Promise<Response<T>>;
+  update<T = any>(params: UpdateParams): Promise<Response<T>>;
+  delete(params: DeleteParams): Promise<Response>;
+}
+
+export interface DecoratedProvider {
+  options: {
+    transformCamel: boolean;
+  }
+}
 
 export type WhereOperator = '=';
 
 export type Where = {
   [column: string]: [WhereOperator, any][]
 };
+
+export type Order = [string, 'asc' | 'desc'][];
 
 export interface ProviderDecoratorParams {
   key: string;
@@ -18,7 +32,7 @@ export interface SelectParams {
   from: string;
   columns?: string[];
   count?: boolean | string;
-  order?: [string, 'asc' | 'desc'][];
+  order?: Order;
   where?: Where;
   skip?: number;
   take?: number;
@@ -31,6 +45,11 @@ export interface UpdateParams {
   upsert?: boolean;
 }
 
+export interface InsertParams {
+  from: string;
+  payload: any;
+}
+
 export interface DeleteParams {
   from: string;
   where?: Where;
@@ -40,4 +59,5 @@ export interface Response<T = any> {
   body: T[] | null;
   count: number | null;
   error: any;
+  extra?: any;
 }

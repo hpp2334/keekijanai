@@ -2,7 +2,7 @@ import { contextManager, ContextManager } from "@/core/context";
 import { router } from "@/core/controller";
 import { middlewareManager, MiddlewareManager } from "@/core/middleware";
 import { serviceManager } from "@/core/service";
-import { configReader } from "../config";
+import { configReader, ConfigType } from "../config";
 import { Platform, PlatformConstructor } from "./type";
 
 export class PlatformManager {
@@ -12,7 +12,9 @@ export class PlatformManager {
     return this._platform ?? (this._platform = new configReader.config.platform());
   }
 
-  getAPI() {
+  getAPI(config: ConfigType.Config) {
+    configReader.parse(config);
+
     const platform = this.platform;
     const api = platform.toAPIFactory(async rawContext => {
       const context = contextManager.fromRawContext(rawContext);

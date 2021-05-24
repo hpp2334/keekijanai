@@ -1,5 +1,6 @@
-import { SelectParams, Response, UpdateParams, Where, DeleteParams } from "./type";
+import { SelectParams, Response, UpdateParams, Where, DeleteParams, ProviderBase, InsertParams, DecoratedProvider, Order } from "./type";
 import _ from 'lodash';
+import { configReader } from "../config";
 
 type TransformKeyHandler = (s: string) => string;
 const toUnderline: TransformKeyHandler = (s) => s.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase()
@@ -7,14 +8,24 @@ const toCamel: TransformKeyHandler = (s) => s.replace(/_([a-z])/g, (_, q) => q.t
 
 
 export class ProviderManager {
-  private defaultProvider!: any;
+  private defaultProvider?: ProviderBase & DecoratedProvider;
+
+  async insert <T = any>(params: InsertParams, providerKey?: string) {
+    const provider = this.getProvider(providerKey);
+    const { transformCamel } = provider.options;
+
+    const normalizedParams = !transformCamel ? params : this.transformInsertParams(params, toUnderline);
+    const rsp = await provider.insert<T>(normalizedParams);
+    rsp.body = this.transformResponseBody(rsp.body, toCamel);
+    return rsp;
+  }
 
   async select <T = any>(params: SelectParams, providerKey?: string) {
     const provider = this.getProvider(providerKey);
     const { transformCamel } = provider.options;
 
     const normalizedParams = !transformCamel ? params : this.transformSelectParams(params, toUnderline);
-    const rsp: Response<T> = await this.defaultProvider.select(normalizedParams);
+    const rsp = await provider.select<T>(normalizedParams);
     rsp.body = this.transformResponseBody(rsp.body, toCamel);
     return rsp;
   }
@@ -24,7 +35,7 @@ export class ProviderManager {
     const { transformCamel } = provider.options;
 
     const normalizedParams = !transformCamel ? params : this.transformUpdateParams(params, toUnderline);
-    const rsp: Response<T> = await this.defaultProvider.select(normalizedParams);
+    const rsp = await provider.update<T>(normalizedParams);
     rsp.body = this.transformResponseBody(rsp.body, toCamel);
     return rsp;
   }
@@ -34,24 +45,34 @@ export class ProviderManager {
     const { transformCamel } = provider.options;
 
     const normalizedParams = !transformCamel ? params : this.transformDeleteParams(params, toUnderline);
-    const rsp: Response<any> = await this.defaultProvider.select(normalizedParams);
+    const rsp = await provider.delete(normalizedParams);
     rsp.body = this.transformResponseBody(rsp.body, toCamel);
     return rsp;
   }
 
-  private getProvider(key?: string) {
-    return this.defaultProvider;
+  private getProvider(key?: string): ProviderBase & DecoratedProvider {
+    if (this.defaultProvider) {
+      return this.defaultProvider;
+    }
+    const [Provider, config] = configReader.config.provider;
+    return this.defaultProvider = new Provider(config) as any;
   }
 
-  private transformSelectParams(select: SelectParams, handler: TransformKeyHandler) {
+  private transformSelectParams(params: SelectParams, handler: TransformKeyHandler): SelectParams {
     return {
-      ...select,
-      where: !select.where ? undefined : _.mapValues(select.where, li => li.map(v => [handler(v[0]), v[1]])),
-      order: select.order?.map(li => li.map(v => [handler(v[0]), v[1]])),
-      columns: select.columns?.map(item => handler(item)),
+      ...params,
+      where: this.transformWhere(params.where, handler),
+      order: params.order?.map(v => [handler(v[0]), v[1]] as Order[0]),
+      columns: params.columns?.map(item => handler(item)),
     };
   }
-  private transformUpdateParams(params: UpdateParams, handler: TransformKeyHandler) {
+  private transformInsertParams(params: InsertParams, handler: TransformKeyHandler): InsertParams {
+    return {
+      ...params,
+      payload: this.transformPayload(params.payload, handler),
+    };
+  }
+  private transformUpdateParams(params: UpdateParams, handler: TransformKeyHandler): UpdateParams {
     return {
       ...params,
       where: this.transformWhere(params.where, handler),
@@ -69,8 +90,8 @@ export class ProviderManager {
       return this.transformPayload(item, handler);
     });
   }
-  private transformWhere(where: Where | undefined, handler: TransformKeyHandler) {
-    return !where ? undefined : _.mapValues(where, li => li.map(v => [handler(v[0]), v[1]]))
+  private transformWhere(where: Where | undefined, handler: TransformKeyHandler): Where | undefined {
+    return !where ? undefined : _.mapValues(where, li => li.map(v => [v[0], handler(v[1])] as Where[''][0]))
   }
   private transformPayload(payload: any, handler: TransformKeyHandler) {
     return !_.isObjectLike(payload) ? payload : _.mapKeys(payload, (value, key) => handler(key));
