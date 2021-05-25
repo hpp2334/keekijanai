@@ -4,7 +4,7 @@ import { configReader } from "../config";
 
 type TransformKeyHandler = (s: string) => string;
 const toUnderline: TransformKeyHandler = (s) => s.replace(/([a-z])([A-Z])/g, '$1_$2').toLowerCase()
-const toCamel: TransformKeyHandler = (s) => s.replace(/_([a-z])/g, (_, q) => q.toUpperCase())
+const toCamel: TransformKeyHandler = (s) => s.replace(/([a-z])_([a-z])/g, (_, p, q) => p + q.toUpperCase())
 
 
 export class ProviderManager {
@@ -91,7 +91,16 @@ export class ProviderManager {
     });
   }
   private transformWhere(where: Where | undefined, handler: TransformKeyHandler): Where | undefined {
-    return !where ? undefined : _.mapValues(where, li => li.map(v => [v[0], handler(v[1])] as Where[''][0]))
+    if (!where) {
+      return undefined;
+    }
+    const list = Object.entries(where);
+    const mappedList = list.map(([key, pair]) => [
+      handler(key),
+      pair
+    ] as [string, Where[string]]);
+    const res = Object.fromEntries(mappedList);
+    return res;
   }
   private transformPayload(payload: any, handler: TransformKeyHandler) {
     return !_.isObjectLike(payload) ? payload : _.mapKeys(payload, (value, key) => handler(key));

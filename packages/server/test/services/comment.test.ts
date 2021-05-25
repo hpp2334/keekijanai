@@ -1,90 +1,26 @@
-import fetch from "node-fetch";
-import { appRequest } from "../../dev/request";
+/// <reference types="../../node_modules/@types/jest" />
+import { requester, ValidUser } from "../utils/requester";
 
 jest.setTimeout(50 * 1000);
 
-let scopes = ['/page1', '/page2'];
-
-const reqFactory = (userId: string) => {
-  const sessionIdentiter: object = {};
-  return (path: string, query?: any, body?: any, method: 'GET' | 'POST' | 'DELETE' = 'GET') => {
-    return appRequest(path, {
-      method,
-      query,
-      body,
-      headers: {
-        Authorization: 'test:' + userId,
-      },
-      sessionIdentity: sessionIdentiter,
-    });
-  }
-}
-const reqs = [reqFactory('userA'), reqFactory('userB')];
-const userIdMap = ['test__userA', 'test__userB'];
-const crComment = (scopeIndex: number, content: string, par?: number, ref?: number) => ({
-  scope: scopes[scopeIndex],
-  content,
-  plainText: content,
-  referenceId: ref,
-  parentId: par,
-});
-const crAndExpect = (userIndex: number, scopeIndex: number, comment: any) =>
-  reqs[userIndex]('/comment/create', { scope: scopes[scopeIndex] }, { comment }, 'POST')
-    .then(rsp => {
-      expect(rsp.ok).toBeTruthy();
-      return rsp.json()
-    })
-    .then(result => {
-      expect(result.content).toBe(comment.content);
-      expect(result.userId).toBe(userIdMap[userIndex]);
-      return result;
-    })
-type Comment = any;
-type UserIndex = number;
-const listAndExpect = (userIndex: number, scopeIndex: number, parIndex: number | undefined, grouping: string = '0,999', target: { total: number; list: Array<[Comment, UserIndex]> }) =>
-  reqs[userIndex]('/comment/list', { scope: scopes[scopeIndex], parentId: parIndex, grouping })
-    .then(rsp => {
-      expect(rsp.ok).toBeTruthy();
-      return rsp.json()
-    })
-    .then(result => {
-      expect(result.total).toBe(target.total);
-      expect(result.comments.length).toBe(target.list.length);
-      expect(Array.isArray(result.comments)).toBeTruthy();
-      result.comments.forEach((element: any, i: number) => {
-        expect(element.content).toBe(target.list[i][0].content);
-        expect(element.userId).toBe(userIdMap[target.list[i][1]]);
-        target.list[i][0].id = element.id;
-      });
-    })
-const delAndExpect = (userIndex: number, scopeIndex: number, comment: any) =>
-  reqs[userIndex]('/comment/delete', { scope: scopes[scopeIndex], commentId: comment.id }, undefined, 'DELETE')
-    .then(rsp => {
-      expect(rsp.ok).toBeTruthy();
-      return rsp.json()
-    })
-    .then(result => {
-      expect(result.id).toBe(comment.id);
-    })
-  const delAndExpectError = (userIndex: number, scopeIndex: number, comment: any) =>
-    reqs[userIndex]('/comment/delete', { scope: scopes[scopeIndex], commentId: comment.id }, undefined, 'DELETE')
-      .then(rsp => {
-        expect(rsp.ok).toBeFalsy();
-      });
+beforeAll(async () => {
+  await requester.init();
+})
 
 beforeEach(async () => {
-  await reqs[0]('/comment/test__clear')
+  await requester.request('admin1', '/comment/test__clear', {
+    method: 'DELETE'
+  })
 });
 
-it('reject when not login', async () => {
-  await appRequest('/comment/create', {
+test('reject when not login', async () => {
+  await requester.request(undefined, '/comment/create', {
     method: 'POST',
+    query: {
+      scope: 'A',
+    },
     body: {
-      comment: {
-        scope: 'A',
-        content: 'A',
-        plainText: 'A',
-      }
+      comment: createComment(),
     }
   })
   .then(
@@ -92,137 +28,241 @@ it('reject when not login', async () => {
   );
 })
 
-it('post for each user', async () => {
-  for (const scope of scopes) {
-    for (const [i, req] of reqs.entries()) {
-      const content = Math.random().toString();
-      const comment = {
-        scope,
-        content,
-        plainText: content,
-      }
-      const result = await req('/comment/create', { scope }, { comment }, 'POST')
-        .then(rsp => {
-          expect(rsp.ok).toBeTruthy();
-          return rsp.json()
-        });
-      expect(result.content).toBe(content);
-      expect(result.userId).toBe(userIdMap[i]);
+test('post for each user', async () => {
+  for (const scope of ['A', 'B']) {
+    for (const user of ['admin1', 'user2'] as ValidUser[]) {
+      await createAndExpect(scope, user)
     }
   }
 });
 
-it('post, delete, get on scope[0], without pagination', async () => {
+test('post, delete, get on scope \'cc\', without pagination', async () => {
   const comments = [
-    crComment(0, Math.random().toString()),
-    crComment(0, Math.random().toString()),
-    crComment(0, Math.random().toString()),
-    crComment(0, Math.random().toString()),
+    await createAndExpect('cc', 'admin1'),
+    await createAndExpect('cc', 'admin1'),
+    await createAndExpect('cc', 'user2'),
+    createComment(),
+  ]
+
+  await listAndExpect(
+    'cc',
+    'admin1',
+    {
+      total: 3,
+      list: [
+        [comments[2], 'user2'],
+        [comments[1], 'admin1'],
+        [comments[0], 'admin1'],
+      ],
+    }
+  )
+
+  comments[3] = await createAndExpect('cc', 'admin1');
+
+  await listAndExpect(
+    'cc', 'admin1', {
+      total: 4,
+      list: [
+        [comments[3], 'admin1'],
+        [comments[2], 'user2'],
+        [comments[1], 'admin1'],
+        [comments[0], 'admin1']
+      ],
+    }
+  )
+});
+
+
+test('post, delete, get on scope \'A\', with pagination', async () => {
+  const comments = [
+    createComment(),
+    createComment(),
+    createComment(),
   ];
 
-  await crAndExpect(0, 0, comments[0]);
-  await crAndExpect(0, 0, comments[1]);
-  await crAndExpect(1, 0, comments[2]);
-  await listAndExpect(0, 0, undefined, '0,999', {
-    total: 3,
-    list: [
-      [comments[2], 1],
-      [comments[1], 0],
-      [comments[0], 0],
-    ],
-  });
-  await delAndExpect(0, 0, comments[1]);
-  await listAndExpect(0, 0, undefined, '0,999', {
-    total: 2,
-    list: [
-      [comments[2], 1],
-      [comments[0], 0],
-    ],
-  });
-  await crAndExpect(0, 0, comments[3]);
-  await listAndExpect(0, 0, undefined, '0,999', {
-    total: 3,
-    list: [
-      [comments[3], 0],
-      [comments[2], 1],
-      [comments[0], 0],
-    ],
-  });
+  await createAndExpect('A', 'user2', comments[0]);
+  await createAndExpect('A', 'admin1', comments[1]);
+  await createAndExpect('A', 'user2', comments[2]);
+
+  await listAndExpect(
+    'A', 'admin1', {
+      total: 3,
+      list: [
+        [comments[2], 'user2'],
+        [comments[1], 'admin1'],
+      ],
+    }, {
+      grouping: '0,2'
+    }
+  )
+  await listAndExpect(
+    'A', 'admin1', {
+      total: 3,
+      list: [
+        [comments[0], 'user2'],
+      ],
+    }, {
+      grouping: '1,2'
+    }
+  )
+  await deleteAndExpect('A', 'admin1', comments[1]);
+  
+  await listAndExpect(
+    'A', 'admin1', {
+      total: 2,
+      list: [
+        [comments[2], 'user2'],
+        [comments[0], 'user2'],
+      ],
+    }, {
+      grouping: '0,2'
+    }
+  )
 });
 
 
-it('post, delete, get on scope[0], with pagination', async () => {
-  const comments = [
-    crComment(0, Math.random().toString()),
-    crComment(0, Math.random().toString()),
-    crComment(0, Math.random().toString()),
-  ];
-
-  await crAndExpect(0, 0, comments[0]);
-  await crAndExpect(0, 0, comments[1]);
-  await crAndExpect(1, 0, comments[2]);
-  await listAndExpect(0, 0, undefined, '0,2', {
-    total: 3,
-    list: [
-      [comments[2], 1],
-      [comments[1], 0],
-    ],
-  });
-  await listAndExpect(1, 0, undefined, '1,2', {
-    total: 3,
-    list: [
-      [comments[0], 0],
-    ],
-  });
-  await delAndExpect(0, 0, comments[1]);
-  await listAndExpect(0, 0, undefined, '0,2', {
-    total: 2,
-    list: [
-      [comments[2], 1],
-      [comments[0], 0],
-    ],
-  });
-});
-
-
-it('post, post in parent', async () => {
-  const commentPar = await crAndExpect(
-    0,
-    0,
-    crComment(0, Math.random().toString()),
+test('post, post in parent', async () => {
+  const commentPar = await createAndExpect('C', 'user2');
+  const commentChild = await createAndExpect('C', 'user2', createComment(undefined, commentPar.id, undefined));
+  
+  await listAndExpect(
+    'C', 'admin1', {
+      total: 1,
+      list: [
+        [commentPar, 'user2'],
+      ],
+    }
   );
-  const commentChild = crComment(0, Math.random().toString(), commentPar.id, undefined);
-  await crAndExpect(0, 0, commentChild);
 
-  await listAndExpect(0, 0, commentPar.id, '0,999', {
-    total: 1,
-    list: [
-      [commentChild, 0],
-    ]
-  });
-});
-
-it('post, post and ref', async () => {
-  const commentPar = await crAndExpect(
-    0,
-    0,
-    crComment(0, Math.random().toString()),
+  await listAndExpect(
+    'C', 'admin1', {
+      total: 1,
+      list: [
+        [commentChild, 'user2'],
+      ],
+    }, {
+      parentId: commentPar.id,
+    }
   );
-  const commentChild = crComment(0, Math.random().toString(), undefined, commentPar.id);
-  await crAndExpect(0, 0, commentChild);
 });
 
-it('del owner comment', async () => {
-  const comment = await crAndExpect(1, 0, crComment(0, Math.random().toString()));
-  await delAndExpect(1, 0, comment);
+test('post, post and ref', async () => {
+  const commentPar = await createAndExpect('C', 'user2');
+  const commentChild = await createAndExpect('C', 'user2', createComment(undefined, undefined, commentPar.id));
 });
 
-it('del other user\'s comment, expect error', async () => {
-  const comment = await crAndExpect(0, 0, crComment(0, Math.random().toString()));
-  await delAndExpectError(1, 0, comment);
+test('del owner comment', async () => {
+  const comment = await createAndExpect('D', 'user2');
+  await deleteAndExpect('D', 'user2', comment);
 });
 
-it('admin del other user\'s comment, expect success', async () => {
-  const comment = await crAndExpect(1, 0, crComment(0, Math.random().toString()));
-  await delAndExpect(0, 0, comment);
+test("del other user's comment, expect error", async () => {
+  const comment = await createAndExpect('D', 'admin1');
+  await deleteAndExpect('D', 'user2', comment, false);
 });
+
+test('admin del other user\'s comment, expect success', async () => {
+  const comment = await createAndExpect('D', 'user2');
+  await deleteAndExpect('D', 'admin1', comment);
+});
+
+
+
+
+
+// Helpers ====
+
+
+const createComment = (content?: string | undefined, par?: number, ref?: number) => {
+  const c = content ?? Math.random().toString();
+  return {
+    content: c,
+    plainText: c,
+    referenceId: ref,
+    parentId: par,
+  }
+};
+const expectCreate = (scope: string, user: ValidUser, comment: any, rsp: Response) => {
+  expect(rsp.ok).toBeTruthy();
+  return rsp.json().then(result => {
+    expect(result.content).toBe(comment.content);
+    expect(result.referenceId).toBe(comment.referenceId ?? null);
+    expect(result.parentId).toBe(comment.parentId ?? null);
+    expect(result.scope).toBe(scope);
+    expect(result.userId).toBe(user);
+    return result;
+  })
+}
+const createAndExpect = (scope: string, user: ValidUser, comment?: any): Promise<any> => {
+  comment = comment ?? createComment();
+  return requester.request(user, '/comment/create', {
+    method: 'POST',
+    query: { scope },
+    body: {
+      comment,
+    }
+  }).then(expectCreate.bind(null, scope, user, comment));
+}
+
+const expectList = (
+  target: { total: number; list: Array<[any, ValidUser]> },
+  rsp: Response,
+) => {
+  expect(rsp.ok).toBeTruthy();
+  return rsp.json().then(result => {
+    expect(result.total).toBe(target.total);
+    expect(result.comments.length).toBe(target.list.length);
+    expect(Array.isArray(result.comments)).toBeTruthy();
+    result.comments.forEach((element: any, i: number) => {
+      expect(element.content).toBe(target.list[i][0].content);
+      expect(element.userId).toBe(target.list[i][1]);
+      target.list[i][0].id = element.id;
+    });
+    return result;
+  })
+}
+
+const listAndExpect = (
+  scope: string,
+  user: ValidUser,
+  target: { total: number; list: Array<[any, ValidUser]> },
+  opts?: {
+    parentId?: number;
+    grouping?: string;
+  }
+) => {
+  return requester.request(user, '/comment/list', {
+    method: 'GET',
+    query: {
+      scope,
+      parentId: opts?.parentId,
+      grouping: opts?.grouping ?? '0,999',
+    },
+  }).then(expectList.bind(null, target))
+}
+
+const expectDeleteTruthy = (comment: any, rsp: Response) => {
+  expect(rsp.ok).toBeTruthy();
+  return rsp.json().then(result => {
+    expect(result.id).toBe(comment.id);
+  });
+};
+const expectDeleteFalsy = (rsp: Response) => {
+  expect(rsp.ok).toBeFalsy();
+}
+const deleteAndExpect = (
+  scope: string,
+  user: ValidUser,
+  comment: any,
+  expectTruthy = true,
+) => {
+  return requester.request(user, '/comment/delete', {
+    method: 'DELETE',
+    query: {
+      scope,
+      commentId: comment.id,
+    },
+  }).then(
+    expectTruthy ? expectDeleteTruthy.bind(null, comment) : expectDeleteFalsy
+  );
+}

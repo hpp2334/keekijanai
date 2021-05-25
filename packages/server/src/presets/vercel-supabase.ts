@@ -1,3 +1,4 @@
+require('module-alias/register')
 import { ConfigType } from "@/core/config";
 
 import { AuthService } from "@/services/auth";

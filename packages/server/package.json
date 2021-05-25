@@ -4,6 +4,9 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
+  "_moduleAliases": {
+    "@": "./src"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^1.11.12",
     "debug": "^4.3.1",
@@ -11,6 +14,7 @@
     "keekijanai-client-core": "^0.0.1",
     "keekijanai-type": "^0.0.1",
     "lodash": "^4.17.21",
+    "module-alias": "^2.2.2",
     "next-tick": "^1.1.0",
     "node-fetch": "^2.6.1",
     "node-telegram-bot-api": "^0.53.0",
@@ -34,6 +38,7 @@
     "@types/node-telegram-bot-api": "^0.51.1",
     "@types/uuid": "^8.3.0",
     "@vercel/node": "^1.10.0",
+    "babel-plugin-module-resolver": "^4.1.0",
     "cookie-parser": "^1.4.5",
     "cookiejar": "^2.1.2",
     "cross-env": "^7.0.3",
@@ -46,8 +51,8 @@
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "test": "cross-env DEBUG=keekijanai:* jest",
-    "dev": "cross-env DEBUG=keekijanai:* nodemon --watch 'src/**' --ext 'ts,json' --exec 'ts-node ./dev'",
+    "test": "npm run build && cross-env DEBUG=keekijanai:* jest",
+    "dev": "cross-env DEBUG=keekijanai:* nodemon --watch 'src/**' --ext 'ts,json' --exec 'ts-node --project ./tsconfig.json ./dev'",
     "build": "npm run clean && tsc",
     "clean": "rimraf ./dist"
   }

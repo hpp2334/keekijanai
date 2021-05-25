@@ -7,17 +7,21 @@ export type Preset = Config;
 
 export type ServicesList = Array<ServiceType.ServiceConstructor | [ServiceType.ServiceConstructor, any]>;
 
-export interface Config {
+export interface ConfigBase {
   maxAgeInSec?: number;
-  preset?: Preset | Array<Preset>;
   controllers: ControllerType.ControllerConstructor[];
   services: ServicesList;
   provider: ProviderType.ProviderConstructor | [ProviderType.ProviderConstructor, any];
   platform: PlatformType.PlatformConstructor;
 }
 
-export type ConfigInternal = Omit<Config, 'preset' | 'provider' | 'services' | 'controllers'> & {
+export type Config = (Partial<ConfigBase> & {
+  preset: Preset | Array<Preset>;
+}) | ConfigBase;
+
+export type ConfigInternal = Omit<ConfigBase, 'provider' | 'platform' | 'services' | 'controllers'> & {
   provider: [ProviderType.ProviderConstructor, any];
+  platform: PlatformType.PlatformConstructor;
   services: Map<string, [ServiceType.ServiceConstructor, any]>;
   controllers: Map<string, ControllerType.ControllerConstructor>;
 };

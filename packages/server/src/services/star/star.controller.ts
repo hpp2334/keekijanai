@@ -1,3 +1,4 @@
+import { ContextType } from "@/core/context";
 import { Controller, ControllerType, Route, } from "@/core/controller";
 
 import { InjectService } from "@/core/service";
@@ -14,7 +15,7 @@ export class StarController {
   @InjectService('star')  starService!: StarService;
 
   @Route("/get")
-  get: ControllerType.RouteHandler = async (ctx) => {
+  async get(ctx: ContextType.Context) {
     const { scope } = ctx.req.query || {};
 
     if (typeof scope !== 'string') {
@@ -26,7 +27,7 @@ export class StarController {
   }
 
   @Route("/post", 'POST')
-  post: ControllerType.RouteHandler = async (ctx) => {
+  async post(ctx: ContextType.Context) {
     const { scope } = ctx.req.query || {};
     const { current } = ctx.req.body;
 
@@ -42,7 +43,7 @@ export class StarController {
   }
 
   @Route("/clear", 'POST')
-  clear: ControllerType.RouteHandler = async (ctx) => {
+  async clear(ctx: ContextType.Context) {
     const { scope } = ctx.req.query || {};
 
     if (typeof scope !== 'string') {

@@ -16,14 +16,13 @@ export class PlatformManager {
     configReader.parse(config);
 
     const platform = this.platform;
+    middlewareManager.add(
+      platform.handleResponse,
+      ...configReader.getMiddlewares(),
+      router.toMiddleware()
+    );
     const api = platform.toAPIFactory(async rawContext => {
       const context = contextManager.fromRawContext(rawContext);
-
-      middlewareManager.add(
-        platform.handleResponse,
-        ...serviceManager.getMiddlewares(),
-        router.toMiddleware()
-      );
       await middlewareManager.run(context);
     });
     return api;

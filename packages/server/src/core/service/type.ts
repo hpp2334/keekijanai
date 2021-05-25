@@ -24,6 +24,7 @@ export interface DecoratedService {
     handler: Function;
   }>
   $$injectServices?: [string, string][];
+  $$middlewares?: MiddlewareType.Middleware[];
 }
 
 export type {

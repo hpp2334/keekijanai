@@ -1,16 +1,13 @@
 import { ContextType } from '@/core/context';
 import { ServiceType } from '.';
 import { configReader } from '../config';
+import { MiddlewareType } from '@/core/middleware';
 import { DecoratedService, ServiceBase } from './type';
 
 type ServiceInstanceMap = Map<string, ServiceType.ServiceBase & DecoratedService>;
 
 export class ServiceManager {
   private _cacheMap = new WeakMap<ContextType.Context, ServiceInstanceMap>();
-
-  getMiddlewares() {
-    return [];
-  }
 
   instantiate(key: string, ctx: ContextType.Context): ServiceBase {
     let map = this._cacheMap.get(ctx);
@@ -24,8 +21,9 @@ export class ServiceManager {
     if (cachedService) {
       return cachedService;
     } else {
-      const [Service, config] = configReader.getService(key);
+      const [Service, config] = this.getService(key);
       cachedService = new Service() as any as (ServiceType.ServiceBase & DecoratedService);
+      cachedService.ctx = ctx;
      
       // process injected services
       if (cachedService.$$injectServices) {
@@ -56,6 +54,14 @@ export class ServiceManager {
           break;
       }
     }
+  }
+
+  private getService(key: string) {
+    const item = configReader.config.services.get(key);
+    if (!item) {
+      throw Error(`not configure service for key "${key}"`);
+    }
+    return item;
   }
 }
 

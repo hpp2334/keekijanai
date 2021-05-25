@@ -1,3 +1,4 @@
+import { ContextType } from '@/core/context';
 import { Controller, ControllerType, Route } from '@/core/controller';
 import { InjectService } from "@/core/service";
 
@@ -12,7 +13,7 @@ export class AuthController {
   @InjectService('auth')    authService!: AuthService;
 
   @Route('/login')
-  auth: ControllerType.RouteHandler = async (ctx) => {
+  async auth(ctx: ContextType.Context) {
     const { provider, usename, password } = ctx.req.query || {};
     debug('oauth2GetCode: provider="%s"', provider);
 
@@ -25,7 +26,7 @@ export class AuthController {
   }
 
   @Route('/accessToken')
-  oauth2GetAccessToken: ControllerType.RouteHandler = async (ctx) => {
+  async oauth2GetAccessToken(ctx: ContextType.Context) {
     const { provider, code } = ctx.req.query || {};
     debug('oauth2GetAccessToken: provider="%s", code="%s"', provider, code);
     if (typeof provider !== 'string') {
@@ -40,9 +41,15 @@ export class AuthController {
   }
 
   @Route('/current')
-  getCurrent: ControllerType.RouteHandler = async (ctx) => {
+  async getCurrent(ctx: ContextType.Context) {
     const jwtString = ctx.req.headers?.['authorization'];
 
     ctx.res.body = await this.authService.getCurrentUser(jwtString);
+  }
+
+  @Route('/test__prepare', 'POST', { onlyDEBUG: true })
+  async TEST__prepare(ctx: ContextType.Context) {
+    const list = ctx.req.body;
+    ctx.res.body = await this.authService.TEST__prepare(list);
   }
 }

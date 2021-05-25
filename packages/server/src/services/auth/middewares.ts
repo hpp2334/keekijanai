@@ -16,19 +16,7 @@ export const mountUser: MiddlewareType.Middleware = async (ctx, next) => {
       isLogin: false,
     };
   } else {
-    if (process.env.NODE_ENV === 'test' && authorization.startsWith('test:')) {
-      const id = 'test__' + authorization.slice(5);
-      ctx.state.user = {
-        isLogin: true,
-        id: id,
-        name: id,
-        role: id === 'test__userA' ? 0b11 : 1,
-      }
-
-      await services.user.upsert({ id, lastLogin: Date.now() });
-    } else {
-      ctx.state.user = await services.auth.getCurrentUser(authorization);
-    }
+    ctx.state.user = await services.auth.getCurrentUser(authorization);
   }
 
   await next();

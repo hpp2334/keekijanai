@@ -1,3 +1,4 @@
+require('module-alias/register')
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Provider, ProviderType } from '@/core/provider';
 import _ from 'lodash';
@@ -20,14 +21,14 @@ class SupabaseProvider implements ProviderType.ProviderBase {
         .from(params.from)
         .select(params.columns?.join(','), { count: this.transformCount(params.count) });
       if (params.where) {
-        request = this.handleWhereToEq(request, params.where);
+        request = this.handleWhere(request, params.where);
       }
       if (!_.isNil(params.skip) && !_.isNil(params.take)) {
-        request.range(params.skip * params.take, (params.skip + 1) * params.take - 1)
+        request = request.range(params.skip * params.take, (params.skip + 1) * params.take - 1)
       }
       if (params.order) {
         params.order.forEach(([column, ord]) => {
-          request.order(column, { ascending: ord === 'asc' })
+          request = request.order(column, { ascending: ord === 'asc' })
         });
       }
 
@@ -55,7 +56,7 @@ class SupabaseProvider implements ProviderType.ProviderBase {
         .from(params.from)
         [params.upsert ? 'upsert' : 'update'](params.payload)
       if (params.where) {
-        request = this.handleWhereToEq(request, params.where);
+        request = this.handleWhere(request, params.where);
       }
 
       const rsp = await request;
@@ -70,7 +71,7 @@ class SupabaseProvider implements ProviderType.ProviderBase {
         .from(params.from)
         .delete();
       if (params.where) {
-        request = this.handleWhereToEq(request, params.where);
+        request = this.handleWhere(request, params.where);
       }
 
       const rsp = await request;
@@ -116,7 +117,7 @@ class SupabaseProvider implements ProviderType.ProviderBase {
         return 'exact';
     }
   }
-  private handleWhereToEq(request: any, where: ProviderType.Where) {
+  private handleWhere(request: any, where: ProviderType.Where) {
     _.forOwn(where, function (list, key) {
       list.forEach(item => {
         const [op, value] = item;
@@ -125,7 +126,12 @@ class SupabaseProvider implements ProviderType.ProviderBase {
         }
         switch (op) {
           case '=':
-            request = request.eq(key, value)
+            if (value === null) {
+              request = request.is(key, null);
+            } else {
+              request = request.eq(key, value);
+            }
+            
             break;
           default:
             console.warn(`unrecognize op "${op}" for "${key}" -> "${value}"`);

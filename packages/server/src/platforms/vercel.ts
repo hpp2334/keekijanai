@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { MiddlewareManager } from "../core/middleware/manager";
-
+require('module-alias/register')
 import { ResponseError } from "@/core/error";
 import { PlatformType } from "@/core/platform";
 import { MiddlewareType } from "@/core/middleware";
@@ -37,7 +37,7 @@ export class Vercel implements PlatformType.Platform {
       } else {
         ctx.res._res.status(500);
         ctx.res._res.send({
-          error: err instanceof Error ? err.message : err,
+          error: 'Server Error',
         });
         console.error(err);
       }

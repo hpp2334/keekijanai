@@ -9,21 +9,18 @@ const serviceBase = {
 }
 
 export function ServiceDecorator(params: ServiceDecoratorParams) {
-  const { key } = params;
+  const { key, middlewares } = params;
 
   return function <T extends ClassType>(ctor: T) {
-    ctor.prototype = Object.create(serviceBase);
+    Object.setPrototypeOf(ctor.prototype, serviceBase);
     ctor.prototype.$$key = key;
+    ctor.prototype.$$middlewares = middlewares;
     return ctor;
   }
 }
 
 export function InjectServiceDecorator(key: string) {
   return function (target: any, propKey: string): any {
-    if (target.$$type !== 'service' && target.$$type !== 'controller') {
-      throw Error('should decorate API in service or controller.');
-    }
-
     const services = target.$$injectServices = target.$$injectServices ?? [];
     services.push([propKey, key]);
   }
@@ -31,10 +28,6 @@ export function InjectServiceDecorator(key: string) {
 
 export function InitDecorator(type?: 'config') {
   return function (target: any, propKey: string): any {
-    if (target.$$type !== 'service') {
-      throw Error('should decorate API in service.');
-    }
-
     const item = {
       type,
       handler: target[propKey],

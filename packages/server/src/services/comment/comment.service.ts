@@ -61,7 +61,7 @@ export class CommentService {
       userId: user.id,
       cTime: Date.now(),
     };
-    const result = await this.provider.update({
+    const result = await this.provider.insert({
       from: 'comment',
       payload: comment,
     });
@@ -95,7 +95,7 @@ export class CommentService {
       ],
       skip: grouping.skip,
       take: grouping.take,
-    })
+    });
 
     if (result.error || !Array.isArray(result.body)) {
       throw Error(`List comments fail.` + result.error?.message);

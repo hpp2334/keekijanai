@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { MiddlewareType } from "@/core/middleware";
-import { Config, ConfigInternal } from "./type";
+import { Config, ConfigBase, ConfigInternal } from "./type";
 
 class ConfigReader {
   private internalConfig?: ConfigInternal;
@@ -21,12 +21,7 @@ class ConfigReader {
   }
 
   private _parse(config: Config) {
-    const err = this.validateConfig(config);
-    if (err) {
-      throw err;
-    }
-
-    if (config.preset) {
+    if ('preset' in config) {
       const presets = Array.isArray(config.preset) ? config.preset : [config.preset];
       presets.forEach(preset => {
         this._parse(preset);
@@ -34,8 +29,11 @@ class ConfigReader {
     }
     let internalConfig = this.internalConfig;
     if (!internalConfig) {
+      if ('preset' in config) {
+        throw Error('preset in config impossbily. It may be a bug');
+      }
       this.internalConfig = _.merge(
-        _.omit(config, ['preset', 'provider', 'services', 'controllers']),
+        _.omit(config, ['provider', 'services', 'controllers']),
         {
           provider: this.fromProvider(config.provider),
           services: this.fromServiceList(config.services, new Map()),
@@ -43,10 +41,18 @@ class ConfigReader {
         }
       );
     } else {
-      internalConfig.provider = this.fromProvider(config.provider);
-      internalConfig.platform = config.platform;
-      internalConfig.services = this.fromServiceList(config.services, internalConfig.services);
-      internalConfig.controllers = this.fromControllerList(config.controllers, internalConfig.controllers);
+      if (config.provider) {
+        internalConfig.provider = this.fromProvider(config.provider);
+      }
+      if (config.platform) {
+        internalConfig.platform = config.platform;
+      }
+      if (config.services) {
+        internalConfig.services = this.fromServiceList(config.services, internalConfig.services);
+      }
+      if (config.controllers) {
+        internalConfig.controllers = this.fromControllerList(config.controllers, internalConfig.controllers);
+      }
     }
   }
 
@@ -54,39 +60,23 @@ class ConfigReader {
     return this.middlewares;
   }
 
-
-  getService(key: string) {
-    const item = this.config.services.get(key);
-    if (!item) {
-      throw Error(`not configure service for key "${key}"`);
-    }
-    return item;
-  }
-
-  
-
-  private validateConfig(config: Config) {
-    if (!config) {
-      return Error('config object should be passed.');
-    }
-    if (!config.platform) {
-      return Error('"platform" in config should be configured.');
-    }
-    return null;
-  }
-
-  private fromProvider(provider: Config['provider']): ConfigInternal['provider']{
+  private fromProvider(provider: ConfigBase['provider']): ConfigInternal['provider']{
     return Array.isArray(provider) ? provider : [provider, undefined];
   }
-  private fromServiceList(services: Config['services'], to: ConfigInternal['services']) {
+  private fromServiceList(services: ConfigBase['services'], to: ConfigInternal['services']) {
     services.forEach(service => {
       const [Service, config] = Array.isArray(service) ? service : [service, undefined];
       const key = Service.prototype.$$key;
       to.set(key, [Service, config]);
+
+      const middlewares = Service.prototype.$$middlewares;
+      if (Array.isArray(middlewares)) {
+        this.middlewares.push(...middlewares);
+      }
     });
     return to;
   }
-  private fromControllerList(controllers: Config['controllers'], to: ConfigInternal['controllers']) {
+  private fromControllerList(controllers: ConfigBase['controllers'], to: ConfigInternal['controllers']) {
     controllers.forEach(Controller => {
       const key = Controller.prototype.$$prefix;
       to.set(key, Controller);

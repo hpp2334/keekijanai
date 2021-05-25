@@ -1,8 +1,8 @@
 import { User } from 'keekijanai-type';
 
-import { Service, ServiceType } from '@/core/service';
+import { Init, Service, ServiceType } from '@/core/service';
 import _ from 'lodash';
-const debug = require('debug')('keekijanai:provider:supabase:user');
+const debug = require('debug')('keekijanai:service:user');
 
 interface Config {
   roles: Record<string, number>;
@@ -22,7 +22,7 @@ export class UserService {
     'ban':     0b0000000,
   };
 
-  async matchRole(user: User.User, roles: string[]) {
+  matchRole(user: User.User, roles: string[]) {
     const calculatedRole = this.calcRole(roles) | (this.internalConfig.roles[user.id] ?? 0);
     return !!(calculatedRole & user.role);
   }
@@ -34,6 +34,7 @@ export class UserService {
     lastLogin?: number;
     avatarUrl?: string;
     email?: string;
+    role?: number;
   }): Promise<User.User> {
     const result = await this.provider.update({
       from: 'keekijanai_user',
@@ -93,7 +94,8 @@ export class UserService {
     return role;
   }
 
-  private setInternalConfig(config: any) {
+  @Init('config')
+  setInternalConfig(config: any) {
     let roles: Exclude<Config['roles'], undefined> = {};
     if (config?.roles) {
       if (!_.isObjectLike(config.roles)) {

@@ -1,46 +1,43 @@
-
-import fetch from "node-fetch";
-import { appRequest } from "../../dev/request";
+import { requester } from "../utils/requester";
 
 jest.setTimeout(50 * 1000);
 
-const routeView = '/view/put';
+beforeAll(async () => {
+  await requester.init();
+});
 
-
-describe('view', () => {
-  const ClientA = {};
-  const ClientB = {};
-
-  function params(scope: string, sessionIdentitier: object): [any, any] {
-    return [
-      routeView,
-      {
-        query: {
-          scope,
-        },
-        sessionIdentity: sessionIdentitier,
-      },
-    ];
-  }
-
-  const scopes = ['/page1', '/page2', '/page' + Date.now()];
-
+beforeEach(async () => {
+  const scopes = ['a', 'b']
   for (const scope of scopes) {
-    let pageViewCount: any;
-
-    test(`use clientA visit scope "${scope}" twice, view count keep same in the second request`, async () => {
-      const preData = await appRequest(...params(scope, ClientA)).then(rsp => rsp.json());
-      expect(typeof preData?.view === 'number').toBeTruthy();
-  
-      const nextData = await appRequest(...params(scope, ClientA)).then(rsp => rsp.json());
-      expect(nextData).toEqual({ view: preData.view });
-      pageViewCount = preData.view;
-    });
-  
-    test(`use clientB visit scope "${scope}", view count increase`, async () => {
-      const nextData = await appRequest(...params(scope, ClientB)).then(rsp => rsp.json());
-      expect(nextData).toEqual({ view: pageViewCount + 1 });
-    });
+    await clear(scope);
   }
 });
 
+test('sym', async () => {
+  const [u1, u2] = [Symbol(), Symbol()];
+
+  await viewAndExpect('a', u1, 1);
+  await viewAndExpect('a', u2, 2);
+  await viewAndExpect('b', u2, 1);
+  await viewAndExpect('a', u1, 2);
+  await viewAndExpect('b', u1, 2);
+  await viewAndExpect('a', u2, 2);
+});
+
+// helpers
+const clear = (scope: string) => {
+  return requester.request('admin1', '/view/clear', {
+    method: 'POST',
+    query: { scope }
+  });
+}
+const viewAndExpect = (scope: string, id: symbol, count: number) => {
+  return requester.request(id, '/view/get', {
+    query: { scope }
+  }).then(rsp => {
+    expect(rsp.ok).toBeTruthy();
+    return rsp.json().then(data => {
+      expect(data.view).toBe(count);
+    })
+  })
+}

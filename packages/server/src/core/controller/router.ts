@@ -6,7 +6,7 @@ import { DecoratedController } from "./type";
 import { serviceManager } from "../service";
 
 
-const debug = require('debug')('keekijanai:core:controller');
+const debug = require('debug')('keekijanai:core:router');
 
 export class Router {
   toMiddleware(): MiddlewareType.Middleware {
@@ -32,7 +32,7 @@ export class Router {
       const routes = proto.$$routes;
       const prefix = proto.$$prefix;
 
-      const route = routes.find(r => r.method.toLowerCase() === method.toLowerCase() && r.path + prefix === path);
+      const route = routes.find(r => r.method.toLowerCase() === method.toLowerCase() && prefix + r.path === path);
       if (route) {
         const controller = new Controller();
 
@@ -40,7 +40,7 @@ export class Router {
           serviceManager.processInjectServices(controller, proto.$$injectServices, ctx)
         }
         const handler = route.route.bind(controller);
-        debug('[Router] "%s" match controller "%s" routeHandler "%s"', path, Controller.name, handler.name);
+        debug('[Router] "%s" match controller "%s" routeHandler "%s"', path, Controller.name, route.route.name);
         return handler;
       }
     }

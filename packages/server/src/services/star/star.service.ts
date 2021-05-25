@@ -7,6 +7,7 @@ import { userError } from "@/services/user";
 import { Star } from 'keekijanai-type';
 
 import _ from 'lodash';
+import { ProviderType } from "@/core/provider";
 
 export interface StarService extends ServiceType.ServiceBase {}
 
@@ -43,12 +44,12 @@ export class StarService {
 
     const reslist = await Promise.all([
       this.selectStar(scope, { star: 1 }),
-      this.selectStar(scope, { star: 1 }),
+      this.selectStar(scope, { star: -1 }),
       user.isLogin
-        ? this.selectStar(scope, { 'user_id': user.id })
+        ? this.selectStar(scope, { 'userId': user.id })
         : Promise.resolve({ body: { star: null } } as any)
     ]);
-    const [resLike, resUnlike, resCurrent] = reslist;
+    const [resLike, resDislike, resCurrent] = reslist;
 
     const resWithError = reslist.find(res => res.error);
     if (resWithError) {
@@ -59,7 +60,7 @@ export class StarService {
 
     return {
       current: typeof currentStar === 'undefined' ? null : currentStar,
-      total: (resLike.count || 0) - (resUnlike.count || 0)
+      total: (resLike.count || 0) - (resDislike.count || 0)
     };
   }
 
@@ -85,15 +86,16 @@ export class StarService {
   }
 
   private selectStar(scope: string, extraWhere: Record<string, any>) {
-    return this.provider.select({
+    const params = {
       from: 'star',
       count: 'estimated',
       where: {
         scope: [['=', scope]],
         ..._.mapValues(extraWhere, (v) => {
-          return [['=', v]];
+          return [['=', v]] as ProviderType.Where[string];
         }),
-      }
-    });
+      } as ProviderType.Where
+    };
+    return this.provider.select(params);
   }
 }

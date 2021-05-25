@@ -5,6 +5,7 @@ import { Controller, ControllerType, Route } from '@/core/controller';
 import { InjectService } from "@/core/service";
 import type { UserService } from "./user.service";
 import { userError } from '.';
+import { ContextType } from '@/core/context';
 
 const debug = require('debug')('keekijanai:controller:user');
 
@@ -15,7 +16,7 @@ export class UserController {
   @InjectService('user')    userService!: UserService;
 
   @Route('/get')
-  get: ControllerType.RouteHandler = async (ctx) => {
+  async get(ctx: ContextType.Context) {
     const { id } = ctx.req.query || {};
     debug('in "get", userid = "%s"', id);
 

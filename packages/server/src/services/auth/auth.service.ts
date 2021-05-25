@@ -80,18 +80,11 @@ export class AuthService {
       }
 
       const { id, provider, accessToken, expirationTime } = JSON.parse(payload.data);
-
-      if (provider) {
-        const user = await this.userService.get(id);
-
-        return {
-          ...user,
-          isLogin: true,
-        };
-      } else {
-        /** Legacy mode, not implement yet */
-        throw Error('"provider" should be given');
-      }
+      const user = await this.userService.get(id);
+      return {
+        ...user,
+        isLogin: true,
+      };
 
     } catch (err) {
       debug('getCurrentUser error. %o', err);
@@ -154,6 +147,34 @@ export class AuthService {
       jwt: jwtString,
       maxAge: maxAge.toString(),
     })
+  }
+
+  /** @description for test only */
+  async TEST__prepare(list: Array<{id: string, role?: number, jwt?: string}>) {
+    const currentTime = await this.timeService.getTime();
+  
+    for (const item of list) {
+      const { id, role } = item;
+      const jwtString: string = await jwt.sign(
+        {
+          data: JSON.stringify({
+            id,
+          }),
+          exp: Math.floor((currentTime + 86400000) / 1000),
+        },
+        this.config.jwtSecret,
+      ) as string;
+  
+      await this.userService.upsert({
+        id,
+        avatarUrl: '',
+        lastLogin: currentTime,
+        role: role ?? 1,
+      });
+
+      item.jwt = jwtString;
+    }
+    return list;
   }
 
   private getOAuth2Service(provider: string) {
