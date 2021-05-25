@@ -32,7 +32,7 @@ export class CommentService {
 
   async get(id: number): Promise<Comment.Get> {
     const result = await this.provider.select({
-      from: 'comment',
+      from: 'keekijanai_comment',
       where: {
         id: [['=', id]]
       }
@@ -62,7 +62,7 @@ export class CommentService {
       cTime: Date.now(),
     };
     const result = await this.provider.insert({
-      from: 'comment',
+      from: 'keekijanai_comment',
       payload: comment,
     });
     if (result.error || result.body?.length !== 1) {
@@ -84,7 +84,7 @@ export class CommentService {
 
   async list(scope: string, parentId: number | undefined, grouping: Grouping) {
     const result = await this.provider.select({
-      from: 'comment',
+      from: 'keekijanai_comment',
       count: 'exact',
       where: {
         'scope': [['=', scope]],
@@ -120,7 +120,7 @@ export class CommentService {
     }
 
     const result = await this.provider.delete({
-      from: 'comment',
+      from: 'keekijanai_comment',
       where: {
         id: [['=', commentId.toString()]]
       }
@@ -139,7 +139,7 @@ export class CommentService {
   private async updateChildCounts(id: number, delta: number = 1) {
     if (id) {
       const result = await this.provider.select({
-        from: 'comment',
+        from: 'keekijanai_comment',
         where: {
           'id': [['=', id]],
         }
@@ -151,7 +151,7 @@ export class CommentService {
       const { childCounts } = result.body[0];
 
       const rsp = await this.provider.update({
-        from: 'comment',
+        from: 'keekijanai_comment',
         where: {
           id: [['=', id.toString()]],
         },
@@ -164,7 +164,7 @@ export class CommentService {
 
   async TEST__clear() {
     const result = await this.provider.delete({
-      from: 'comment',
+      from: 'keekijanai_comment',
     });
     if (result.error) {
       throw result.error;

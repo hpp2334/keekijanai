@@ -19,7 +19,7 @@ export class ViewService {
     const clientId = this.deviceService.id;
 
     const result = await this.provider.update({
-      from: 'view',
+      from: 'keekijanai_view',
       payload: {
         scope,
         clientId,
@@ -31,7 +31,7 @@ export class ViewService {
     }
 
     const rsp = await this.provider.select({
-      from: 'view',
+      from: 'keekijanai_view',
       count: 'exact',
       where: {
         scope: [['=', scope]]
@@ -46,7 +46,7 @@ export class ViewService {
       throw viewError.forbidden;
     }
     await this.provider.delete({
-      from: 'view',
+      from: 'keekijanai_view',
       where: {
         scope: [['=', scope]]
       }

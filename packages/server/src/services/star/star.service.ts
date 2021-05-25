@@ -25,7 +25,7 @@ export class StarService {
     }
     
     const result = await this.provider.update({
-      from: 'star',
+      from: 'keekijanai_star',
       payload: {
         scope,
         star,
@@ -75,7 +75,7 @@ export class StarService {
     }
 
     const result = await this.provider.delete({
-      from: 'star',
+      from: 'keekijanai_star',
       where: {
         scope: [['=', scope]]
       }
@@ -87,7 +87,7 @@ export class StarService {
 
   private selectStar(scope: string, extraWhere: Record<string, any>) {
     const params = {
-      from: 'star',
+      from: 'keekijanai_star',
       count: 'estimated',
       where: {
         scope: [['=', scope]],
