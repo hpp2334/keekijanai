@@ -15,9 +15,7 @@ class StarServiceImpl extends Service {
       query: {
         scope,
       },
-    }).pipe(
-      map(value => value.response as any)
-    );
+    });
     return result;
   }
 
@@ -31,9 +29,7 @@ class StarServiceImpl extends Service {
       body: {
         current: star,
       }
-    }).pipe(
-      map(value => value.response as any)
-    );
+    });
     return result;
   }
 }

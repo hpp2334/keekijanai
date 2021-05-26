@@ -15,9 +15,7 @@ class UserServiceImpl extends Service {
       query: {
         id,
       },
-    }).pipe(
-      map(value => value.response as any)
-    );
+    });
     return result;
   }
 }

@@ -1,5 +1,6 @@
 import { auth as authService } from 'keekijanai-client-core';
 import { Auth, User } from 'keekijanai-type';
+import { tap } from 'rxjs/operators';
 import { useCallback, useEffect, useState } from 'react';
 import { useMemoExports, useRequestState } from '../../util';
 
@@ -9,7 +10,14 @@ export function useAuth() {
   const { loading } = loadingState;
 
   useEffect(() => {
-    authService.user$.subscribe(setUser);
+    const subscription = authService.user$
+      .pipe(
+        tap(loadingState.toDone)
+      )
+      .subscribe(setUser);
+    return () => {
+      subscription.unsubscribe();
+    }
   }, []);
 
   const update = useCallback(() => {
@@ -21,11 +29,6 @@ export function useAuth() {
     update();
     authService.onCallback(cb);
   }, [update]);
-
-  useEffect(() => {
-    update();
-  }, [update]);
-
 
   const exports = useMemoExports({
     user,

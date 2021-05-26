@@ -11,11 +11,13 @@
     "keekijanai-type": "^0.0.1",
     "localstorage-memory": "^1.0.3",
     "lodash": "^4.17.21",
+    "lru-cache": "^6.0.0",
     "next-tick": "^1.1.0",
     "rxjs": "^7.0.1"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.169",
+    "@types/lru-cache": "^5.1.0",
     "@types/next-tick": "^1.0.0",
     "@types/node": "^15.3.0",
     "fs-jetpack": "^4.1.0",

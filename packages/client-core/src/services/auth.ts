@@ -3,7 +3,7 @@ import { Client } from "../core/client";
 import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
 import { map, switchMapTo, tap } from 'rxjs/operators';
 import { Service, serviceFactory } from "../core/service";
-import { createLocalStorageEntry } from "../util";
+import { createLocalStorageEntry } from "../utils/local-storage-entry";
 import { Auth } from "keekijanai-type";
 import processNextTick from 'next-tick';
 
@@ -65,16 +65,22 @@ class AuthServiceImpl extends Service {
     this.user$.next({ isLogin: false });
   }
 
+  /** @todo refactor requester, instead of lock everywhere */
+  private lockUpdateCurrent = false;
   updateCurrent = () => {
     if (!this.jwt) {
       this.user$.next({ isLogin: false });
       return of(null);
     }
-
+    if (this.lockUpdateCurrent) {
+      return of(null);
+    }
+    
+    this.lockUpdateCurrent = true;
     return this.client.requester.request({
       route: this.routes.current,
     }).pipe(
-      map(value => value.response as any),
+      tap(() => { this.lockUpdateCurrent = false }),
       tap(user => { this.user$.next(user) }),
       switchMapTo(of(null)),
     );

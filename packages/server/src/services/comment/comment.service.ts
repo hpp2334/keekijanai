@@ -96,15 +96,14 @@ export class CommentService {
       skip: grouping.skip,
       take: grouping.take,
     });
-
-    if (result.error || !Array.isArray(result.body)) {
-      throw Error(`List comments fail.` + result.error?.message);
+    if (result.error) {
+      throw Error(`List comments fail. ` + result.error?.message || result.error);
     }
     if (_.isNil(result.count)) {
       throw Error(`count is null`);
     }
 
-    return { comments: result.body, total: result.count };
+    return { comments: result.body ?? [], total: result.count };
   }
 
   async delete(commentId: number) {

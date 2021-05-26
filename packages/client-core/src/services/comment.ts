@@ -2,6 +2,7 @@ import { Comment, Grouping } from 'keekijanai-type';
 import { Observable } from "rxjs";
 import { map, tap } from 'rxjs/operators';
 import { Service, serviceFactory } from "../core/service";
+import _ from 'lodash';
 
 class CommentServiceImpl extends Service {
   routes = {
@@ -9,6 +10,12 @@ class CommentServiceImpl extends Service {
     create: '/comment/create',
     list: '/comment/list',
     delete: '/comment/delete',
+  };
+  options = {
+    preCache: {
+      pre: 1,
+      next: 3,
+    }
   };
 
   get = (id: number): Observable<Comment.Get> => {
@@ -18,9 +25,11 @@ class CommentServiceImpl extends Service {
       query: {
         id
       },
-    }).pipe(
-      map(value => value.response as any)
-    );
+      cache: {
+        scope: 'comment',
+        keys: ['get', id]
+      }
+    });
     return result;
   }
   
@@ -33,24 +42,60 @@ class CommentServiceImpl extends Service {
       },
       body: {
         comment,
+      },
+      cache: {
+        mode: 'clear',
+        scope: 'comment',
       }
-    }).pipe(
-      map(value => value.response as any)
-    );
+    });
     return result;
   }
 
-  list = (scope: string, parentId: number | undefined, grouping: Grouping): Observable<Comment.List> => {
-    const result = this.client.requester.request({
+  private _list = (scope: string, parentId: number | undefined, grouping: Grouping, cacheLeft: number): Observable<Comment.List> => {
+    const gpStr = this.getGroupingString(grouping);
+    let result = this.client.requester.request({
       route: this.routes.list,
       query: {
         scope,
         parentId,
-        grouping: `${grouping.skip},${grouping.take}`,
+        grouping: gpStr,
+      },
+      cache: {
+        scope: 'comment',
+        keys: ['list', scope, parentId ?? null, gpStr]
       }
-    }).pipe(
-      map(value => value.response as any),
-    );
+    });
+
+    if (cacheLeft >= 1) {
+      result = result.pipe(
+        // pre cache pre 1 page and next 3 page comments
+        tap((list: Comment.List) => {
+          [
+            ..._.range(-this.options.preCache.pre, -1),
+            ..._.range(1, this.options.preCache.next),
+          ].forEach(p => {
+            const nextSkip = grouping.skip + p;
+            if (nextSkip < 0 || nextSkip * grouping.take >= list.total) {
+              return;
+            }
+            this._list(scope, parentId, { ...grouping, skip: nextSkip }, cacheLeft - 1).subscribe(_.noop);
+          });
+        }),
+        // pre cache child comments
+        tap((list: Comment.List) => {
+          list.comments
+            .filter(v => v.childCounts > 0)
+            .forEach(c => {
+              this._list(scope, c.id, { ...grouping, skip: 0 }, cacheLeft - 1).subscribe(_.noop)
+            })
+        })
+      )
+    }
+    return result;
+  }
+
+  list = (scope: string, parentId: number | undefined, grouping: Grouping): Observable<Comment.List> => {
+    const result = this._list(scope, parentId, grouping, 2);
     return result;
   }
 
@@ -60,11 +105,17 @@ class CommentServiceImpl extends Service {
       method: 'DELETE',
       query: {
         commentId,
+      },
+      cache: {
+        mode: 'clear',
+        scope: 'comment',
       }
-    }).pipe(
-      map(value => value.response as any)
-    );
+    });
     return result;
+  }
+
+  private getGroupingString(grouping: Grouping) {
+    return `${grouping.skip},${grouping.take}`;
   }
 }
 

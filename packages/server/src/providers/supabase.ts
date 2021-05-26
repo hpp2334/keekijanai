@@ -33,6 +33,9 @@ class SupabaseProvider implements ProviderType.ProviderBase {
       }
 
       const rsp = await request;
+      if (rsp.error) {
+        throw rsp;
+      }
       return this.handleResponse(rsp);
     } catch (err) {
       return this.handleError(err);

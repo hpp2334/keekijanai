@@ -1,17 +1,28 @@
-import { ajax } from 'rxjs/ajax';
+import { ajax, AjaxResponse } from 'rxjs/ajax';
 import { Client } from "./client";
 import { auth } from "../services/auth";
-import * as _ from 'lodash';
+import { CacheManager, Cache } from '../utils/cache';
+import _ from 'lodash';
+import { of } from 'rxjs';
+import { map, tap } from 'rxjs/operators';
 
 interface RequestParam {
   route: string;
   query?: {};
   method?: string;
   body?: any;
+  cache?: {
+    mode?: 'use';
+    scope: string;
+    keys: Array<any>;
+  } | {
+    mode: 'clear';
+    scope: string;
+  };
 }
 
 export class Requester {
-  constructor(private client: Client) {}
+  constructor(private client: Client, private cacheManager: CacheManager) {}
 
   getURI(params: RequestParam) {
     const unfilteredQueryObject = {
@@ -26,17 +37,54 @@ export class Requester {
   }
   
   request(params: RequestParam) {
+    const { method = 'GET', body, cache } = params;
+    if (cache) {
+      cache.mode = cache.mode ?? 'use';
+    }
+
+    let cacheKey: string | undefined;
+    let cacher: Cache | undefined;
+    if (cache?.mode === 'use') {
+      const { scope, keys } = cache;
+      cacher = this.getCache(scope);
+      cacheKey = this.getCacheKey(keys);
+      if (cacher.has(cacheKey)) {
+        console.log(`has ${cacheKey}, not request`);
+        const cached = cacher.get(cacheKey);
+        return of(cached);
+      }
+    }
+
     const jwt = auth.jwt;
     const headers = Object.assign(
       {},
       jwt === null ? {} : { Authorization: jwt },
     );
 
-    return ajax({
-      method: params.method || 'GET',
+    let rsp$ = ajax({
+      method,
       headers,
       url: this.getURI(params),
-      body: params.body
+      body
     });
+    
+    rsp$ = rsp$.pipe(
+      map(value => value.response),
+      tap((value: any) => {
+        if (cacheKey && cacher) {
+          cacher.set(cacheKey, value);
+        } else if (cache) {
+          this.cacheManager.delete(cache?.scope);
+        }
+      }),
+    );
+    return rsp$;
+  }
+
+  private getCache(scope: string) {
+    return this.cacheManager.get(scope, 500);
+  }
+  private getCacheKey(keys: any[]) {
+    return JSON.stringify(keys);
   }
 }

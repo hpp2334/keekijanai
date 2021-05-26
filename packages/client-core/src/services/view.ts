@@ -15,9 +15,7 @@ export class ViewServiceImpl extends Service {
       query: {
         scope,
       },
-    }).pipe(
-      map(value => value.response as any)
-    );
+    });
     return result; 
   }
 }

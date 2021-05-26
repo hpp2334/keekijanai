@@ -13,6 +13,10 @@ module.exports = {
   },
   resolve: {
     extensions: ['.tsx', '.ts', '.js', '.jsx', '.json'],
+    alias: {
+      'keekijanai-client-core': path.resolve(__dirname, '../client-core/src'),
+      'keekijanai-type': path.resolve(__dirname, '../type/src'),
+    }
   },
   devtool: 'source-map',
   module: {
