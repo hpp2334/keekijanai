@@ -1,24 +1,24 @@
-import React, { useState, useContext, useCallback, useEffect, useRef, useMemo } from 'react'
-import { Popover, Button, Pagination, Typography, Empty, List, ConfigProvider, Popconfirm, notification, Badge, Space, Skeleton } from 'antd';
-import moment from 'moment';
+import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import { Popover, Button, Typography, List, ConfigProvider, Popconfirm, notification, Badge, Space, Skeleton } from 'antd';
 import { Translation, useTranslation } from 'react-i18next';
-import { CommentHookObject, CommentListHookObject, useComment, useCommentList } from './controller';
+import { CommentListHookObject, CommentLoadHookObject, useComment, useCommentList, useCommentLoad, getCommentListHookObjectCore } from './controller';
 import { useAuth } from '../Auth/controller';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 import loadable from '@loadable/component';
 import { Comment as TypeComment } from 'keekijanai-type';
 import { sprintf } from 'sprintf-js';
 import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOutlined, WarningOutlined } from '@ant-design/icons';
-import { noop, useMemoExports, useSwitch } from '../../util';
+import { noop, useSwitch } from '../../util';
 import { useUser } from '../User/controller';
-import { Avatar } from '../User';
 import { format } from 'date-fns';
 
 import './Comment.css';
 import clsx from 'clsx';
 import { UserComponent } from '../User/UserComponent';
-import { comment } from 'keekijanai-client-core';
 import { authModal } from '../Auth/AuthModal';
+import { tap } from 'rxjs/operators';
+import _ from 'lodash';
+import { Observable } from 'rxjs';
 
 const Editor = loadable(() => import('react-draft-wysiwyg' as any).then(v => v.Editor));
 
@@ -28,43 +28,42 @@ export interface CommentProps {
 }
 
 interface CommentHeaderProps {
-  commentHookObject: Pick<CommentHookObject, 'comment' | 'loading'>;
+  comment: TypeComment.Get;
+  loading?: CommentLoadHookObject['loading'];
   showReference?: boolean;
 }
 
 interface CommentItemProps {
   scope: string;
   comment: TypeComment.Get;
-  commentListHookObj: CommentListHookObject;
-  level: number;
-  showCommentCounts?: boolean;
+  parent?: TypeComment.Get;
+  onCommentDelete?: () => any;
+  onCommentReply?: () => any;
+  showChildCounts?: boolean;
 }
 
 interface CommentListProps {
   scope: string;
-  commentListHookObj: CommentListHookObject;
-  level: number;
+  parent?: TypeComment.Get;
+  onCommentDelete?: () => any;
+  onCommentCreate?: () => any;
 
   showCommentListHeader?: boolean;
-  showCommentsCounts?: boolean;
+  showCommentReplyCounts?: boolean;
 
   className?: string;
   style?: React.CSSProperties;
 }
 
-interface SubCommentListProps {
-  scope: string;
-  parentId: number;
-  level: number;
-}
+type CommentListCoreProps = CommentListProps & ReturnType<typeof getCommentListHookObjectCore>;
 
 interface CommentPostProps {
   scope: string;
-  parentId?: number;
-  referenceId?: number;
-  commentListHookObj: CommentListHookObject;
+  parent?: TypeComment.Get;
   placeholder?: string;
+  onPost: (comment: TypeComment.Create) => Observable<any>;
   onCancel?: () => any;
+  posting?: boolean;
 }
 
 interface ReferenceCommentProps {
@@ -72,23 +71,23 @@ interface ReferenceCommentProps {
 }
 
 interface ReadonlyEditorProps {
-  commentHookObject: Pick<CommentHookObject, 'comment'>;
+  comment: TypeComment.Get;
   className?: string;
 }
 
 function ReadonlyEditor(props: ReadonlyEditorProps) {
-  const { commentHookObject: referenceComment, className } = props;
+  const { comment, className } = props;
   const editorState = useMemo(() => {
-    if (!referenceComment.comment) {
+    if (!comment) {
       return EditorState.createEmpty();
     }
 
-    const raw = JSON.parse(referenceComment.comment.content);
+    const raw = JSON.parse(comment.content);
     const contentState = convertFromRaw(raw);
     return EditorState.createWithContent(contentState);
-  }, [referenceComment]);
+  }, [comment]);
   
-  return !referenceComment.comment ? null : (
+  return !comment ? null : (
     <Editor
       readOnly={true}
       toolbarHidden={true}
@@ -100,19 +99,12 @@ function ReadonlyEditor(props: ReadonlyEditorProps) {
 }
 
 function CommentHeader(props: CommentHeaderProps) {
-  const { commentHookObject, showReference = false } = props;
-  const { comment, loading } = commentHookObject;
-  const userHookObject = useUser();
-
-  useEffect(() => {
-    if (comment) {
-      userHookObject.update(comment.userId);
-    }
-  }, [comment]);
+  const { comment, loading = 'done', showReference = false } = props;
+  const { user, loading: userLoading } = useUser(comment.userId);
   
   return (
     <div className="kkjn__header">
-      <UserComponent userHookObject={userHookObject} avatarSize={20} />
+      <UserComponent user={user} loading={userLoading} avatarSize={20} />
       {loading === 'loading' && <Skeleton.Input style={{ width: '150px' }} size='small' />}
       {loading === 'done' && comment && (
         <Typography.Text className="kkjn__date">{format(comment.cTime, 'yyyy-MM-dd hh:mm:ss')}</Typography.Text>
@@ -131,15 +123,8 @@ function CommentHeader(props: CommentHeaderProps) {
 
 function ReferenceComment(props: ReferenceCommentProps) {
   const { id } = props;
-  const commentHookObject = useComment(id);
-  const { comment, loading, lastError } = commentHookObject;
-  const userHookObject = useUser();
-
-  useEffect(() => {
-    if (loading === 'done' && comment) {
-      userHookObject.update(comment.userId);
-    }
-  }, [comment, loading]);
+  const commentLoadHookObject = useCommentLoad(id);
+  const { comment, loading, lastError } = commentLoadHookObject;
 
   return (
     <div className="kkjn__comment">
@@ -147,8 +132,8 @@ function ReferenceComment(props: ReferenceCommentProps) {
         {loading === 'loading' && <Skeleton active />}
         {loading === 'done' && comment && (
           <div className="kkjn__comment-item">
-            <CommentHeader commentHookObject={commentHookObject} />
-            <ReadonlyEditor commentHookObject={commentHookObject} />
+            <CommentHeader comment={comment} loading={loading} />
+            <ReadonlyEditor comment={comment} />
           </div>
         )}
         {loading === 'error' && (
@@ -163,10 +148,9 @@ function ReferenceComment(props: ReferenceCommentProps) {
 }
 
 function CommentPost(props: CommentPostProps) {
-  const { scope, parentId, referenceId, commentListHookObj, placeholder, onCancel } = props;
+  const { scope, placeholder, onPost, onCancel, posting = false } = props;
   const { t } = useTranslation();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
-  const [creating, setCreating] = useState(false);
   
   const handleSubmit = () => {
     const contentState = editorState.getCurrentContent();
@@ -176,23 +160,13 @@ function CommentPost(props: CommentPostProps) {
       scope: scope,
       content: JSON.stringify(raw),
       plainText: contentState.getPlainText(),
-      parentId,
-      referenceId,
     };
     
-    setCreating(true);
-    commentListHookObj.create(scope, comment).subscribe({
+    onPost(comment).subscribe({
       next: () => {
         setEditorState(EditorState.createEmpty());
-        setCreating(false);
         onCancel?.();
-      },
-      error: (err) => {
-        notification.error({
-          message: err?.message ?? err,
-        });
-        setCreating(false);
-      },
+      }
     })
   };
 
@@ -208,10 +182,10 @@ function CommentPost(props: CommentPostProps) {
       />
       <div className='kkjn__panel'>
         <Space>
-          {onCancel && <Button disabled={creating} onClick={onCancel} size='small'>{t("CANCEL")}</Button>}
+          {onCancel && <Button disabled={posting} onClick={onCancel} size='small'>{t("CANCEL")}</Button>}
           <Button
             disabled={!editorState.getCurrentContent().hasText()}
-            loading={creating}
+            loading={posting}
             type='primary'
             onClick={handleSubmit}
             icon={<SendOutlined />}
@@ -226,35 +200,34 @@ function CommentPost(props: CommentPostProps) {
 }
 
 function CommentItem(props: CommentItemProps) {
-  const { scope, comment, commentListHookObj, level, showCommentCounts = true } = props;
+  const { scope, comment, parent, onCommentReply, onCommentDelete, showChildCounts = true } = props;
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
 
-  const userHookObject = useUser(comment.userId);
-  const { user } = userHookObject;
+  const commentHookObject = useComment(comment, parent, onCommentDelete, onCommentReply);
+  const commentListHookObject = useCommentList(scope, undefined, comment, true, onCommentDelete);
+  const { user, actionState } = commentHookObject;
 
-  const [editorState] = useState(() => {
+  const [replyPlaceHolderMainText] = useState(() => {
     const raw = JSON.parse(comment.content);
     const contentState = convertFromRaw(raw);
-    return EditorState.createWithContent(contentState);
-  });
-  const [removing, setRemoving] = useState(false);
-  
-  const replyPlaceHolder = useMemo(() => {
+    const editorState = EditorState.createWithContent(contentState);
     const plainContent = editorState.getCurrentContent().getPlainText();
-    return sprintf(t("REPLY_COMMENT_TO_USER"), user?.name, plainContent);
-  }, [user, editorState]);
+    return plainContent;
+  });
+  const replyPlaceHolder = useMemo(() => {
+    return sprintf(t("REPLY_COMMENT_TO_USER"), user?.name, replyPlaceHolderMainText);
+  }, [user]);
 
   const switchShowReply = useSwitch();
 
-  const composedCommentHO = useMemo(() => {
-    return {
-      comment,
-      loading: 'done' as const,
+  const queryCommentList = useCallback(() => {
+    if (!parent && comment.childCounts) {
+      commentListHookObject.query();
     }
-  }, []);
+  }, [comment.childCounts]);
 
-  const handleReply = useCallback(() => {
+  const handleClickReplyButton = useCallback(() => {
     if (currentUser.isLogin) {
       switchShowReply.switchOpen();
     } else {
@@ -262,41 +235,48 @@ function CommentItem(props: CommentItemProps) {
     }
   }, [currentUser, switchShowReply]);
 
-  const handleRemoveComment = (id: number) => (ev: any) => {
-    setRemoving(true);
-    commentListHookObj
-      .remove(id)
+  const handleRemoveComment = () => {
+    commentHookObject
+      .remove()
       .subscribe({
-        next: val => {
-          notification.success({ message: t("DELETE_COMMENT_SUCESS") })
-        },
-        error: err => {
-          notification.error({ message: t("DELETE_COMMENT_ERROR") + ": " + err })
-        },
-        complete: () => {
-          setRemoving(false);
-        }
+        next: () => notification.success({ message: t("DELETE_COMMENT_SUCESS") }),
+        error: err => notification.error({ message: t("DELETE_COMMENT_ERROR") + ": " + err })
       })
   };
+  const handleReply = (comment: TypeComment.Create) => {
+    return commentHookObject
+      .reply(comment, !parent)
+      .pipe(
+        tap(queryCommentList),
+      )
+  };
+
+  const style = useMemo((): React.CSSProperties => ({
+    marginLeft: (parent ? 2 : 1) * 20 + 'px',
+  }), []);
+
+  useEffect(() => {
+    queryCommentList();
+  }, []);
   
   return (
     <div className="kkjn__comment-item">
-      <CommentHeader commentHookObject={composedCommentHO} showReference={true} />
-      <ReadonlyEditor commentHookObject={composedCommentHO} />
+      <CommentHeader comment={comment} showReference={comment.parentId !== comment.referenceId} />
+      <ReadonlyEditor comment={comment} />
       <div className="kkjn__panel">
         {currentUser.isLogin && currentUser.id === comment.userId && (
           <Popconfirm
             title={t("READY_TO_REMOVE")}
             placement='top'
-            onConfirm={handleRemoveComment(comment.id)}
+            onConfirm={handleRemoveComment}
             okText={t("YES")}
             cancelText={t("NO")}
           >
-            <Button loading={removing} danger={true} type='text' shape='circle' size='small' icon={<DeleteOutlined />}></Button>
+            <Button loading={actionState === 'removing'} danger={true} type='text' shape='circle' size='small' icon={<DeleteOutlined />}></Button>
           </Popconfirm>
         )}
         <Button
-          disabled={removing}
+          disabled={actionState === 'removing'}
           type='text'
           className={clsx(
             'kkjn__button',
@@ -304,40 +284,31 @@ function CommentItem(props: CommentItemProps) {
           )}
           size='small'
           icon={<CommentOutlined />}
-          onClick={handleReply}  
-        >{!!showCommentCounts && ' ' + comment.childCounts}</Button>
+          onClick={handleClickReplyButton}  
+        >{!!showChildCounts && ' ' + comment.childCounts}</Button>
       </div>
-      {switchShowReply.open && currentUser.isLogin && <CommentPost
-        scope={scope}
-        commentListHookObj={commentListHookObj}
-        parentId={level <= 1 ? comment.id : comment.parentId}
-        referenceId={level <= 1 ? undefined : comment.id}
-        onCancel={switchShowReply.off}
-        placeholder={replyPlaceHolder}
-      />}
-      {level <= 1 && comment.childCounts > 0 && <SubCommentList scope={scope} parentId={comment.id} level={level + 1} />}
+      {switchShowReply.open && currentUser.isLogin && (
+        <CommentPost
+          scope={scope}
+          parent={parent}
+          posting={actionState === 'replying'}
+          onPost={handleReply}
+          onCancel={switchShowReply.off}
+          placeholder={replyPlaceHolder}
+        />
+      )}
+      {!parent && comment.childCounts > 0 && (
+        <CommentListCore
+          {...getCommentListHookObjectCore(commentListHookObject)}
+          scope={scope}
+          parent={comment}
+          style={style}
+          className={'kkjn__sub-list'}
+          showCommentListHeader={false}
+          showCommentReplyCounts={false}
+        />
+      )}
     </div>
-  )
-}
-
-function SubCommentList(props: SubCommentListProps) {
-  const { scope, parentId, level } = props;
-  const commentListHookObj = useCommentList(scope, parentId);
-
-  const style = useMemo((): React.CSSProperties => ({
-    marginLeft: level * 20 + 'px',
-  }), []);
-
-  return (
-    <CommentList
-      className="kkjn__sub-list"
-      scope={scope}
-      commentListHookObj={commentListHookObj}
-      style={style}
-      showCommentListHeader={false}
-      showCommentsCounts={false}
-      level={level}
-    />
   )
 }
 
@@ -354,47 +325,58 @@ function EmptyCommentList() {
   )
 }
 
-function CommentList(props: CommentListProps) {
-  const { scope, commentListHookObj, level, showCommentsCounts = true, showCommentListHeader = true, className, style } = props;
+function CommentListCore(props: CommentListCoreProps) {
+  const { scope, parent, showCommentReplyCounts = true, showCommentListHeader = true, className, style } = props;
+  const { page, pageSize, total, loading, comments, changePage,
+    onCommentCreate: emitCommentCreate,
+    onCommentDelete: emitCommentDelete,
+  } = props;
   const { t } = useTranslation();
 
-  const handleChangePage = useCallback((page: number) => {
-    commentListHookObj.changePage(page);
-  }, [commentListHookObj]);
+  const handleCommentReply = emitCommentCreate;
+  const handleCommentDelete = emitCommentDelete;
+
   const pagination = useMemo(() => ({
     simple: true,
     size: 'small' as const,
-    pageSize: commentListHookObj.pageSize,
-    total: commentListHookObj.total ?? 0,
-    current: commentListHookObj.page,
-    onChange: handleChangePage
-  }), [handleChangePage, commentListHookObj.page, commentListHookObj.total, commentListHookObj.pageSize]);
+    pageSize: pageSize,
+    total: total ?? 0,
+    current: page,
+    onChange: changePage
+  }), [page, total, pageSize, changePage]);
 
-  return (
+  return (parent && total === 0) ? null : (
     <div className={clsx('kkjn__list', className)} style={style}>
       {showCommentListHeader && (
         <div className="kkjn__header">
           <span className="kkjn__title">{t("COMMENT_LIST")}</span>
-          {commentListHookObj.total !== undefined && <Badge count={commentListHookObj.total}></Badge>}
+          {total !== undefined && <Badge count={total}></Badge>}
         </div>
       )}
-      {commentListHookObj.loading === 'init-loading' && (
+      {loading === 'init-loading' && (
         <Skeleton active />
       )}
-      {(commentListHookObj.loading === 'done' || commentListHookObj.loading === 'loading') && (
+      {(loading === 'done' || loading === 'loading') && (
         <ConfigProvider renderEmpty={EmptyCommentList}>
           <List
             size='small'
             split={false}
-            loading={commentListHookObj.loading === 'loading'}
+            loading={loading === 'loading'}
             itemLayout='vertical'
-            pagination={pagination}
-            dataSource={commentListHookObj.comments ?? []}
+            pagination={pageSize > (total ?? 0) ? undefined : pagination}
+            dataSource={comments ?? []}
             renderItem={item => (
               <List.Item
                 key={item.id + '$' + item.childCounts}
               >
-                <CommentItem scope={scope} comment={item} commentListHookObj={commentListHookObj} level={level} showCommentCounts={showCommentsCounts} />
+                <CommentItem
+                  scope={scope}
+                  parent={parent}
+                  comment={item}
+                  onCommentReply={handleCommentReply}
+                  onCommentDelete={handleCommentDelete}
+                  showChildCounts={showCommentReplyCounts}
+                />
               </List.Item>
             )}
           />
@@ -406,13 +388,26 @@ function CommentList(props: CommentListProps) {
 
 export function Comment(props: CommentProps) {
   const { scope, className } = props;
-  const commentListHookObj = useCommentList(scope, undefined);
   const { user } = useAuth();
+
+  const [posting, setPosting] = useState(false);
+  const commentListHookObject = useCommentList(scope);
+
+  const handlePost = useCallback((comment: TypeComment.Create) => {
+    setPosting(true);
+    return commentListHookObject
+      .create(scope, comment)
+      .pipe(
+        tap(() => {
+          setPosting(false);
+        })
+      )
+  }, [commentListHookObject.create]);
 
   return (
     <div className={clsx('kkjn__comment', className)}>
-      <CommentList scope={scope} commentListHookObj={commentListHookObj} level={1} />
-      {user.isLogin && <CommentPost scope={scope} commentListHookObj={commentListHookObj} />}
+      <CommentListCore scope={scope} {...getCommentListHookObjectCore(commentListHookObject)} />
+      {user.isLogin && <CommentPost scope={scope} onPost={handlePost} posting={posting} />}
     </div>
   )
 }

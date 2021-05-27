@@ -7,7 +7,8 @@ import { UserHookObject } from './controller';
 
 
 export interface AvatarProps {
-  userHookObject: Pick<UserHookObject, 'user' | 'loading'>;
+  user: User.User | undefined;
+  loading: UserHookObject['loading'];
   size?: number;
 
   className?: string;
@@ -15,13 +16,13 @@ export interface AvatarProps {
 }
 
 export function Avatar(props: AvatarProps) {
-  const { userHookObject, size = 50, className, style } = props;
+  const { user, loading, size = 50, className, style } = props;
 
   return (
     <span className="kkjn__avatar">
-      {userHookObject.loading === 'loading' && <Skeleton.Avatar shape='circle' size={size} active />}
-      {userHookObject.loading === 'done' && userHookObject.user && (
-        <img className={clsx(className)} style={style} width={size + 'px'} height={size + 'px'} src={userHookObject.user.avatarUrl}></img>
+      {loading === 'loading' && <Skeleton.Avatar shape='circle' size={size} active />}
+      {loading === 'done' && user && (
+        <img className={clsx(className)} style={style} width={size + 'px'} height={size + 'px'} src={user.avatarUrl}></img>
       )}
     </span>
   )

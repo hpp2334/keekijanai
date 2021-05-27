@@ -97,7 +97,7 @@ export class CommentService {
       take: grouping.take,
     });
     if (result.error) {
-      throw Error(`List comments fail. ` + result.error?.message || result.error);
+      throw Error(`List comments fail. ` + JSON.stringify(result.error));
     }
     if (_.isNil(result.count)) {
       throw Error(`count is null`);

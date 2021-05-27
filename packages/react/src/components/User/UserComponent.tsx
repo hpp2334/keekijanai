@@ -1,5 +1,6 @@
 import { Skeleton, Typography } from 'antd';
 import clsx from 'clsx';
+import { User } from 'keekijanai-type';
 import React from 'react'
 import { Avatar } from './Avatar'
 import { UserHookObject } from './controller'
@@ -7,7 +8,8 @@ import { UserHookObject } from './controller'
 import './UserComponent.css';
 
 interface UserComponentProps {
-  userHookObject: Pick<UserHookObject, 'user' | 'loading'>;
+  user: User.User | undefined;
+  loading: UserHookObject['loading'];
 
   avatarSize?: number;
   showAvatar?: boolean;
@@ -22,12 +24,11 @@ interface UserComponentProps {
 }
 
 export function UserComponent(props: UserComponentProps) {
-  const { userHookObject, avatarSize, showAvatar = true, avatarClassName, avatarStyle, userNameClassName, userNameStyle, containerClassName, containerStyle } = props;
-  const { user, loading } = userHookObject;
+  const { user, loading, avatarSize, showAvatar = true, avatarClassName, avatarStyle, userNameClassName, userNameStyle, containerClassName, containerStyle } = props;
 
   return (
     <span className={clsx('kkjn__user-component', containerClassName)} style={containerStyle}>
-      {showAvatar && <Avatar userHookObject={userHookObject} size={avatarSize} className={clsx(avatarClassName)} style={avatarStyle} />}
+      {showAvatar && <Avatar user={user} loading={loading} size={avatarSize} className={clsx(avatarClassName)} style={avatarStyle} />}
       {loading === 'loading' && <Skeleton.Input className={clsx("kkjn__username", userNameClassName)} style={{ width: '50px' }} size='small' active />}
       {loading === 'done' && user && (
         <Typography.Text className={clsx("kkjn__username", userNameClassName)} style={userNameStyle}>{user.name}</Typography.Text>

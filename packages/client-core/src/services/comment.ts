@@ -62,7 +62,7 @@ class CommentServiceImpl extends Service {
       },
       cache: {
         scope: 'comment',
-        keys: ['list', scope, parentId ?? null, gpStr]
+        keys: ['list', parentId, gpStr]
       }
     });
 
@@ -99,7 +99,7 @@ class CommentServiceImpl extends Service {
     return result;
   }
 
-  delete = (commentId: number): Observable<Comment.Delete> => {
+  delete = (scope: string, commentId: number, parentId: number | undefined): Observable<Comment.Delete> => {
     const result = this.client.requester.request({
       route: this.routes.delete,
       method: 'DELETE',
@@ -108,7 +108,7 @@ class CommentServiceImpl extends Service {
       },
       cache: {
         mode: 'clear',
-        scope: 'comment',
+        scope: ['comment'],
       }
     });
     return result;

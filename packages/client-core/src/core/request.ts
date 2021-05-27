@@ -17,7 +17,7 @@ interface RequestParam {
     keys: Array<any>;
   } | {
     mode: 'clear';
-    scope: string;
+    scope: string | string[];
   };
 }
 
@@ -49,7 +49,6 @@ export class Requester {
       cacher = this.getCache(scope);
       cacheKey = this.getCacheKey(keys);
       if (cacher.has(cacheKey)) {
-        console.log(`has ${cacheKey}, not request`);
         const cached = cacher.get(cacheKey);
         return of(cached);
       }
@@ -73,8 +72,13 @@ export class Requester {
       tap((value: any) => {
         if (cacheKey && cacher) {
           cacher.set(cacheKey, value);
-        } else if (cache) {
-          this.cacheManager.delete(cache?.scope);
+        } else if (cache?.mode === 'clear') {
+          const remove = this.cacheManager.delete.bind(this.cacheManager);
+          if (Array.isArray(cache.scope)) {
+            cache.scope.forEach(remove);
+          } else {
+            remove(cache.scope);
+          }
         }
       }),
     );
