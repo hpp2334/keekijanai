@@ -10,7 +10,7 @@ import { sprintf } from 'sprintf-js';
 import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOutlined, WarningOutlined } from '@ant-design/icons';
 import { noop, useSwitch } from '../../util';
 import { useUser } from '../User/controller';
-import { format } from 'date-fns';
+import { format } from 'date-fns-tz';
 
 import './Comment.css';
 import clsx from 'clsx';
@@ -107,7 +107,7 @@ function CommentHeader(props: CommentHeaderProps) {
       <UserComponent user={user} loading={userLoading} avatarSize={20} />
       {loading === 'loading' && <Skeleton.Input style={{ width: '150px' }} size='small' />}
       {loading === 'done' && comment && (
-        <Typography.Text className="kkjn__date">{format(comment.cTime, 'yyyy-MM-dd hh:mm:ss')}</Typography.Text>
+        <Typography.Text className="kkjn__date">{format(comment.cTime, 'yyyy-MM-dd HH:mm:ss')}</Typography.Text>
       )}
       {showReference && !!comment?.referenceId && (
         <Popover
