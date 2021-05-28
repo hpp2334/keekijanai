@@ -8,6 +8,7 @@
     "build": "rimraf ./dist && tsc"
   },
   "dependencies": {
+    "joi": "^17.4.0",
     "keekijanai-type": "^0.0.1",
     "localstorage-memory": "^1.0.3",
     "lodash": "^4.17.21",

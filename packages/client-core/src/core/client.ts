@@ -1,5 +1,5 @@
 import { CacheManager } from "../utils/cache";
-import { ConfigReader, ConfigType, INIT_CONFIG } from "./config";
+import { ConfigReader, ConfigType } from "./config";
 import { Requester } from "./request";
 
 class Client {
@@ -13,7 +13,6 @@ class Client {
   }
 
   initialize() {
-    this.configReader.read(INIT_CONFIG);
   }
 
   updateConfig(config: ConfigType) {

@@ -1,4 +1,4 @@
-import { useMemoExports } from "@/util";
+import { useMemoExports } from "../../util";
 import { useCallback, useState } from "react";
 import { CodeEffectProps } from "./CodeEffect";
 import { CodeSourcesProps } from "./CodeSources";

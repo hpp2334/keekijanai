@@ -52,7 +52,7 @@ function HaveLogined(props: HaveLoginedProps) {
 
   return (
     <div className='kkjn__logined'>
-      <UserComponent userHookObject={composedUserHO} avatarSize={30} containerClassName="kkjn__user-indicator" />
+      <UserComponent user={user.isLogin ? user : undefined} loading={loading} containerClassName="kkjn__user-indicator" />
       <Popconfirm
         placement="top"
         title={t("CONFIRM_LOGOUT")}

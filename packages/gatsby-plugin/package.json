@@ -1,0 +1,29 @@
+{
+  "name": "gatsby-plugin-keekijanai",
+  "version": "0.0.1",
+  "description": "A gatsby plugin for keekijanai-react",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hpp2334/keekijanai.git"
+  },
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "keekijanai"
+  ],
+  "author": "hpp2334",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hpp2334/keekijanai/issues"
+  },
+  "homepage": "https://github.com/hpp2334/keekijanai#readme",
+  "peerDependencies": {
+    "keekijanai-react": "^0.0.1",
+    "react": "^17.0.0 | ^16.8.0",
+    "react-dom": "^17.0.0 | ^16.8.0"
+  }
+}

@@ -1,4 +1,4 @@
-import { withCodeShow } from '@';
+import { withCodeShow } from 'keekijanai-react';
 
 export const requireRaw = require.context(
   '!raw-loader!./demo',
