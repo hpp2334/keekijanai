@@ -1,16 +1,12 @@
-import React, { useContext, useMemo, useCallback, useRef, useEffect, useState } from 'react';
-import ReactDOM from 'react-dom';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForceUpdate, useMemoExports, useSwitch } from '../../util';
+import { useForceUpdate } from '../../util';
 import { useAuth } from './controller';
 import { auth as authService } from 'keekijanai-client-core';
 import { Auth } from 'keekijanai-type';
-import { Button, Popconfirm, Skeleton, Typography } from 'antd';
-import { GithubOutlined } from '@ant-design/icons';
-import { BehaviorSubject } from 'rxjs';
+import { Button, Popconfirm } from 'antd';
 
 import './Auth.css';
-import { Avatar } from '../User';
 import { authModal } from './AuthModal';
 import { UserComponent } from '../User/UserComponent';
 import clsx from 'clsx';

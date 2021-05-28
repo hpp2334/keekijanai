@@ -13,4 +13,4 @@ export * from './components/View';
 export * from './components/CodeShow';
 
 export { Context } from './context';
-export { client } from 'keekijanai-client-core';
+export { client } from './controller';
