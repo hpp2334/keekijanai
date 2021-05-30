@@ -1,39 +1,49 @@
-import {
-  comment as commentService,
-} from 'keekijanai-client-core';
 import { Comment as TypeComment } from 'keekijanai-type';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Observable, of } from 'rxjs';
 import { map, mergeAll, switchMapTo, tap } from 'rxjs/operators';
 import { useMemoExports, useRequestState } from '../../util';
 import { batchUsers, useUser } from '../User/controller';
 import _ from 'lodash';
+import { CommentCachable } from 'keekijanai-client-core';
+
+interface CommentContext {
+  service: CommentCachable;
+}
+
+export const commentContext = React.createContext<CommentContext | undefined>(undefined);
+
+export function useCommentCachable() {
+  const ctx = useContext(commentContext);
+
+  if (!ctx?.service) {
+    throw Error('not wrap comment context');
+  }
+  return ctx.service;
+}
 
 export function useCommentList(
-  scope: string,
-  take: number = 5,
   parent?: TypeComment.Get,
   manual: boolean = false,
-  onCommentDelete?: () => void,
   onCommentCreate?: () => void,
 ) {
-  take = take ?? 5;
+  const service = useCommentCachable();
 
   const [comments, setComments] = useState<TypeComment.List['comments']>();
   const [total, setTotal] = useState<number>();
 
   const [page, setPage] = useState(1);
 
-  const [pageSize] = useState(take);
   const [loading, setLoadingState] = useState<'init-loading' | 'loading' | 'error' | 'done'>('init-loading');
   const [lastError, setLastError] = useState<string | null>(null);
 
   const _query = useCallback((nextPage: number) => {
     setLoadingState(prev => prev === 'init-loading' ? prev : 'loading');
-    const rsp = commentService
-      .list(scope, parent?.id, { skip: nextPage - 1, take })
+    const rsp = service
+      .list(parent?.id, nextPage - 1)
       .pipe(
         map((list: TypeComment.List) => {
+          console.log(list);
           const ids = list.comments.map(c => c.userId);
 
           return batchUsers(ids).pipe(
@@ -65,30 +75,19 @@ export function useCommentList(
     _query(nextPage);
   }, [_query]);
 
-
-  const emitCommentDelete = useCallback(() => {
-    onCommentDelete?.();
-    query();
-  }, [onCommentDelete, query]);
-
-  const emitCommentCreate = useCallback(() => {
-    onCommentCreate?.();
-    query();
-  }, [onCommentCreate, query]);
-
   const create = useCallback((scope: string, comment: TypeComment.Create, referenceId?: number) => {
-    const rsp = commentService
-      .create(scope, {
+    const rsp = service
+      .create({
         ...comment,
         scope,
         parentId: parent?.id,
         referenceId: referenceId ?? parent?.id,
       })
       .pipe(
-        tap(emitCommentCreate),
+        tap(() => onCommentCreate?.()),
       )
     return rsp;
-  }, [emitCommentCreate]);
+  }, [onCommentCreate]);
 
   useEffect(() => {
     if (!manual) {
@@ -101,14 +100,12 @@ export function useCommentList(
     comments,
     total,
     page,
-    pageSize,
+    pageSize: 5,
     loading,
     lastError,
     query,
     changePage,
     create,
-    emitCommentDelete,
-    emitCommentCreate,
   });
 
   return exports;
@@ -118,11 +115,13 @@ export function useCommentLoad(id: number) {
   const reqState = useRequestState();
   const { loading, lastError } = reqState;
 
+  const service = useCommentCachable();
+
   const [comment, setComment] = useState<TypeComment.Get>();
 
   const query = useCallback(() => {
     reqState.toloading();
-    const rsp = commentService
+    const rsp = service
       .get(id)
       .pipe(
         map(c => {
@@ -170,14 +169,14 @@ export function useComment(
   onCommentDelete?: () => void,
   onCommentReply?: () => void,
 ) {
-  const { scope } = comment;
+  const service = useCommentCachable();
   const { user } = useUser(comment.userId);
   const [actionState, setActionState] = useState<'removing' | 'replying' | undefined>(undefined);
 
   const remove = useCallback(() => {
     setActionState('removing');
-    return commentService
-      .delete(scope, comment.id, comment.parentId)
+    return service
+      .delete(comment.id)
       .pipe(
         tap(() => { onCommentDelete?.() }),
         tap(() => { setActionState(undefined) })
@@ -186,16 +185,14 @@ export function useComment(
 
   const reply = useCallback((created: TypeComment.Create, asParent = true) => {
     setActionState('replying');
-    return commentService
-      .create(scope, {
+    return service
+      .create({
         ...created,
         referenceId: comment.id,
         parentId: asParent ? comment.id : undefined,
       }).pipe(
-        tap(() => {
-          onCommentReply?.();
-        }),
-        tap(() => { setActionState(undefined) })
+        tap(() => onCommentReply?.()),
+        tap(() => setActionState(undefined))
       )
   }, [onCommentReply]);
 
@@ -212,13 +209,11 @@ export function useComment(
 }
 
 export function getCommentListHookObjectCore(commentListHookObject: CommentListHookObject) {
-  return _.merge(
-    {
-      onCommentCreate: commentListHookObject.emitCommentCreate,
-      onCommentDelete: commentListHookObject.emitCommentDelete,
-    },
-    _.pick(commentListHookObject, ['page', 'pageSize', 'total', 'loading', 'comments', 'changePage'])
-  );
+  return _.pick(commentListHookObject, ['page', 'pageSize', 'total', 'loading', 'comments', 'changePage']);
+  // return _.merge(
+  //   {},
+  //   _.pick(commentListHookObject, ['page', 'pageSize', 'total', 'loading', 'comments', 'changePage'])
+  // );
 }
 
 export type CommentListHookObject = ReturnType<typeof useCommentList>;

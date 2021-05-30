@@ -5,7 +5,8 @@
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "scripts": {
-    "build": "rimraf ./dist && tsc"
+    "build": "rimraf ./dist && tsc",
+    "dev": "tsc -w"
   },
   "dependencies": {
     "joi": "^17.4.0",

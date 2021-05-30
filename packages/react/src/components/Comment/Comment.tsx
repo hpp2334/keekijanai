@@ -1,7 +1,11 @@
+import './Comment.css';
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { Popover, Button, Typography, List, ConfigProvider, Popconfirm, notification, Badge, Space, Skeleton } from 'antd';
 import { Translation, useTranslation } from 'react-i18next';
-import { CommentListHookObject, CommentLoadHookObject, useComment, useCommentList, useCommentLoad, getCommentListHookObjectCore } from './controller';
+import {
+  CommentListHookObject, CommentLoadHookObject, useComment, commentContext,
+  useCommentList, useCommentLoad, getCommentListHookObjectCore
+} from './controller';
 import { useAuth } from '../Auth/controller';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 import loadable from '@loadable/component';
@@ -11,14 +15,13 @@ import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOu
 import { noop, useSwitch } from '../../util';
 import { useUser } from '../User/controller';
 import { format } from 'date-fns-tz';
-
-import './Comment.css';
 import clsx from 'clsx';
 import { UserComponent } from '../User/UserComponent';
 import { authModal } from '../Auth/AuthModal';
 import { tap } from 'rxjs/operators';
 import _ from 'lodash';
 import { Observable } from 'rxjs';
+import { CommentCachable } from 'keekijanai-client-core';
 
 const Editor = loadable(() => import('react-draft-wysiwyg' as any).then(v => v.Editor));
 
@@ -37,16 +40,14 @@ interface CommentItemProps {
   scope: string;
   comment: TypeComment.Get;
   parent?: TypeComment.Get;
-  onCommentDelete?: () => any;
-  onCommentReply?: () => any;
   showChildCounts?: boolean;
+  reQuery?: () => any;
 }
 
 interface CommentListProps {
   scope: string;
   parent?: TypeComment.Get;
-  onCommentDelete?: () => any;
-  onCommentCreate?: () => any;
+  reQuery?: () => any;
 
   showCommentListHeader?: boolean;
   showCommentReplyCounts?: boolean;
@@ -200,12 +201,12 @@ function CommentPost(props: CommentPostProps) {
 }
 
 function CommentItem(props: CommentItemProps) {
-  const { scope, comment, parent, onCommentReply, onCommentDelete, showChildCounts = true } = props;
+  const { scope, comment, parent, reQuery, showChildCounts = true } = props;
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
 
-  const commentHookObject = useComment(comment, parent, onCommentDelete, onCommentReply);
-  const commentListHookObject = useCommentList(scope, undefined, comment, true, onCommentDelete);
+  const commentHookObject = useComment(comment, parent, reQuery, reQuery);
+  const commentListHookObject = useCommentList(comment, true, reQuery);
   const { user, actionState } = commentHookObject;
 
   const [replyPlaceHolderMainText] = useState(() => {
@@ -222,7 +223,7 @@ function CommentItem(props: CommentItemProps) {
   const switchShowReply = useSwitch();
 
   const queryCommentList = useCallback(() => {
-    if (!parent && comment.childCounts) {
+    if (!parent && comment.childCounts > 0) {
       commentListHookObject.query();
     }
   }, [comment.childCounts]);
@@ -246,9 +247,6 @@ function CommentItem(props: CommentItemProps) {
   const handleReply = (comment: TypeComment.Create) => {
     return commentHookObject
       .reply(comment, !parent)
-      .pipe(
-        tap(queryCommentList),
-      )
   };
 
   const style = useMemo((): React.CSSProperties => ({
@@ -300,6 +298,7 @@ function CommentItem(props: CommentItemProps) {
       {!parent && comment.childCounts > 0 && (
         <CommentListCore
           {...getCommentListHookObjectCore(commentListHookObject)}
+          reQuery={reQuery}
           scope={scope}
           parent={comment}
           style={style}
@@ -326,15 +325,13 @@ function EmptyCommentList() {
 }
 
 function CommentListCore(props: CommentListCoreProps) {
-  const { scope, parent, showCommentReplyCounts = true, showCommentListHeader = true, className, style } = props;
-  const { page, pageSize, total, loading, comments, changePage,
-    onCommentCreate: emitCommentCreate,
-    onCommentDelete: emitCommentDelete,
+  const { scope, parent, className, style,
+    reQuery,
+    showCommentReplyCounts = true,
+    showCommentListHeader = true
   } = props;
+  const { page, pageSize, total, loading, comments, changePage } = props;
   const { t } = useTranslation();
-
-  const handleCommentReply = emitCommentCreate;
-  const handleCommentDelete = emitCommentDelete;
 
   const pagination = useMemo(() => ({
     simple: true,
@@ -373,8 +370,7 @@ function CommentListCore(props: CommentListCoreProps) {
                   scope={scope}
                   parent={parent}
                   comment={item}
-                  onCommentReply={handleCommentReply}
-                  onCommentDelete={handleCommentDelete}
+                  reQuery={reQuery}
                   showChildCounts={showCommentReplyCounts}
                 />
               </List.Item>
@@ -386,28 +382,45 @@ function CommentListCore(props: CommentListCoreProps) {
   )
 }
 
-export function Comment(props: CommentProps) {
+export function CommentCore(props: CommentProps) {
   const { scope, className } = props;
   const { user } = useAuth();
 
   const [posting, setPosting] = useState(false);
-  const commentListHookObject = useCommentList(scope);
+  const commentListHookObject = useCommentList();
 
   const handlePost = useCallback((comment: TypeComment.Create) => {
     setPosting(true);
     return commentListHookObject
       .create(scope, comment)
       .pipe(
-        tap(() => {
-          setPosting(false);
-        })
+        tap(() => setPosting(false)),
+        tap(commentListHookObject.query)
       )
-  }, [commentListHookObject.create]);
+  }, [commentListHookObject.create, commentListHookObject.query]);
 
   return (
     <div className={clsx('kkjn__comment', className)}>
-      <CommentListCore scope={scope} {...getCommentListHookObjectCore(commentListHookObject)} />
+      <CommentListCore
+        scope={scope}
+        {...getCommentListHookObjectCore(commentListHookObject)}
+        reQuery={commentListHookObject.query}
+      />
       {user.isLogin && <CommentPost scope={scope} onPost={handlePost} posting={posting} />}
     </div>
+  )
+}
+
+
+export function Comment(props: CommentProps) {
+  const { scope } = props;
+  const [ctxValue] = useState(() => ({
+    service: new CommentCachable(scope),
+  }))
+
+  return (
+    <commentContext.Provider value={ctxValue}>
+      <CommentCore {...props} />
+    </commentContext.Provider>
   )
 }
