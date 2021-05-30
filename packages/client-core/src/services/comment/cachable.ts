@@ -35,7 +35,6 @@ export class CommentCachable {
       .pipe(
         tap(created => {
           const parentNode = this._itemNodeMap.get(parentId) as TreeNode<Comment.Get> | undefined;
-          console.log('[cc] create', parentNode);
           if (parentNode) {
             if (parentNode.hasValue()) {
               const item = parentNode.getValue()!;

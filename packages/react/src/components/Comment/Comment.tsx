@@ -12,7 +12,7 @@ import loadable from '@loadable/component';
 import { Comment as TypeComment } from 'keekijanai-type';
 import { sprintf } from 'sprintf-js';
 import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOutlined, WarningOutlined } from '@ant-design/icons';
-import { noop, useSwitch } from '../../util';
+import { noop, useSwitch, useUnmountCancel } from '../../util';
 import { useUser } from '../User/controller';
 import { format } from 'date-fns-tz';
 import clsx from 'clsx';
@@ -152,7 +152,8 @@ function CommentPost(props: CommentPostProps) {
   const { scope, placeholder, onPost, onCancel, posting = false } = props;
   const { t } = useTranslation();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
-  
+  const unmountCancel = useUnmountCancel();
+
   const handleSubmit = () => {
     const contentState = editorState.getCurrentContent();
     const raw = convertToRaw(contentState);
@@ -163,12 +164,16 @@ function CommentPost(props: CommentPostProps) {
       plainText: contentState.getPlainText(),
     };
     
-    onPost(comment).subscribe({
-      next: () => {
-        setEditorState(EditorState.createEmpty());
-        onCancel?.();
-      }
-    })
+    onPost(comment)
+      .pipe(
+        unmountCancel(),
+      )
+      .subscribe({
+        next: () => {
+          setEditorState(EditorState.createEmpty());
+          onCancel?.();
+        }
+      })
   };
 
   return (

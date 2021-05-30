@@ -1,4 +1,8 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import { MonoTypeOperatorFunction, Observable, Observer, Subject } from 'rxjs';
+import { useMountedState, useUnmount } from 'react-use';
+import { tap } from 'lodash';
+import { takeUntil } from 'rxjs/operators';
 
 export const noop: (...args: any[]) => any = () => {};
 
@@ -71,4 +75,16 @@ export function useRequestState() {
 
   const exports = useMemoExports({ loading, lastError, toDone, toloading, toError });
   return exports;
+}
+
+export function useUnmountCancel() {
+  const [subject] = useState(new Subject());
+  useUnmount(() => subject.complete());
+
+  const handler = useCallback(
+    <T>(): MonoTypeOperatorFunction<T> => takeUntil(subject),
+    []
+  );
+
+  return handler;
 }

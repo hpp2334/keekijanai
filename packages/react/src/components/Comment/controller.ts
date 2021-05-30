@@ -2,10 +2,11 @@ import { Comment as TypeComment } from 'keekijanai-type';
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Observable, of } from 'rxjs';
 import { map, mergeAll, switchMapTo, tap } from 'rxjs/operators';
-import { useMemoExports, useRequestState } from '../../util';
+import { useMemoExports, useRequestState, useUnmountCancel } from '../../util';
 import { batchUsers, useUser } from '../User/controller';
 import _ from 'lodash';
 import { CommentCachable } from 'keekijanai-client-core';
+import { useMountedState } from 'react-use';
 
 interface CommentContext {
   service: CommentCachable;
@@ -27,6 +28,7 @@ export function useCommentList(
   manual: boolean = false,
   onCommentCreate?: () => void,
 ) {
+  const unmountCancel = useUnmountCancel();
   const service = useCommentCachable();
 
   const [comments, setComments] = useState<TypeComment.List['comments']>();
@@ -43,7 +45,6 @@ export function useCommentList(
       .list(parent?.id, nextPage - 1)
       .pipe(
         map((list: TypeComment.List) => {
-          console.log(list);
           const ids = list.comments.map(c => c.userId);
 
           return batchUsers(ids).pipe(
@@ -51,6 +52,7 @@ export function useCommentList(
           )
         }),
         mergeAll(),
+        unmountCancel(),
       )
       .subscribe({
         error: err => {
@@ -67,7 +69,7 @@ export function useCommentList(
   }, []);
 
   const query = useCallback(() => {
-    _query(page);
+    return _query(page);
   }, [page]);
 
   const changePage = useCallback((nextPage: number) => {
@@ -84,6 +86,7 @@ export function useCommentList(
         referenceId: referenceId ?? parent?.id,
       })
       .pipe(
+        unmountCancel(),
         tap(() => onCommentCreate?.()),
       )
     return rsp;
@@ -112,6 +115,7 @@ export function useCommentList(
 }
 
 export function useCommentLoad(id: number) {
+  const unmountCancel = useUnmountCancel();
   const reqState = useRequestState();
   const { loading, lastError } = reqState;
 
@@ -132,6 +136,7 @@ export function useCommentLoad(id: number) {
           )
         }),
         mergeAll(),
+        unmountCancel(),
       )
       .subscribe({
         next: c => {
@@ -150,7 +155,10 @@ export function useCommentLoad(id: number) {
   }, [id]);
   
   useEffect(() => {
-    query();
+    const subscription = query();
+    return () => {
+      subscription.unsubscribe();
+    }
   }, [query]);
 
   const exports = useMemoExports({
@@ -169,6 +177,7 @@ export function useComment(
   onCommentDelete?: () => void,
   onCommentReply?: () => void,
 ) {
+  const unmountCancel = useUnmountCancel();
   const service = useCommentCachable();
   const { user } = useUser(comment.userId);
   const [actionState, setActionState] = useState<'removing' | 'replying' | undefined>(undefined);
@@ -178,6 +187,7 @@ export function useComment(
     return service
       .delete(comment.id)
       .pipe(
+        unmountCancel(),
         tap(() => { onCommentDelete?.() }),
         tap(() => { setActionState(undefined) })
       )
@@ -191,6 +201,7 @@ export function useComment(
         referenceId: comment.id,
         parentId: asParent ? comment.id : undefined,
       }).pipe(
+        unmountCancel(),
         tap(() => onCommentReply?.()),
         tap(() => setActionState(undefined))
       )
