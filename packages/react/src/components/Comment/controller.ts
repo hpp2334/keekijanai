@@ -193,13 +193,13 @@ export function useComment(
       )
   }, [onCommentDelete]);
 
-  const reply = useCallback((created: TypeComment.Create, asParent = true) => {
+  const reply = useCallback((created: TypeComment.Create, asParent: boolean = true) => {
     setActionState('replying');
     return service
       .create({
         ...created,
         referenceId: comment.id,
-        parentId: asParent ? comment.id : undefined,
+        parentId: asParent ? comment.id : parent?.id,
       }).pipe(
         unmountCancel(),
         tap(() => onCommentReply?.()),

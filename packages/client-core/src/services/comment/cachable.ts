@@ -41,10 +41,9 @@ export class CommentCachable {
               item.childCounts++;
             }
 
-            const node = parentNode.access([take.toString(), '0']);
+            const node = parentNode.access([take.toString()]);
             if (node) {
               node.removeAll(false);
-              node.deleteValue();
             }
             this.list(parentId, 0).subscribe(_.noop);
           }
@@ -54,6 +53,8 @@ export class CommentCachable {
   }
 
   delete = (commentId: number): Observable<Comment.Delete> => {
+    const take = this.options.grouping.take;
+
     const result = commentService
       .delete(commentId)
       .pipe(
@@ -72,7 +73,7 @@ export class CommentCachable {
                 value.childCounts--;
               }
 
-              node.parent?.removeAll(true);
+              node.parent?.parent?.removeAll(false);
               this.list(parId, skip).subscribe(_.noop);
             }
           }

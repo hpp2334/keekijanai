@@ -60,7 +60,6 @@ type CommentListCoreProps = CommentListProps & ReturnType<typeof getCommentListH
 
 interface CommentPostProps {
   scope: string;
-  parent?: TypeComment.Get;
   placeholder?: string;
   onPost: (comment: TypeComment.Create) => Observable<any>;
   onCancel?: () => any;
@@ -249,9 +248,9 @@ function CommentItem(props: CommentItemProps) {
         error: err => notification.error({ message: t("DELETE_COMMENT_ERROR") + ": " + err })
       })
   };
-  const handleReply = (comment: TypeComment.Create) => {
+  const handleReply = (created: TypeComment.Create) => {
     return commentHookObject
-      .reply(comment, !parent)
+      .reply(created, !parent)
   };
 
   const style = useMemo((): React.CSSProperties => ({
@@ -293,7 +292,6 @@ function CommentItem(props: CommentItemProps) {
       {switchShowReply.open && currentUser.isLogin && (
         <CommentPost
           scope={scope}
-          parent={parent}
           posting={actionState === 'replying'}
           onPost={handleReply}
           onCancel={switchShowReply.off}
@@ -390,6 +388,7 @@ function CommentListCore(props: CommentListCoreProps) {
 export function CommentCore(props: CommentProps) {
   const { scope, className } = props;
   const { user } = useAuth();
+  const unmountCancel = useUnmountCancel();
 
   const [posting, setPosting] = useState(false);
   const commentListHookObject = useCommentList();
@@ -399,8 +398,9 @@ export function CommentCore(props: CommentProps) {
     return commentListHookObject
       .create(scope, comment)
       .pipe(
+        unmountCancel(),
         tap(() => setPosting(false)),
-        tap(commentListHookObject.query)
+        tap(() => commentListHookObject.changePage(1))
       )
   }, [commentListHookObject.create, commentListHookObject.query]);
 
