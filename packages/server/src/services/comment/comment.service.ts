@@ -1,13 +1,14 @@
 import { Comment, Grouping, User } from "keekijanai-type";
 import * as _ from 'lodash';
 
-import { InjectService, Service, ServiceType } from '@/core/service';
+import { Init, InjectService, Service, ServiceType } from '@/core/service';
 
 import type { NotifyService } from '@/services/notify';
 import type { UserService } from "@/services/user";
 import type { AuthService } from '@/services/auth';
 import { authError } from '@/services/auth';
 import { commentError } from '@/services/comment';
+import Mint from "mint-filter";
 
 const debug = require('debug')('keekijanai:service:comment');
 
@@ -20,6 +21,12 @@ type CommentDB = CommentDBCreate & {
   childCounts: number;
 }
 
+interface Config {
+  sensitive?: string[];
+}
+
+let _cachedMint: any = null;
+
 export interface CommentService extends ServiceType.ServiceBase {}
 
 @Service({
@@ -29,6 +36,15 @@ export class CommentService {
   @InjectService('notify')  notifyService!: NotifyService;
   @InjectService('user')    userService!: UserService;
   @InjectService('auth')    authService!: AuthService;
+  private config!: Config;
+
+  @Init('config')
+  setInternalConfig(config: any) {
+    this.config = {};
+    if (config && Array.isArray(config.sensitive)) {
+      this.config.sensitive = config.sensitive;
+    }
+  }
 
   async get(id: number): Promise<Comment.Get> {
     const result = await this.provider.select({
@@ -61,6 +77,14 @@ export class CommentService {
       userId: user.id,
       cTime: Date.now(),
     };
+    if (this.config?.sensitive?.length) {
+      const { sensitive } = this.config;
+      const mint: Mint = _cachedMint = _cachedMint ?? new Mint(sensitive);
+      const invalid = !mint.validator(comment.content) || !mint.validator(comment.plainText);
+      if (invalid) {
+        throw commentError.sensitive;
+      }
+    }
     const result = await this.provider.insert({
       from: 'keekijanai_comment',
       payload: comment,

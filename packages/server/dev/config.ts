@@ -28,6 +28,9 @@ const config: VercelSupabasePresetOptions = {
         // }
       ]
     },
+    comment: {
+      sensitive: ["傻逼", "去死"],
+    }
   }
 }
 export default config;

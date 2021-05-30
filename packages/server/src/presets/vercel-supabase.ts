@@ -39,6 +39,9 @@ export interface VercelSupabasePresetOptions {
     },
     user?: {
       roles?: Record<string, string[] | string | number>;
+    },
+    comment?: {
+      sensitive?: string[];
     }
   }
 }
@@ -55,7 +58,7 @@ export function getVercelSupabasePreset(options: VercelSupabasePresetOptions): C
     services: [
       DeviceService,
       [AuthService, options.services.auth],
-      CommentService,
+      [CommentService, options.services.comment],
       [NotifyService, options.services.notify],
       StarService,
       TimeService,

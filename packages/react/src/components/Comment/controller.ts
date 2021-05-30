@@ -202,8 +202,11 @@ export function useComment(
         parentId: asParent ? comment.id : parent?.id,
       }).pipe(
         unmountCancel(),
+        tap({
+          error: () => setActionState(undefined),
+          next: () => setActionState(undefined),
+        }),
         tap(() => onCommentReply?.()),
-        tap(() => setActionState(undefined))
       )
   }, [onCommentReply]);
 

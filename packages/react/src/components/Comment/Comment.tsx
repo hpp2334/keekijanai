@@ -170,6 +170,13 @@ function CommentPost(props: CommentPostProps) {
       .subscribe({
         next: () => {
           setEditorState(EditorState.createEmpty());
+        },
+        error: (err) => {
+          notification.error({
+            message: err?.response?.error ?? err?.message ?? err,
+          });
+        },
+        complete: () => {
           onCancel?.();
         }
       })
@@ -399,7 +406,10 @@ export function CommentCore(props: CommentProps) {
       .create(scope, comment)
       .pipe(
         unmountCancel(),
-        tap(() => setPosting(false)),
+        tap({
+          next: () => setPosting(false),
+          error: () => setPosting(false),
+        }),
         tap(() => commentListHookObject.changePage(1))
       )
   }, [commentListHookObject.create, commentListHookObject.query]);

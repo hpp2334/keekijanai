@@ -23,21 +23,24 @@ export function Star(props: StarProps) {
     return star.current === val ? 'kkjn__btn-activated' : 'kkjn__btn-unactivated';
   }, [star]);
 
-  const getProps = useCallback((value: number, icon: React.ReactNode, handleClick: () => void) => ({
-    disabled: star.loading === 'loading',
-    shape: 'round' as const,
-    size: 'large' as const,
-    type: 'text' as const,
-    icon,
-    className: getButtonClassName(value),
-    onClick: () => {
-      if (user.isLogin) {
-        handleClick();
-      } else {
-        authModal.open();
-      }
-    },
-  }), [user, getButtonClassName]);
+  const getProps = useCallback(
+    (value: number, icon: React.ReactNode, handleClick: () => void) => ({
+      disabled: star.loading === 'loading',
+      shape: 'round' as const,
+      size: 'large' as const,
+      type: 'text' as const,
+      icon,
+      className: getButtonClassName(value),
+      onClick: () => {
+        if (user.isLogin) {
+          handleClick();
+        } else {
+          authModal.open();
+        }
+      },
+    }),
+    [user, getButtonClassName]
+  );
 
   return (
     <div className="kkjn__star">
