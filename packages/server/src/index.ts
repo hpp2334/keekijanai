@@ -1,4 +1,3 @@
-require('module-alias/register')
 import "reflect-metadata";
 import { configReader, ConfigType } from "@/core/config";
 import { platformManager } from "@/core/platform";
