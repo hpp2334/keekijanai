@@ -1,4 +1,3 @@
-import { CacheManager } from "../utils/cache";
 import { ConfigReader, ConfigType } from "./config";
 import { Requester } from "./request";
 
@@ -9,7 +8,7 @@ class Client {
 
   constructor() {
     this.configReader = new ConfigReader();
-    this.requester = new Requester(this, new CacheManager());
+    this.requester = new Requester(this);
   }
 
   initialize() {

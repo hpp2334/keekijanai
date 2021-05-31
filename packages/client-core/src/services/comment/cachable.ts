@@ -2,7 +2,7 @@ import { Grouping, Comment } from 'keekijanai-type';
 import _ from 'lodash';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
-import { TreeMap, TreeNode } from '../../lib/tree-map';
+import { TreeMap, TreeNode } from 'jelly-util-tree-map';
 import { comment as commentService } from './basic';
 
 export class CommentCachable {
@@ -64,7 +64,7 @@ export class CommentCachable {
           if (node?.hasValue()) {
             const comment = node.getValue()!;
             const parId = comment?.parentId;
-            const skip = Number(node.parent?._selfKeyInParent);
+            const skip = Number(node.parent?.parentKey);
 
             if (typeof parId !== 'undefined') {
               const parNode = this._itemNodeMap.get(parId);

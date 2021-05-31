@@ -1,7 +1,6 @@
 import { ajax, AjaxResponse } from 'rxjs/ajax';
 import { Client } from "./client";
 import { auth } from "../services/auth";
-import { CacheManager, Cache } from '../utils/cache';
 import _ from 'lodash';
 import { of } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -14,7 +13,7 @@ interface RequestParam {
 }
 
 export class Requester {
-  constructor(private client: Client, private cacheManager: CacheManager) {}
+  constructor(private client: Client) {}
 
   getURI(params: RequestParam) {
     const unfilteredQueryObject = {
