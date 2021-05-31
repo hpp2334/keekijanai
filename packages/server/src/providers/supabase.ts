@@ -1,4 +1,3 @@
-require('module-alias/register')
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { Provider, ProviderType } from '@/core/provider';
 import _ from 'lodash';

@@ -1,4 +1,3 @@
-require('module-alias/register')
 import { setup } from '..';
 import { getVercelSupabasePreset } from '../dist/presets/vercel-supabase';
 import config from './config';

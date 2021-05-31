@@ -1,6 +1,5 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { MiddlewareManager } from "../core/middleware/manager";
-require('module-alias/register')
 import { ResponseError } from "@/core/error";
 import { PlatformType } from "@/core/platform";
 import { MiddlewareType } from "@/core/middleware";

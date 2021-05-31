@@ -25,6 +25,9 @@
     "uuid": "^8.3.2"
   },
   "devDependencies": {
+    "@babel/core": "^7.14.3",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/plugin-proposal-decorators": "^7.14.2",
     "@babel/preset-env": "^7.14.2",
     "@babel/preset-typescript": "^7.13.0",
     "@types/cookie-parser": "^1.4.2",
@@ -44,13 +47,17 @@
     "cookie-parser": "^1.4.5",
     "cookiejar": "^2.1.2",
     "cross-env": "^7.0.3",
+    "esbuild": "^0.12.5",
+    "esbuild-plugin-alias": "^0.1.2",
     "express": "^4.17.1",
     "fs-jetpack": "^4.1.0",
+    "glob-promise": "^4.2.0",
     "gulp": "^4.0.2",
     "gulp-cli": "^2.3.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.7",
     "rimraf": "^3.0.2",
+    "through2": "^2.0.5",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
   },
