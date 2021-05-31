@@ -2,11 +2,16 @@
   "name": "root",
   "private": true,
   "devDependencies": {
+    "cpy": "^8.1.2",
     "fs-jetpack": "^4.1.0",
+    "gulp": "^4.0.2",
+    "gulp-cli": "^2.3.0",
     "lerna": "^4.0.0",
+    "minimatch": "^3.0.4",
     "yargs": "^17.0.1"
   },
   "scripts": {
-    "generate-pkgs": "node ./tools/generate-packages.mjs"
+    "prepare": "gulp prepare",
+    "build": "gulp build"
   }
 }
