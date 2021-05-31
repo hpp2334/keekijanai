@@ -1,4 +1,4 @@
-import { VercelSupabasePresetOptions  } from '@/presets/vercel-supabase';
+import { VercelSupabasePresetOptions  } from '../dist/presets/vercel-supabase';
 
 const config: VercelSupabasePresetOptions = {
   supabase: {
