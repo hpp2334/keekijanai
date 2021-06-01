@@ -18,8 +18,8 @@
   "dependencies": {
     "@vercel/node": "^1.11.0",
     "gatsby": "^3.4.1",
-    "gatsby-plugin-keekijanai": "^0.0.1",
-    "keekijanai-react": "^0.0.1",
+    "gatsby-plugin-keekijanai": "^0.0.2",
+    "keekijanai-react": "^0.0.2",
     "keekijanai-server": "^0.0.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"

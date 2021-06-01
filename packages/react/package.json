@@ -87,8 +87,8 @@
     "yargs": "^17.0.1"
   },
   "peerDependencies": {
-    "react": "^17.0.0 | ^16.8.0",
-    "react-dom": "^17.0.0 | ^16.8.0"
+    "react": ">=16.8.0",
+    "react-dom": ">=16.8.0"
   },
   "scripts": {
     "build": "npm-run-all --parallel build:*",
