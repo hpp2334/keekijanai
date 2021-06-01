@@ -5,8 +5,14 @@
   "types": "./dist/index.d.ts",
   "license": "MIT",
   "exports": {
-    ".": "./dist/index.js",
-    "./presets/*": "./dist/presets/*.js",
+    ".": {
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./presets/*": {
+      "default": "./dist/presets/*.js",
+      "types": "./dist/presets/*.d.ts"
+    },
     "./platforms/*": "./dist/platforms/*.js"
   },
   "dependencies": {
@@ -63,8 +69,7 @@
   },
   "scripts": {
     "test": "npm run build && cross-env DEBUG=keekijanai:* jest",
-    "dev": "cross-env DEBUG=keekijanai:* nodemon --watch 'src/**' --ext 'ts,json' --exec 'ts-node --project ./tsconfig.json ./dev'",
-    "build": "npm run clean && tsc",
+    "build": "gulp build",
     "clean": "rimraf ./dist"
   }
 }

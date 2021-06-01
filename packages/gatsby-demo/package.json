@@ -8,6 +8,7 @@
     "gatsby"
   ],
   "scripts": {
+    "vercel-dev": "cross-env DEBUG=keekijanai:* vercel dev",
     "dev": "gatsby develop",
     "start": "gatsby develop",
     "build": "gatsby build",
@@ -15,13 +16,16 @@
     "clean": "gatsby clean"
   },
   "dependencies": {
+    "@vercel/node": "^1.11.0",
     "gatsby": "^3.4.1",
     "gatsby-plugin-keekijanai": "^0.0.1",
     "keekijanai-react": "^0.0.1",
+    "keekijanai-server": "^0.0.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "http-proxy-middleware": "^0.19.1"
   }
 }
