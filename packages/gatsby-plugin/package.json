@@ -1,6 +1,6 @@
 {
   "name": "gatsby-plugin-keekijanai",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A gatsby plugin for keekijanai-react",
   "main": "index.js",
   "scripts": {
