@@ -23,9 +23,12 @@ export interface VercelSupabasePresetOptions {
   },
   services: {
     auth?: {
+      /** an unguessable string */
       jwtSecret: string,
+      /** jwt maxAge */
       maxAge?: number;
       oauth2?: {
+        /** callback page path in client */
         callback: string,
         platforms?: Record<string, {
           appID: string;
@@ -34,12 +37,29 @@ export interface VercelSupabasePresetOptions {
       }
     },
     notify?: {
+      /**
+       * @example
+       * notifiers: [
+       *   {
+       *     type: 'telegram',
+       *     token:  '123456' ,
+       *     chatID: '123456',
+       *   }
+       * ]
+       */
       notifiers: Array<any>;
     },
     user?: {
+      /**
+       * @example
+       * roles: {
+       *   [getUserIDfromOAuth2('provider', 'example_user')]: ['admin']
+       * }
+       */
       roles?: Record<string, string[] | string | number>;
     },
     comment?: {
+      /** comment sentitve words */
       sensitive?: string[];
     }
   }
@@ -68,3 +88,7 @@ export function getVercelSupabasePreset(options: VercelSupabasePresetOptions): C
     provider: [Supabase, options.supabase]
   }
 }
+
+export const utils = {
+  getUserIDfromOAuth2: AuthService.getUserIDfromOAuth2,
+};

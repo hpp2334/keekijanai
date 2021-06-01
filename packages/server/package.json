@@ -9,11 +9,11 @@
       "default": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
-    "./presets/*": {
+    "./dist/presets/*": {
       "default": "./dist/presets/*.js",
       "types": "./dist/presets/*.d.ts"
     },
-    "./platforms/*": "./dist/platforms/*.js"
+    "./dist/platforms/*": "./dist/platforms/*.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^1.11.12",
