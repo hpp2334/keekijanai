@@ -1,6 +1,6 @@
 {
   "name": "keekijanai-type",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "main": "./dist/index.d.ts",
   "scripts": {
@@ -21,5 +21,5 @@
     "ts-node": "^9.1.1",
     "tslib": "^2.2.0",
     "typescript": "^4.2.4"
-  }  
+  }
 }
