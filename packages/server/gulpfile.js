@@ -1,11 +1,7 @@
 const gulp = require('gulp');
 const { execSync } = require('child_process');
-const esbuild = require('esbuild');
-const alias = require('esbuild-plugin-alias');
 const babel = require('@babel/core');
-const babelConfig = require('./babel.config');
 const path = require('path');
-const glob = require('glob-promise');
 const through2 = require('through2');
 
 const clean = async () => {

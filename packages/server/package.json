@@ -28,7 +28,8 @@
     "node-telegram-bot-api": "^0.53.0",
     "proxy-agent": "^4.0.1",
     "reflect-metadata": "^0.1.13",
-    "uuid": "^8.3.2"
+    "uuid": "^8.3.2",
+    "yargs": "^17.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.14.3",
@@ -59,7 +60,6 @@
     "fs-jetpack": "^4.1.0",
     "glob-promise": "^4.2.0",
     "gulp": "^4.0.2",
-    "gulp-cli": "^2.3.0",
     "jest": "^26.6.3",
     "nodemon": "^2.0.7",
     "rimraf": "^3.0.2",
