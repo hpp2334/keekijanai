@@ -1,4 +1,4 @@
-const { execSync } = require('child_process');
+const { execSync, exec } = require('child_process');
 const jetpack = require('fs-jetpack');
 const path = require('path');
 const gulp = require('gulp');
@@ -6,6 +6,9 @@ const minimatch = require("minimatch");
 const yargs = require('yargs');
 const { hideBin } = require('yargs/helpers');
 const cpy = require('cpy');
+const { promisify } = require('util');
+
+const execAsync = promisify(exec);
 
 let _globalMapping = null;
 
@@ -21,12 +24,16 @@ const getContext = (params) => {
         pkgJson,
         inputDir: path.posix.join('./packages', dirName),
         outputDir: path.posix.join('./dist', dirName),
+        get outputPkgJson() {
+          return jetpack.read(path.join(this.outputDir, './package.json'), 'json');
+        }
       };
     }
   }
 
   const ctx = {};
   ctx.scope = params.scope;
+  ctx.skipPrepare = !!params['skip-prepare'];
   ctx.list = Object
     .keys(_globalMapping)
     .filter(key => ctx.scope ? minimatch(key, ctx.scope) : true)
@@ -84,6 +91,22 @@ const prepare = async (ctx) => {
   await Promise.all(tasks);
 }
 
+const publish = async (ctx) => {
+  const { list } = ctx;
+  for (const { name, outputDir, outputPkgJson } of list) {
+    const { stdout } = await execAsync('npm v --json', { cwd: outputDir });
+    const publishedVersion = JSON.parse(stdout).version;
+    const currentVersion = outputPkgJson.version;
+    if (publishedVersion === currentVersion) {
+      console.log(`"${name}" version equal, skip publish.`);
+    } else if (outputPkgJson.private) {
+      console.log(`"${name}" is private. skip publish.`)
+    } else {
+      execSync('npm publish', { cwd: outputDir, stdio: 'inherit' })
+    }
+  }
+}
+
 const CLI_build = () => {
   const ctx = getContextFromCMD();
   const list = [
@@ -95,8 +118,8 @@ const CLI_build = () => {
   return gulp.series(...list);
 }
 
-const CLI_prepare = () => {
-  const ctx = getContextFromCMD();
+const CLI_prepare = (_ctx) => {
+  const ctx = _ctx || getContextFromCMD();
   const list = [
     clean,
     bootstrap,
@@ -107,5 +130,19 @@ const CLI_prepare = () => {
   return gulp.series(...list);
 }
 
+const CLI_publish = () => {
+  const ctx = getContextFromCMD();
+  const list = [
+    publish
+  ].map(f => f.bind(null, ctx));
+
+  if (!ctx.skipPrepare) {
+    list.splice(0, 0, CLI_prepare(ctx));
+  }
+
+  return gulp.series(...list);
+}
+
 exports['build'] = CLI_build();
 exports['prepare'] = CLI_prepare();
+exports['publish'] = CLI_publish();
