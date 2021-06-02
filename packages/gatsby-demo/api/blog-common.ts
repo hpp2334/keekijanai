@@ -1,6 +1,6 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { setup } from 'keekijanai-server';
-import { getVercelSupabasePreset, VercelSupabasePresetOptions } from 'keekijanai-server/presets/vercel-supabase';
+import { getVercelSupabasePreset, utils, VercelSupabasePresetOptions } from 'keekijanai-server/dist/presets/vercel-supabase';
 
 const presetConfig: VercelSupabasePresetOptions = {
   supabase: {
@@ -20,6 +20,11 @@ const presetConfig: VercelSupabasePresetOptions = {
         },
         callback: '/callback',
       },
+    },
+    user: {
+      roles: {
+        [utils.getUserIDfromOAuth2('github', 'hpp2334')]: ['admin'],
+      }
     },
     notify: {
       notifiers: [

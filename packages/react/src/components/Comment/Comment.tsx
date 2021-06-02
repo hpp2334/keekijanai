@@ -273,7 +273,7 @@ function CommentItem(props: CommentItemProps) {
       <CommentHeader comment={comment} showReference={comment.parentId !== comment.referenceId} />
       <ReadonlyEditor comment={comment} />
       <div className="kkjn__panel">
-        {currentUser.isLogin && currentUser.id === comment.userId && (
+        {currentUser.isLogin && (currentUser.id === comment.userId || currentUser.role === 0b11) && (
           <Popconfirm
             title={t("READY_TO_REMOVE")}
             placement='top'

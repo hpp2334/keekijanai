@@ -67,6 +67,7 @@ export class UserService {
     }
   
     const payload = result.body[0];
+    payload.role = payload.role | (this.internalConfig.roles[payload.id] ?? 0);
 
     if (!opts?.includePassword) {
       delete payload.password;

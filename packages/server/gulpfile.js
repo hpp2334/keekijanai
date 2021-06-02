@@ -3,6 +3,17 @@ const { execSync } = require('child_process');
 const babel = require('@babel/core');
 const path = require('path');
 const through2 = require('through2');
+const { glob } = require('glob-promise');
+const jetpack = require('fs-jetpack');
+
+
+Object.defineProperty(String.prototype, 'slash', {
+  get: function () {
+    return this.split(path.sep).join(path.posix.sep)
+  }
+})
+
+const cwd = () => process.cwd().slash;
 
 const clean = async () => {
   execSync('npm run clean', { stdio: 'inherit' });
@@ -26,7 +37,7 @@ const build = async () => {
       const { code } = await babel.transformAsync(
         file.contents.toString(),
         {
-          filename: path.resolve(process.cwd(), file.path),
+          filename: path.resolve(cwd(), file.path),
         }
       );
       file.contents = Buffer.from(code);
@@ -39,6 +50,22 @@ const build = async () => {
 
 const emitTypes = async () => {
   execSync(`tsc -p tsconfig.json --emitDeclarationOnly`, { stdio: 'inherit' });
+  
+  return gulp
+    .src('./dist/**/*.d.ts')
+    .pipe(through2.obj(async function (file, encoding, next) {
+      let str = file.contents.toString()
+      const from = path.resolve(cwd(), path.dirname(file.path.slash));
+      const to = path.resolve(cwd(), './dist');
+      let dir = path.relative(from, to).slash;
+      dir = dir === '' ? '.' : dir;
+      const RE = /from (["'])(?:@)(\/[^\1\n]+)?\1;/mg;
+      str = str.replace(RE, (_, p, q) => { return `from "${dir}${q}";` });
+      file.contents = Buffer.from(str);
+      this.push(file);
+      next();
+    }))
+    .pipe(gulp.dest('./dist'))
 }
 
 const CLI_build = () => {
@@ -48,6 +75,7 @@ const CLI_build = () => {
 const CLI_develop = async () => {
   return gulp.watch(
     './src/**/*.*',
+    { ignoreInitial: false, },
     gulp.series(clean, build),
   )
 }
