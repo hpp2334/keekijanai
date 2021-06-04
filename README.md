@@ -25,7 +25,7 @@ Keekijanai (ケーキじゃない！) 基于 React（使用 antd），提供了�
   - 阅读量统计  
   - \* 代码展示  
 
-## 安装
+## 安装与配置
 
 假设使用 Vercel + Gatsby + Supabase。  
 
@@ -34,6 +34,10 @@ Keekijanai (ケーキじゃない！) 基于 React（使用 antd），提供了�
 ```
 npm i keekijanai-server keekijanai-react gatsby-plugin-keekijanai
 ```
+
+### 服务端
+
+根据服务端类型与版本在 [server/sqls 目录](https://github.com/hpp2334/keekijanai/tree/main/packages/server/sqls) 中找到对应的 SQL 文件初始化数据库。   
 
 ### Serverless Function
 
