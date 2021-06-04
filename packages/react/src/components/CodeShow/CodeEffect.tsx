@@ -4,9 +4,16 @@ import { getCodeEffectContainer } from './code-effect-components';
 import { Card } from 'antd';
 
 export type CodeEffectProps = {
-  get: (key: string) => any;
-  entry: string;
+  /**
+   * type 默认为 "react"，根据 type 决定入口文件导出：
+   * - type === "native"：需要入口文件导出 { html, handler }，其中 handler 会被异步调度（通过 useEffect）  
+   * - type === "native"：需要入口文件默认导出 ReactNode  
+   */
   type?: 'native' | 'react' | undefined;
+  /** 获取文件导出，如使用 webpack，可以使用 require.context API */
+  get: (key: string) => any;
+  /** 入口文件 key */
+  entry: string;
 }
 
 export function CodeEffect(props: CodeEffectProps) {

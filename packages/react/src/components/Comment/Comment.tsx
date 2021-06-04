@@ -26,6 +26,7 @@ import { CommentCachable } from 'keekijanai-client-core';
 const Editor = loadable(() => import('react-draft-wysiwyg' as any).then(v => v.Editor));
 
 export interface CommentProps {
+  /** 列表 id，如可取 location.pathname */
   scope: string;
   className?: string;
 }

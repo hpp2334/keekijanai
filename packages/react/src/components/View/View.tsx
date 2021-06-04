@@ -7,6 +7,7 @@ import { Skeleton, Space, Typography } from 'antd';
 import './View.css'
 
 interface ViewProps {
+  /** id，如可取 location.pathname */
   scope: string;
 }
 

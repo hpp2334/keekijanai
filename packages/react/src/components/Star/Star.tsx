@@ -10,6 +10,7 @@ import { useAuth } from '../Auth';
 import { authModal } from '../Auth/AuthModal';
 
 export interface StarProps {
+  /** id，如可取 location.pathname */
   scope: string;
 }
 

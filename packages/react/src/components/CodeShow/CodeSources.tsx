@@ -15,10 +15,11 @@ export interface HightlightProps {
 }
 
 export type CodeSourcesProps = {
+  /** 获取文件自身内容（即源码），如使用 webpack，可以使用 require.context API 与 raw-loader */
   get: (key: string) => string | { default: string };
-  /** key -> name */
+  /** 从 key 映射到 name，渲染时标签页名称会使用 name */
   nameMap?: Record<string, string>;
-  /** default is "react" */
+  /** 需要显示源代码的文件的 key 组成的数组 */
   sourceList: string[];
   refSource?: React.Ref<any>;
 }
