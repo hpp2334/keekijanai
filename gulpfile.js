@@ -94,13 +94,16 @@ const prepare = async (ctx) => {
 const publish = async (ctx) => {
   const { list } = ctx;
   for (const { name, outputDir, outputPkgJson } of list) {
+    if (outputPkgJson.private) {
+      console.log(`"${name}" is private. skip publish.`);
+      continue;
+    }
+
     const { stdout } = await execAsync('npm v --json', { cwd: outputDir });
     const publishedVersion = JSON.parse(stdout).version;
     const currentVersion = outputPkgJson.version;
     if (publishedVersion === currentVersion) {
       console.log(`"${name}" version equal, skip publish.`);
-    } else if (outputPkgJson.private) {
-      console.log(`"${name}" is private. skip publish.`)
     } else {
       execSync('npm publish', { cwd: outputDir, stdio: 'inherit' })
     }
