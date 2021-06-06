@@ -138,6 +138,7 @@ export class AuthService {
 
     await this.userService.upsert({
       id: userID,
+      name: userProfile.name,
       avatarUrl: userProfile.avatarUrl,
       email: userProfile.email,
       lastLogin: currentTime,

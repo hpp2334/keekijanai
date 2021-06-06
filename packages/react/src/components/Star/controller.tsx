@@ -1,13 +1,29 @@
 import { useCallback, useEffect } from "react";
 import { useState } from "react";
-import { star } from 'keekijanai-client-core';
+import { StarService } from 'keekijanai-client-core';
 import { Star } from 'keekijanai-type';
-import { useMemoExports, useRequestState } from "../../util";
+import { createNotNilContextState, useMemoExports, useRequestState } from "../../util";
 
-export function useStar(scope: string) {
+interface ContextValue {
+  starService: StarService;
+}
+
+const [useStarContextValue, StarProvider] = createNotNilContextState<ContextValue, { scope: string }>(
+  props => ({
+    starService: new StarService(props.scope),
+  })
+);
+
+export {
+  useStarContextValue,
+  StarProvider
+}
+
+export function useStar() {
   const [current, setCurrent] = useState<null | -1 | 0 | 1>();
   const [total, setTotal] = useState<number>();
   const reqState = useRequestState();
+  const { starService } = useStarContextValue();
   const { loading } = reqState;
 
   const update = useCallback((val: any) => {
@@ -18,26 +34,22 @@ export function useStar(scope: string) {
 
   const get = useCallback(() => {
     reqState.toloading();
-    star
-      .get(scope)
+    starService
+      .get()
       .subscribe({
         next: update
       })
-  }, [scope]);
+  }, []);
 
   const post = useCallback((val: Star.StarType) => {
     reqState.toloading();
     const next = typeof current === 'number' && val === current ? null : val;
-    star
-      .post(scope, next)
+    starService
+      .post(next)
       .subscribe({
         next: update
       })
-  }, [scope, current]);
-
-  const handlePostLike = useCallback(() => { post(1) }, [post]);
-  const handlePostMama = useCallback(() => { post(0) }, [post]);
-  const handlePostUnlike = useCallback(() => { post(-1) }, [post]);
+  }, [current]);
 
   useEffect(() => {
     get();
@@ -49,9 +61,6 @@ export function useStar(scope: string) {
     loading,
     get,
     post,
-    handlePostLike,
-    handlePostMama,
-    handlePostUnlike,
   });
   return exports;
 }

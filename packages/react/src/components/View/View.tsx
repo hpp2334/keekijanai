@@ -1,19 +1,22 @@
 import React, { useContext } from 'react'
-import { toSearch } from '../../util';
-import { useView } from './controller';
+import { toSearch, withContexts } from '../../util';
+import { useView, ViewProvider } from './controller';
 import { EyeOutlined } from '@ant-design/icons';
 import { Skeleton, Space, Typography } from 'antd';
 
 import './View.css'
+import { TranslationContext } from '../../translations';
 
 interface ViewProps {
   /** id，如可取 location.pathname */
   scope: string;
 }
 
-export function View(props: ViewProps) {
-  const { scope } = props;
-  const viewHookObject = useView(scope);
+export const View = withContexts<ViewProps>(
+  TranslationContext,
+  ViewProvider,
+)(function (props) {
+  const viewHookObject = useView();
 
   return (
     <div className="kkjn__view">
@@ -28,4 +31,4 @@ export function View(props: ViewProps) {
       </div>
     </div>
   )
-}
+})

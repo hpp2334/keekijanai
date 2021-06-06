@@ -1,11 +1,15 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
+import { readFileSync } from 'fs';
+import path from 'path';
 import { setup } from 'keekijanai-server';
 import { getVercelSupabasePreset, utils, VercelSupabasePresetOptions } from 'keekijanai-server/dist/presets/vercel-supabase';
 
+const IS_DEV = process.env.NODE_ENV === 'development';
+
 const presetConfig: VercelSupabasePresetOptions = {
   supabase: {
-    url: 'https://irsaiuoawxhaytjrwjfq.supabase.co',
-    appKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjE5Mjc4NjU2LCJleHAiOjE5MzQ4NTQ2NTZ9.UgiklrSQJOd5j2GbT_V1_ZKna0oaa2hqvcXomFh6J4w',
+    url: 'SHOULD_BE_OVERWRITTEN',
+    appKey: 'SHOULD_BE_OVERWRITTEN',
   },
   services: {
     auth: {
@@ -14,8 +18,8 @@ const presetConfig: VercelSupabasePresetOptions = {
       oauth2: {
         platforms: {
           'github': {
-            appID: '46626721dbe60689d1ca',
-            appSecret: 'c9b8665ea23343eb7d529118e797cfcd96db9df9'
+            appID: 'SHOULD_BE_OVERWRITTEN',
+            appSecret: 'SHOULD_BE_OVERWRITTEN'
           }
         },
         callback: '/callback',
@@ -39,6 +43,14 @@ const presetConfig: VercelSupabasePresetOptions = {
       sensitive: ["傻逼", "去死"],
     }
   }
+}
+
+// should not push real value of "SHOULD_BE_OVERWRITTEN" to github, so use another file saving secret info
+if (IS_DEV) {
+  const jsonText = readFileSync(path.resolve(__dirname, '../secret.json'), 'utf-8');
+  const json = JSON.parse(jsonText);
+  presetConfig.supabase = json.supabase;
+  presetConfig.services.auth.oauth2.platforms.github = json.github;
 }
 
 const config = getVercelSupabasePreset(presetConfig);

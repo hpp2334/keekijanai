@@ -1,11 +1,12 @@
-import { Grouping, Comment } from 'keekijanai-type';
+import { Comment } from 'keekijanai-type';
 import _ from 'lodash';
 import { Observable, of } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { TreeMap, TreeNode } from 'jelly-util-tree-map';
-import { comment as commentService } from './basic';
+import { Service } from '../../core/service';
+import { CommentService } from './basic';
 
-export class CommentCachable {
+export class CommentCachableService extends Service {
   private options = {
     preCache: {
       pre: 1,
@@ -18,33 +19,31 @@ export class CommentCachable {
   cacher = new TreeMap<any>();
   private _itemNodeMap = new Map<number | undefined, TreeNode<Comment.Get>>();
   private _scope: string;
+  private commentService: CommentService;
 
   constructor(scope: string) {
+    super();
     this._scope = scope;
+    this.commentService = new CommentService(this._scope);
 
     this._itemNodeMap.set(undefined, this.cacher.root as any);
   }
 
   create = (comment: Comment.Create): Observable<Comment.Get> => {
     const { parentId } = comment;
-    const scope = this._scope;
     const take = this.options.grouping.take;
   
-    const result = commentService
-      .create(scope, comment)
+    const result = this.commentService
+      .create(comment)
       .pipe(
-        tap(created => {
+        tap(() => {
           const parentNode = this._itemNodeMap.get(parentId) as TreeNode<Comment.Get> | undefined;
+          if (parentId !== undefined) {
+            parentNode?.deleteValue();
+            this.get(parentId).subscribe(_.noop);
+          }
           if (parentNode) {
-            if (parentNode.hasValue()) {
-              const item = parentNode.getValue()!;
-              item.childCounts++;
-            }
-
-            const node = parentNode.access([take.toString()]);
-            if (node) {
-              node.removeAll(false);
-            }
+            parentNode.access([take])?.children?.forEach(childNode => childNode.deleteValue());
             this.list(parentId, 0).subscribe(_.noop);
           }
         }),
@@ -53,9 +52,7 @@ export class CommentCachable {
   }
 
   delete = (commentId: number): Observable<Comment.Delete> => {
-    const take = this.options.grouping.take;
-
-    const result = commentService
+    const result = this.commentService
       .delete(commentId)
       .pipe(
         tap(() => {
@@ -67,13 +64,14 @@ export class CommentCachable {
             const skip = Number(node.parent?.parentKey);
 
             if (typeof parId !== 'undefined') {
+              
               const parNode = this._itemNodeMap.get(parId);
-              if (parNode?.hasValue()) {
-                const value = parNode.getValue()!;
-                value.childCounts--;
+              if (parNode) {
+                parNode.deleteValue();
+                this.get(parId).subscribe(_.noop);
               }
 
-              node.parent?.parent?.removeAll(false);
+              node.parent?.parent?.children?.forEach(childNode => childNode.deleteValue());
               this.list(parId, skip).subscribe(_.noop);
             }
           }
@@ -89,15 +87,22 @@ export class CommentCachable {
       return of(value);
     }
 
-    const result = commentService.get(id);
+    const result = this.commentService
+      .get(id)
+      .pipe(
+        tap(item => {
+          if (node) {
+            node.setValue(item);
+          }
+        })
+      );
     return result;
   }
 
   private _list = (parentId: number | undefined, skip: number, cacheLeft: number): Observable<Comment.List> => {
-    const scope = this._scope;
     const take = this.options.grouping.take;
     const baseNode = this._itemNodeMap.get(parentId);
-    const node = baseNode?.access([take.toString(), skip.toString()], true) as TreeNode<Comment.List> | undefined;
+    const node = baseNode?.access([take, skip], true) as TreeNode<Comment.List> | undefined;
   
     // Cache
     if (node?.hasValue()) {
@@ -111,8 +116,8 @@ export class CommentCachable {
       });
     }
 
-    let result = commentService
-      .list(scope, parentId, { take, skip })
+    let result = this.commentService
+      .list(parentId, { take, skip })
       .pipe(
         tap(list => {
           if (node) {
@@ -122,7 +127,7 @@ export class CommentCachable {
             });
   
             for (const item of list.comments) {
-              const commentNode = node.access(item.id.toString(), true) as any as TreeNode<Comment.Get>;
+              const commentNode = node.access([item.id], true) as any as TreeNode<Comment.Get>;
               commentNode.setValue(item);
               this._itemNodeMap.set(item.id, commentNode);
             }

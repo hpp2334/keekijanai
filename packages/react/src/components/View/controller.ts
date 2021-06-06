@@ -1,23 +1,39 @@
-import { view as viewService } from 'keekijanai-client-core';
+import { ViewService } from 'keekijanai-client-core';
 import { useCallback, useEffect, useState } from 'react';
-import { useMemoExports, useRequestState } from '../../util';
+import { createNotNilContextState, useMemoExports, useRequestState } from '../../util';
 
-export function useView(scope: string) {
+interface ContextValue {
+  viewService: ViewService;
+}
+
+const [useViewContextValue, ViewProvider] = createNotNilContextState<ContextValue, { scope: string }>(
+  (props) => ({
+    viewService: new ViewService(props.scope),
+  })
+);
+
+export {
+  useViewContextValue,
+  ViewProvider
+}
+
+export function useView() {
   const [view, setView] = useState<number>();
   const reqState = useRequestState();
+  const { viewService } = useViewContextValue();
   const { loading } = reqState;
 
   const update = useCallback(() => {
     reqState.toloading();
     viewService
-      .get(scope)
+      .get()
       .subscribe({
         next: res => {
           setView(res.view);
           reqState.toDone();
         }
       })
-  }, [scope]);
+  }, []);
 
   useEffect(() => {
     update();

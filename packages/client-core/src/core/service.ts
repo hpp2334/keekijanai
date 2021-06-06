@@ -1,18 +1,19 @@
-import { Client, client } from "./client";
+import { Client, getClient } from "./client";
 
 class ServiceBase {
-  constructor(protected client: Client) {}
-}
+  protected client: Client;
+  protected _v = Date.now();
 
-interface ServiceConstructor<T extends ServiceBase> {
-  new (client: Client): T;
-}
+  constructor() {
+    this.client = getClient();
+  }
 
-function serviceFactory <T extends ServiceBase>(Ctor: ServiceConstructor<T>) {
-  return new Ctor(client);
+  updateV() {
+    this._v++;
+    return this._v;
+  }
 }
 
 export {
   ServiceBase as Service,
-  serviceFactory,
 }

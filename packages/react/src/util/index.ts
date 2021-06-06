@@ -1,7 +1,9 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react'
+import React, { useEffect, useState, useMemo, useCallback, useContext } from 'react'
 import { MonoTypeOperatorFunction, Observable, Observer, Subject } from 'rxjs';
 import { useMountedState, useUnmount } from 'react-use';
 import { takeUntil, take } from 'rxjs/operators';
+
+export { withContexts, createNotNilContextState } from './context';
 
 export const noop: (...args: any[]) => any = () => {};
 

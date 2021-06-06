@@ -24,4 +24,6 @@ i18n
     debug: false,
   });
 
-export default i18n;
+export {
+  i18n
+}

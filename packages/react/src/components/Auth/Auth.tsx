@@ -1,8 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useForceUpdate } from '../../util';
+import { useForceUpdate, withContexts } from '../../util';
 import { useAuth } from './controller';
-import { auth as authService } from 'keekijanai-client-core';
 import { Auth } from 'keekijanai-type';
 import { Button, Popconfirm } from 'antd';
 
@@ -10,6 +9,7 @@ import './Auth.css';
 import { authModal } from './AuthModal';
 import { UserComponent } from '../User/UserComponent';
 import clsx from 'clsx';
+import { TranslationContext } from '../../translations';
 
 
 export interface LoginProps {
@@ -26,23 +26,12 @@ interface HaveLoginedProps {
 }
 
 function HaveLogined(props: HaveLoginedProps) {
+  const authHook = useAuth();
   const { t } = useTranslation();
   const { user, loading, forceUpdate } = props;
-  const composedUserHO = useMemo(() => {
-    if (!user.isLogin) {
-      return {
-        loading,
-        user: undefined,
-      }
-    }
-    return {
-      loading,
-      user,
-    }
-  }, [user]);
 
   const handleLogout = () => {
-    authService.logout();
+    authHook.logout();
     forceUpdate();
   };
 
@@ -72,7 +61,9 @@ function HaveLogouted(props: HaveLogoutedProps) {
   );
 }
 
-export function Login(props: LoginProps) {
+export const Login = withContexts<LoginProps>(
+  TranslationContext,
+)(function (props) {
   const { className } = props;
   const forceUpdate = useForceUpdate();
   const { user, loading } = useAuth();
@@ -86,4 +77,4 @@ export function Login(props: LoginProps) {
       }
     </div>
   )
-}
+})

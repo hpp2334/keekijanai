@@ -1,35 +1,33 @@
 import { Comment as TypeComment } from 'keekijanai-type';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { Observable, of } from 'rxjs';
-import { map, mergeAll, switchMapTo, tap } from 'rxjs/operators';
-import { useMemoExports, useRequestState, useUnmountCancel } from '../../util';
-import { batchUsers, useUser } from '../User/controller';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { tap } from 'rxjs/operators';
+import { createNotNilContextState, useMemoExports, useRequestState, useUnmountCancel } from '../../util';
+import { userContext, useUser } from '../User/controller';
 import _ from 'lodash';
-import { CommentCachable } from 'keekijanai-client-core';
-import { useMountedState } from 'react-use';
+import { CommentCachableService } from 'keekijanai-client-core';
 
-interface CommentContext {
-  service: CommentCachable;
+interface ContextValue {
+  commentCachableService: CommentCachableService;
 }
 
-export const commentContext = React.createContext<CommentContext | undefined>(undefined);
+const [useCommentContextValue, CommentProvider] = createNotNilContextState<ContextValue, { scope: string }>(
+  (props) => ({
+    commentCachableService: new CommentCachableService(props.scope),
+  })
+);
 
-export function useCommentCachable() {
-  const ctx = useContext(commentContext);
-
-  if (!ctx?.service) {
-    throw Error('not wrap comment context');
-  }
-  return ctx.service;
+export {
+  useCommentContextValue,
+  CommentProvider
 }
 
 export function useCommentList(
   parent?: TypeComment.Get,
   manual: boolean = false,
-  onCommentCreate?: () => void,
 ) {
   const unmountCancel = useUnmountCancel();
-  const service = useCommentCachable();
+  const { commentCachableService } = useCommentContextValue();
+  const { userService } = useContext(userContext);
 
   const [comments, setComments] = useState<TypeComment.List['comments']>();
   const [total, setTotal] = useState<number>();
@@ -41,17 +39,10 @@ export function useCommentList(
 
   const _query = useCallback((nextPage: number) => {
     setLoadingState(prev => prev === 'init-loading' ? prev : 'loading');
-    const rsp = service
+    const rsp = commentCachableService
       .list(parent?.id, nextPage - 1)
       .pipe(
-        map((list: TypeComment.List) => {
-          const ids = list.comments.map(c => c.userId);
-
-          return batchUsers(ids).pipe(
-            switchMapTo(of(list))
-          )
-        }),
-        mergeAll(),
+        userService.blockTapBatch(data => data.comments.map(c => c.userId)),
         unmountCancel(),
       )
       .subscribe({
@@ -78,7 +69,7 @@ export function useCommentList(
   }, [_query]);
 
   const create = useCallback((scope: string, comment: TypeComment.Create, referenceId?: number) => {
-    const rsp = service
+    const rsp = commentCachableService
       .create({
         ...comment,
         scope,
@@ -87,10 +78,9 @@ export function useCommentList(
       })
       .pipe(
         unmountCancel(),
-        tap(() => onCommentCreate?.()),
       )
     return rsp;
-  }, [onCommentCreate]);
+  }, []);
 
   useEffect(() => {
     if (!manual) {
@@ -119,23 +109,17 @@ export function useCommentLoad(id: number) {
   const reqState = useRequestState();
   const { loading, lastError } = reqState;
 
-  const service = useCommentCachable();
+  const { commentCachableService } = useCommentContextValue();
+  const { userService } = useContext(userContext);
 
   const [comment, setComment] = useState<TypeComment.Get>();
 
   const query = useCallback(() => {
     reqState.toloading();
-    const rsp = service
+    const rsp = commentCachableService
       .get(id)
       .pipe(
-        map(c => {
-          const id = c.userId;
-          
-          return batchUsers([id]).pipe(
-            switchMapTo(of(c))
-          )
-        }),
-        mergeAll(),
+        userService.blockTapBatch(data => [data.userId]),
         unmountCancel(),
       )
       .subscribe({
@@ -172,52 +156,60 @@ export function useCommentLoad(id: number) {
 }
 
 export function useComment(
-  comment: TypeComment.Get,
+  nativeComment: TypeComment.Get,
   parent: TypeComment.Get | undefined,
-  onCommentDelete?: () => void,
-  onCommentReply?: () => void,
 ) {
+  const [comment, setComment] = useState(nativeComment);
   const unmountCancel = useUnmountCancel();
-  const service = useCommentCachable();
+  const { commentCachableService } = useCommentContextValue();
   const { user } = useUser(comment.userId);
   const [actionState, setActionState] = useState<'removing' | 'replying' | undefined>(undefined);
 
+  const reQuery = useCallback(() => {
+    commentCachableService
+      .get(comment.id)
+      .pipe(
+        unmountCancel(),
+      )
+      .subscribe(setComment)
+  }, []);
+
   const remove = useCallback(() => {
     setActionState('removing');
-    return service
+    return commentCachableService
       .delete(comment.id)
       .pipe(
         unmountCancel(),
-        tap(() => { onCommentDelete?.() }),
         tap(() => { setActionState(undefined) })
       )
-  }, [onCommentDelete]);
+  }, []);
 
   const reply = useCallback((created: TypeComment.Create, asParent: boolean = true) => {
     setActionState('replying');
-    return service
+    return commentCachableService
       .create({
         ...created,
         referenceId: comment.id,
         parentId: asParent ? comment.id : parent?.id,
       }).pipe(
+        tap(reQuery),
         unmountCancel(),
         tap({
           error: () => setActionState(undefined),
           next: () => setActionState(undefined),
         }),
-        tap(() => onCommentReply?.()),
       )
-  }, [onCommentReply]);
+  }, [reQuery]);
 
   const exports = useMemo(() => ({
     remove,
     reply,
+    reQuery,
     actionState,
     user,
     parent,
     comment
-  }), [remove, reply, actionState, user, parent]);
+  }), [remove, reply, reQuery, comment, actionState, user, parent]);
 
   return exports;
 }

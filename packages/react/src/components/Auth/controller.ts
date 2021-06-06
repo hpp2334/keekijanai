@@ -1,10 +1,17 @@
-import { auth as authService } from 'keekijanai-client-core';
+import { AuthService } from 'keekijanai-client-core';
 import { Auth, User } from 'keekijanai-type';
 import { tap } from 'rxjs/operators';
-import { useCallback, useEffect, useState } from 'react';
-import { useMemoExports, useRequestState } from '../../util';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createNotNilContextState, useMemoExports, useRequestState } from '../../util';
+import { createStateContext } from 'react-use';
+
+
+const authContext = createContext({
+  authService: new AuthService(),
+});
 
 export function useAuth() {
+  const { authService } = useContext(authContext);
   const [user, setUser] = useState<Auth.CurrentUser>({ isLogin: false });
   const loadingState = useRequestState();
   const { loading } = loadingState;
@@ -25,6 +32,9 @@ export function useAuth() {
     authService.updateCurrent().subscribe(loadingState.toDone);
   }, []);
 
+  const logout = authService.logout;
+  const oauth = authService.oauth;
+
   const onCallback = useCallback((cb: (redirect?: string) => void) => {
     update();
     authService.onCallback(cb);
@@ -34,6 +44,8 @@ export function useAuth() {
     user,
     loading,
     onCallback,
+    logout,
+    oauth,
   });
 
   return exports;

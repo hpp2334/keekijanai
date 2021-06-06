@@ -1,30 +1,36 @@
 import { Star } from 'keekijanai-type';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Service, serviceFactory } from "../core/service";
+import { Service } from "../core/service";
 
-class StarServiceImpl extends Service {
-  routes = {
+export class StarService extends Service {
+  private routes = {
     get: '/star/get',
     post: '/star/post',
   };
+  private scope: string;
 
-  get = (scope: string): Observable<Star.Get> => {
+  constructor(scope: string) {
+    super();
+
+    this.scope = scope;
+  }
+
+  get = (): Observable<Star.Get> => {
     const result = this.client.requester.request({
       route: this.routes.get,
       query: {
-        scope,
+        scope: this.scope,
       },
     });
     return result;
   }
 
-  post = (scope: string, star: Star.StarType): Observable<Star.Get> => {
+  post = (star: Star.StarType): Observable<Star.Get> => {
     const result = this.client.requester.request({
       route: this.routes.post,
       method: 'POST',
       query: {
-        scope,
+        scope: this.scope,
       },
       body: {
         current: star,
@@ -34,4 +40,3 @@ class StarServiceImpl extends Service {
   }
 }
 
-export const star = serviceFactory(StarServiceImpl);

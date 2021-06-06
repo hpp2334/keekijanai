@@ -27,15 +27,7 @@ export class UserService {
     return !!(calculatedRole & user.role);
   }
 
-  async upsert(params: {
-    id: string;
-    password?: string;
-    provider?: string;
-    lastLogin?: number;
-    avatarUrl?: string;
-    email?: string;
-    role?: number;
-  }): Promise<User.User> {
+  async upsert(params: { id: string; } & Partial<User.User>): Promise<User.User> {
     const result = await this.provider.update({
       from: 'keekijanai_user',
       payload: params,

@@ -1,48 +1,58 @@
 import { Comment, Grouping } from 'keekijanai-type';
 import { Observable } from "rxjs";
-import { map, tap } from 'rxjs/operators';
-import { Service, serviceFactory } from "../../core/service";
+import { Service } from "../../core/service";
 import _ from 'lodash';
+import { tap } from 'rxjs/operators';
 
-class CommentServiceImpl extends Service {
-  routes = {
+export class CommentService extends Service {
+  private routes = {
     get: '/comment/get',
     create: '/comment/create',
     list: '/comment/list',
     delete: '/comment/delete',
   };
+  private _scope: string;
+
+  constructor(scope: string) {
+    super();
+    this._scope = scope;
+  }
 
   get = (id: number): Observable<Comment.Get> => {
     const result = this.client.requester.request({
       route: this.routes.get,
       method: 'GET',
       query: {
-        id
+        id,
       }
     });
     return result;
   }
   
-  create = (scope: string, comment: Comment.Create): Observable<Comment.Get> => {
+  create = (comment: Omit<Comment.Create, 'scope'>): Observable<Comment.Get> => {
     const result = this.client.requester.request({
       route: this.routes.create,
       method: 'POST',
       query: {
-        scope,
+        scope: this._scope,
+        parentId: comment.parentId,
       },
       body: {
-        comment,
+        comment: {
+          ...comment,
+          scope: this._scope,
+        },
       }
     });
     return result;
   }
 
-  list = (scope: string, parentId: number | undefined, grouping: Grouping): Observable<Comment.List> => {
+  list = (parentId: number | undefined, grouping: Grouping): Observable<Comment.List> => {
     const gpStr = this.getGroupingString(grouping);
     let result = this.client.requester.request({
       route: this.routes.list,
       query: {
-        scope,
+        scope: this._scope,
         parentId,
         grouping: gpStr,
       }
@@ -65,5 +75,3 @@ class CommentServiceImpl extends Service {
     return `${grouping.skip},${grouping.take}`;
   }
 }
-
-export const comment = serviceFactory(CommentServiceImpl);

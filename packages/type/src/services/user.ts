@@ -6,4 +6,5 @@ export interface User {
   provider?: string;
   avatarUrl?: string;
   lastLogin?: number;
+  email?: string;
 }

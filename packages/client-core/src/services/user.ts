@@ -1,10 +1,9 @@
 import { User } from "keekijanai-type";
-import { Observable } from "rxjs";
-import { map } from "rxjs/operators";
-import { Service, serviceFactory } from "../core/service";
+import { merge, Observable, pipe, of } from "rxjs";
+import { mergeMap, switchMapTo, last, tap } from "rxjs/operators";
+import { Service } from "../core/service";
 
-
-class UserServiceImpl extends Service {
+export class UserService extends Service {
   private routes = {
     get: '/user/get',
   };
@@ -15,9 +14,24 @@ class UserServiceImpl extends Service {
       query: {
         id,
       },
+      cache: {
+        paths: ['user', 'get', id],
+      }
     });
     return result;
   }
+
+  blockTapBatch = <T>(getIDs: (kept: T) => string[]) =>
+    (source: Observable<T>) => source.pipe(
+      mergeMap(data => {
+        const ids = [...new Set(getIDs(data))];
+        return merge(
+          ...ids.map(id => this.get(id))
+        ).pipe(
+          switchMapTo(of(data)),
+        )
+      }),
+      last(),
+    )
 }
 
-export const user = serviceFactory(UserServiceImpl);

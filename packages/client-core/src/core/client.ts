@@ -11,9 +11,6 @@ class Client {
     this.requester = new Requester(this);
   }
 
-  initialize() {
-  }
-
   updateConfig(config: ConfigType) {
     this.configReader.read(config);
   }
@@ -23,11 +20,10 @@ class Client {
   }
 }
 
-const client = new Client();
-client.initialize();
+let client: Client | undefined;
 
-export {
-  client,
+export const getClient = () => {
+  return client ?? (client = new Client());
 }
 
 export type {

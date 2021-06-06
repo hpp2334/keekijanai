@@ -1,8 +1,7 @@
 
-import { Client } from "../core/client";
-import { Observable, Subject, of, BehaviorSubject } from 'rxjs';
-import { map, switchMapTo, tap } from 'rxjs/operators';
-import { Service, serviceFactory } from "../core/service";
+import { of, BehaviorSubject } from 'rxjs';
+import { switchMapTo, tap } from 'rxjs/operators';
+import { Service } from "../core/service";
 import { createLocalStorageEntry } from "../utils/local-storage-entry";
 import { Auth } from "keekijanai-type";
 import processNextTick from 'next-tick';
@@ -15,7 +14,7 @@ interface JwtInfo {
 const keekijanaiJwtEntry = createLocalStorageEntry('keekijanai-jwt');
 const lastPageEntry = createLocalStorageEntry('keekijanai-last-page');
 
-class AuthServiceImpl extends Service {
+export class AuthService extends Service {
   private routes = {
     current: '/auth/current',
     login: '/auth/login',
@@ -23,10 +22,17 @@ class AuthServiceImpl extends Service {
   private jwtInfo: JwtInfo | undefined;
   user$ = new BehaviorSubject<Auth.CurrentUser>({ isLogin: false });
 
-  constructor(client: Client) {
-    super(client);
+  constructor() {
+    super();
 
     this.jwtInfo = this.readLocalJwtInfo();
+
+    this.client.requester.hook('beforeRequest', (headers) => {
+      const jwt = this.jwt;
+      if (jwt !== undefined) {
+        headers.Authorization = this.jwt;
+      }
+    });
 
     processNextTick(() => {
       this.updateCurrent().subscribe({});
@@ -37,13 +43,25 @@ class AuthServiceImpl extends Service {
     if (!this.jwtInfo || Date.now() > this.jwtInfo.expire) {
       keekijanaiJwtEntry.removeItem();
       this.jwtInfo = undefined;
-      return null;
+      return undefined;
     }
     return this.jwtInfo.jwt;
   }
 
   auth = (username: string, password: string) => {
-    throw Error('"auth" function not implement!');
+    return this.client.requester.request({
+      route: this.routes.login,
+      query: {
+        username,
+        password,
+      }
+    }).pipe(
+      tap(response => {
+        const { jwt, maxAge } = response;
+        this.updateLocalJwtInfo(jwt, maxAge);
+      }),
+      tap(() => this.updateCurrent().subscribe({}))
+    )
   }
 
   oauth = (provider: string) => {
@@ -65,22 +83,15 @@ class AuthServiceImpl extends Service {
     this.user$.next({ isLogin: false });
   }
 
-  /** @todo refactor requester, instead of lock everywhere */
-  private lockUpdateCurrent = false;
   updateCurrent = () => {
-    if (!this.jwt) {
+    if (this.jwt === undefined) {
       this.user$.next({ isLogin: false });
       return of(null);
     }
-    if (this.lockUpdateCurrent) {
-      return of(null);
-    }
     
-    this.lockUpdateCurrent = true;
     return this.client.requester.request({
       route: this.routes.current,
     }).pipe(
-      tap(() => { this.lockUpdateCurrent = false }),
       tap(user => { this.user$.next(user) }),
       switchMapTo(of(null)),
     );
@@ -94,15 +105,18 @@ class AuthServiceImpl extends Service {
       if (!jwt) {
         return;
       }
-  
-      this.jwtInfo = { jwt, expire: maxAge + Date.now() };
-      keekijanaiJwtEntry.setItem(JSON.stringify(this.jwtInfo));
-
+      
+      this.updateLocalJwtInfo(jwt, maxAge);
       this.updateCurrent().subscribe({});
 
       const lastPage = lastPageEntry.getItem();
       callback(lastPage ?? undefined);
     }
+  }
+
+  private updateLocalJwtInfo(jwt: string, maxAge: number) {
+    this.jwtInfo = { jwt, expire: maxAge + Date.now() };
+    keekijanaiJwtEntry.setItem(JSON.stringify(this.jwtInfo));
   }
 
   private readLocalJwtInfo() {
@@ -119,4 +133,3 @@ class AuthServiceImpl extends Service {
   }
 }
 
-export const auth = serviceFactory(AuthServiceImpl);

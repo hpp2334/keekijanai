@@ -3,8 +3,8 @@ import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { Popover, Button, Typography, List, ConfigProvider, Popconfirm, notification, Badge, Space, Skeleton } from 'antd';
 import { Translation, useTranslation } from 'react-i18next';
 import {
-  CommentListHookObject, CommentLoadHookObject, useComment, commentContext,
-  useCommentList, useCommentLoad, getCommentListHookObjectCore
+  CommentLoadHookObject, useComment,
+  useCommentList, useCommentLoad, getCommentListHookObjectCore, CommentProvider
 } from './controller';
 import { useAuth } from '../Auth/controller';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
@@ -12,7 +12,7 @@ import loadable from '@loadable/component';
 import { Comment as TypeComment } from 'keekijanai-type';
 import { sprintf } from 'sprintf-js';
 import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOutlined, WarningOutlined } from '@ant-design/icons';
-import { noop, useSwitch, useUnmountCancel } from '../../util';
+import { noop, useSwitch, useUnmountCancel, withContexts } from '../../util';
 import { useUser } from '../User/controller';
 import { format } from 'date-fns-tz';
 import clsx from 'clsx';
@@ -21,7 +21,7 @@ import { authModal } from '../Auth/AuthModal';
 import { tap } from 'rxjs/operators';
 import _ from 'lodash';
 import { Observable } from 'rxjs';
-import { CommentCachable } from 'keekijanai-client-core';
+import { TranslationContext } from '../../translations';
 
 const Editor = loadable(() => import('react-draft-wysiwyg' as any).then(v => v.Editor));
 
@@ -42,13 +42,15 @@ interface CommentItemProps {
   comment: TypeComment.Get;
   parent?: TypeComment.Get;
   showChildCounts?: boolean;
-  reQuery?: () => any;
+  onReply?: (asParent?: boolean) => void;
+  onDelete?: () => void;
 }
 
 interface CommentListProps {
   scope: string;
   parent?: TypeComment.Get;
-  reQuery?: () => any;
+  onCreate?: () => void;
+  onDelete?: () => void;
 
   showCommentListHeader?: boolean;
   showCommentReplyCounts?: boolean;
@@ -213,13 +215,20 @@ function CommentPost(props: CommentPostProps) {
 }
 
 function CommentItem(props: CommentItemProps) {
-  const { scope, comment, parent, reQuery, showChildCounts = true } = props;
+  const {
+    scope,
+    comment: nativeComment,
+    parent,
+    onReply,
+    onDelete,
+    showChildCounts = true
+  } = props;
   const { t } = useTranslation();
   const { user: currentUser } = useAuth();
 
-  const commentHookObject = useComment(comment, parent, reQuery, reQuery);
-  const commentListHookObject = useCommentList(comment, true, reQuery);
-  const { user, actionState } = commentHookObject;
+  const commentHookObject = useComment(nativeComment, parent);
+  const { user, actionState, comment } = commentHookObject;
+  const commentListHookObject = useCommentList(comment, true);
 
   const [replyPlaceHolderMainText] = useState(() => {
     const raw = JSON.parse(comment.content);
@@ -252,14 +261,31 @@ function CommentItem(props: CommentItemProps) {
     commentHookObject
       .remove()
       .subscribe({
-        next: () => notification.success({ message: t("DELETE_COMMENT_SUCESS") }),
+        next: () => {
+          notification.success({ message: t("DELETE_COMMENT_SUCESS") });
+          onDelete?.();
+        },
         error: err => notification.error({ message: t("DELETE_COMMENT_ERROR") + ": " + err })
       })
   };
   const handleReply = (created: TypeComment.Create) => {
+    const asParent = !parent;
     return commentHookObject
-      .reply(created, !parent)
+      .reply(created, asParent)
+      .pipe(
+        tap(() => onReply?.(asParent)),
+      )
   };
+
+  const handleListItemCreate = useCallback(() => {
+    commentListHookObject.query();
+    commentHookObject.reQuery();
+  }, [commentListHookObject.query, commentHookObject.reQuery]);
+
+  const handleListItemDelete = useCallback(() => {
+    commentListHookObject.query();
+    commentHookObject.reQuery();
+  }, [commentListHookObject.query, commentHookObject.reQuery]);
 
   const style = useMemo((): React.CSSProperties => ({
     marginLeft: (parent ? 2 : 1) * 20 + 'px',
@@ -309,7 +335,8 @@ function CommentItem(props: CommentItemProps) {
       {!parent && comment.childCounts > 0 && (
         <CommentListCore
           {...getCommentListHookObjectCore(commentListHookObject)}
-          reQuery={reQuery}
+          onCreate={handleListItemCreate}
+          onDelete={handleListItemDelete}
           scope={scope}
           parent={comment}
           style={style}
@@ -336,13 +363,28 @@ function EmptyCommentList() {
 }
 
 function CommentListCore(props: CommentListCoreProps) {
-  const { scope, parent, className, style,
-    reQuery,
+  const {
+    scope,
+    parent,
+    className,
+    style,
+    onCreate,
+    onDelete,
     showCommentReplyCounts = true,
     showCommentListHeader = true
   } = props;
   const { page, pageSize, total, loading, comments, changePage } = props;
   const { t } = useTranslation();
+
+  const handleItemReply = useCallback((asParent?: boolean) => {
+    if (!asParent) {
+      onCreate?.();
+    }
+  }, [onCreate]);
+
+  const handleItemDelete = useCallback(() => {
+    onDelete?.();
+  }, [onDelete]);
 
   const pagination = useMemo(() => ({
     simple: true,
@@ -381,7 +423,8 @@ function CommentListCore(props: CommentListCoreProps) {
                   scope={scope}
                   parent={parent}
                   comment={item}
-                  reQuery={reQuery}
+                  onReply={handleItemReply}
+                  onDelete={handleItemDelete}
                   showChildCounts={showCommentReplyCounts}
                 />
               </List.Item>
@@ -393,7 +436,10 @@ function CommentListCore(props: CommentListCoreProps) {
   )
 }
 
-export function CommentCore(props: CommentProps) {
+export const CommentCore = withContexts<CommentProps>(
+  TranslationContext,
+  CommentProvider,
+)(function (props) {
   const { scope, className } = props;
   const { user } = useAuth();
   const unmountCancel = useUnmountCancel();
@@ -420,23 +466,13 @@ export function CommentCore(props: CommentProps) {
       <CommentListCore
         scope={scope}
         {...getCommentListHookObjectCore(commentListHookObject)}
-        reQuery={commentListHookObject.query}
+        onCreate={commentListHookObject.query}
+        onDelete={commentListHookObject.query}
       />
       {user.isLogin && <CommentPost scope={scope} onPost={handlePost} posting={posting} />}
     </div>
   )
-}
+});
 
 
-export function Comment(props: CommentProps) {
-  const { scope } = props;
-  const [ctxValue] = useState(() => ({
-    service: new CommentCachable(scope),
-  }))
-
-  return (
-    <commentContext.Provider value={ctxValue}>
-      <CommentCore {...props} />
-    </commentContext.Provider>
-  )
-}
+export const Comment = CommentCore;

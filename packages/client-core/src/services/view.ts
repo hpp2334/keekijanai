@@ -1,23 +1,27 @@
-import { map } from 'rxjs/operators';
-import { Observable, throwError } from "rxjs";
-import { Service, serviceFactory } from "../core/service";
+import { Observable } from "rxjs";
+import { Service } from "../core/service";
 import { View } from 'keekijanai-type';
 
-export class ViewServiceImpl extends Service {
-  routes = {
+export class ViewService extends Service {
+  private routes = {
     get: '/view/get',
   };
+  private scope: string;
 
-  get = (scope: string): Observable<View.Get> => {
+  constructor(scope: string) {
+    super();
+
+    this.scope = scope;
+  }
+
+  get = (): Observable<View.Get> => {
     const result = this.client.requester.request({
       route: this.routes.get,
       method: 'GET',
       query: {
-        scope,
+        scope: this.scope,
       },
     });
     return result; 
   }
 }
-
-export const view = serviceFactory(ViewServiceImpl);
