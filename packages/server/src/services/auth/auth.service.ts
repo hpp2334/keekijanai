@@ -1,16 +1,15 @@
 import { Auth, User } from "keekijanai-type";
-
+import assert from 'assert';
 import { URLSearchParams } from 'url';
 import _, { noop } from "lodash";
 import Joi from 'joi';
 import bcrypt from 'bcrypt';
 
 import { oauth2ServiceFactory, oauth2ServiceConstructors } from "@/utils/oauth2";
-import { NotImplement } from "@/utils/decorators";
 import * as jwt from '@/utils/jwt';
 import { Service, InjectService, Init, ServiceType } from '@/core/service';
 
-import type { UserService } from '@/services/user';
+import { userError, UserService } from '@/services/user';
 import type { TimeService } from '@/services/time';
 
 import { mountUser } from "./middewares";
@@ -65,6 +64,9 @@ export class AuthService {
 
       const { id, provider, accessToken, expirationTime } = JSON.parse(payload.data);
       const user = await this.userService.get(id);
+
+      assert(user, userError.userNotExists);
+  
       return {
         ...user,
         isLogin: true,
@@ -102,15 +104,10 @@ export class AuthService {
 
   async legacyAuth(userID: string, password: string) {
     const legacyConfig = this.config.legacy;
-    let user: User.User;
-    try {
-      user = await this.userService.get(userID, {
-        includePassword: true,
-      });
-    } catch (err) {
-      console.error(err);
-      throw new ResponseError('user not found', 400);
-    }
+    const user = await this.userService.get(userID, {
+      includePassword: true,
+    });
+    assert(user, userError.userNotExists);
 
     const matched = await bcrypt.compare(
       password + legacyConfig.secret,

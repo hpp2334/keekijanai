@@ -9,7 +9,7 @@ export const userContext = createContext({
   userService: new UserService(),
 })
 
-export function useUser(id?: string) {
+export function useUser(id: string | undefined) {
   const { userService } = useContext(userContext);
   const [user, setUser] = useState<User.User>();
   const reqState = useRequestState();

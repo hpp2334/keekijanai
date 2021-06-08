@@ -64,7 +64,7 @@ export class UserService {
 
   async get(id: string, opts?: {
     includePassword?: boolean,
-  }): Promise<User.User> {
+  }): Promise<User.User | undefined> {
     const result = await this.provider.select({
         from: 'keekijanai_user',
         columns: ['*'],
@@ -72,15 +72,17 @@ export class UserService {
           id: [['=', id]]
         }
       });
-    if (result.body?.length !== 1) {
-      throw Error(`get user fail where id="${id}" ` + result);
+    if ((result.body?.length ?? 0) > 1) {
+      throw Error(`get user result length more than 1, where id="${id}"`);
     }
   
-    const payload = result.body[0];
-    payload.role = payload.role | (this.internalConfig.roles[payload.id] ?? 0);
+    const payload = result.body?.[0];
+    if (payload) {
+      payload.role = payload.role | (this.internalConfig.roles[payload.id] ?? 0);
 
-    if (!opts?.includePassword) {
-      delete payload.password;
+      if (!opts?.includePassword) {
+        delete payload.password;
+      }
     }
     
     debug('get user success, payload=%j', payload);

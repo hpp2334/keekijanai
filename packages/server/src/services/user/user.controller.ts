@@ -6,6 +6,7 @@ import { InjectService } from "@/core/service";
 import type { UserService } from "./user.service";
 import { userError } from '.';
 import { ContextType } from '@/core/context';
+import Joi from 'joi';
 
 const debug = require('debug')('keekijanai:controller:user');
 
@@ -15,14 +16,16 @@ export interface UserController extends ControllerType.ControllerBase {}
 export class UserController {
   @InjectService('user')    userService!: UserService;
 
-  @Route('/get')
+  @Route('/get', 'GET', {
+    validation: {
+      query: Joi.object({
+        id: Joi.string().required(),
+      }).unknown(true)
+    }
+  })
   async get(ctx: ContextType.Context) {
     const { id } = ctx.req.query || {};
     debug('in "get", userid = "%s"', id);
-
-    if (typeof id !== 'string') {
-      throw userError.args.user.id.notString;
-    }
 
     const result = await this.userService.get(id);
     ctx.res.body = result;
