@@ -60,6 +60,9 @@ const presetConfig: VercelSupabasePresetOptions = {
       jwtSecret: '123456',
       maxAge: 12 * 60 * 60 * 1000,
       oauth2: {
+        legacy: {
+          secret: 'klj3l21!@#%!@#2d23d2323',
+        },
         platforms: {
           'github': {
             appID: 'xxx',
@@ -96,6 +99,10 @@ export interface VercelSupabasePresetOptions {
       jwtSecret: string,
       /** jwt maxAge */
       maxAge?: number;
+      legacy?: {
+        secret: string;
+        saltRounds?: number;
+      };
       oauth2?: {
         /** callback page path in client */
         callback: string,
@@ -145,11 +152,17 @@ module.exports = {
     {
       resolve: 'gatsby-plugin-keekijanai',
       options: {
-        route: {
-          // 指定 API 名，注意将 API_NAME 替换为真正的文件名
-          // 此项默认值为 "/api/keekijanai"
-          root: '/api/API_NAME'
-        }
+        core: {
+          route: {
+            // 指定 API 名，注意将 API_NAME 替换为真正的文件名
+            // 此项默认值为 "/api/keekijanai"
+            root: '/api/API_NAME'
+          }
+        },
+        authModal: {
+          // 开启传统登录模式
+          enableLegacyAuth: true,
+        },
       }
     },
   ],
