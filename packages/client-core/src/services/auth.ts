@@ -1,6 +1,6 @@
 
 import { of, BehaviorSubject } from 'rxjs';
-import { switchMapTo, tap } from 'rxjs/operators';
+import { mergeMap, mergeMapTo, switchMapTo, tap } from 'rxjs/operators';
 import { Service } from "../core/service";
 import { createLocalStorageEntry } from "../utils/local-storage-entry";
 import { Auth } from "keekijanai-type";
@@ -17,7 +17,9 @@ const lastPageEntry = createLocalStorageEntry('keekijanai-last-page');
 export class AuthService extends Service {
   private routes = {
     current: '/auth/current',
-    login: '/auth/login',
+    legacyAuth: '/auth/legacyAuth',
+    legacyRegister: '/auth/legacyRegister',
+    getCode: '/auth/getCode',
   };
   private jwtInfo: JwtInfo | undefined;
   user$ = new BehaviorSubject<Auth.CurrentUser>({ isLogin: false });
@@ -48,19 +50,31 @@ export class AuthService extends Service {
     return this.jwtInfo.jwt;
   }
 
-  auth = (username: string, password: string) => {
+  legacyRegister = (userID: string, password: string) => {
     return this.client.requester.request({
-      route: this.routes.login,
-      query: {
-        username,
+      route: this.routes.legacyRegister,
+      method: 'POST',
+      body: {
+        userID,
+        password,
+      }
+    })
+  }
+
+  legacyAuth = (userID: string, password: string) => {
+    return this.client.requester.request({
+      route: this.routes.legacyAuth,
+      method: 'POST',
+      body: {
+        userID,
         password,
       }
     }).pipe(
-      tap(response => {
-        const { jwt, maxAge } = response;
+      tap(result => {
+        const { jwt, maxAge } = result;
         this.updateLocalJwtInfo(jwt, maxAge);
       }),
-      tap(() => this.updateCurrent().subscribe({}))
+      mergeMap(() => this.updateCurrent()),
     )
   }
 
@@ -68,7 +82,7 @@ export class AuthService extends Service {
     if (typeof window !== 'undefined') {
       lastPageEntry.setItem(window.location.pathname);
       const url = this.client.requester.getURI({
-        route: this.routes.login,
+        route: this.routes.getCode,
         query: {
           provider,
         }

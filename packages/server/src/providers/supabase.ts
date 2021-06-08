@@ -16,7 +16,7 @@ class SupabaseProvider implements ProviderType.ProviderBase {
 
   async select<T = any>(params: ProviderType.SelectParams): Promise<ProviderType.Response<T>> {
     try {
-      let request = this.client 
+      let request = this.client
         .from(params.from)
         .select(params.columns?.join(','), { count: this.transformCount(params.count) });
       if (params.where) {

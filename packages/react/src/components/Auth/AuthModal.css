@@ -30,3 +30,13 @@
   font-size: 1.5rem;
   font-weight: 500;
 }
+
+
+.kkjn__auth-modal .kkjn__auth-form {
+  align-self: stretch;
+  padding: 20px;
+}
+
+.kkjn__auth-modal .kkjn__auth-button {
+  width: 100%;
+}

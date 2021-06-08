@@ -1,12 +1,17 @@
-export default {
+{
   "YES": "Yes",
   "NO": "No",
 
   "NOT_LOGIN": "Not Login",
-  "LOGIN": "Login",
-  "LOGOUT": "Logout",
+  "LOGIN": "Log in",
+  "LOGOUT": "Log out",
   "CONFIRM_LOGOUT": "Confirm to logout?",
-  "CHOOSE_ONE_OF_LOGIN_METHOD": "Choose one of login method",
+  "LOGIN_TO_CONTINUE": "Login to continue",
+  "REGISTER": "Register",
+  "USER_ID": "User ID",
+  "PASSWORD": "Password",
+  "PASSWORD_CONFIRM": "Confirm Password",
+  "REGISTER_SUCCESSFULLY": "Register successfully",
   
   "CONFIRM": "Confirm",
   "CANCEL": "Cancel",

@@ -5,7 +5,8 @@ const path = require('path');
 const through2 = require('through2');
 const { glob } = require('glob-promise');
 const jetpack = require('fs-jetpack');
-
+const yargs = require('yargs');
+const { hideBin } = require('yargs/helpers');
 
 Object.defineProperty(String.prototype, 'slash', {
   get: function () {
@@ -69,7 +70,10 @@ const emitTypes = async () => {
 }
 
 const CLI_build = () => {
-  return gulp.series(clean, build, emitTypes);
+  const params = yargs(hideBin(process.argv)).argv;
+  const skipTypes = params['skip-types'] ?? false;
+
+  return gulp.series(...[clean, build, !skipTypes && emitTypes].filter(Boolean));
 }
 
 const CLI_develop = async () => {

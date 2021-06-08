@@ -47,8 +47,9 @@ export function useCommentList(
       )
       .subscribe({
         error: err => {
+          console.error(err);
           setLoadingState('error');
-          setLastError(err);
+          setLastError(err?.response?.error ?? err?.message ?? err);
         },
         next: res => {
           setLoadingState('done');
@@ -215,7 +216,7 @@ export function useComment(
 }
 
 export function getCommentListHookObjectCore(commentListHookObject: CommentListHookObject) {
-  return _.pick(commentListHookObject, ['page', 'pageSize', 'total', 'loading', 'comments', 'changePage']);
+  return _.pick(commentListHookObject, ['page', 'pageSize', 'total', 'loading', 'lastError', 'comments', 'changePage']);
   // return _.merge(
   //   {},
   //   _.pick(commentListHookObject, ['page', 'pageSize', 'total', 'loading', 'comments', 'changePage'])

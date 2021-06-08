@@ -373,7 +373,7 @@ function CommentListCore(props: CommentListCoreProps) {
     showCommentReplyCounts = true,
     showCommentListHeader = true
   } = props;
-  const { page, pageSize, total, loading, comments, changePage } = props;
+  const { page, pageSize, total, loading, lastError, comments, changePage } = props;
   const { t } = useTranslation();
 
   const handleItemReply = useCallback((asParent?: boolean) => {
@@ -405,6 +405,9 @@ function CommentListCore(props: CommentListCoreProps) {
       )}
       {loading === 'init-loading' && (
         <Skeleton active />
+      )}
+      {loading === 'error' && (
+        <Typography.Text>{lastError}</Typography.Text>
       )}
       {(loading === 'done' || loading === 'loading') && (
         <ConfigProvider renderEmpty={EmptyCommentList}>

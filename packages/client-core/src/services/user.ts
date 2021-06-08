@@ -25,6 +25,10 @@ export class UserService extends Service {
     (source: Observable<T>) => source.pipe(
       mergeMap(data => {
         const ids = [...new Set(getIDs(data))];
+        if (ids.length === 0) {
+          return of(data);
+        }
+
         return merge(
           ...ids.map(id => this.get(id))
         ).pipe(

@@ -55,7 +55,9 @@ const processScript = (ctx) => async function processScript() {
     let contents = file.contents;
     // post process
     if (/\.js$/.test(file.path)) {
-      contents = Buffer.from(contents).toString().replace(/\.less(['"])/g, (_, p) => '.css' + p);
+      contents = Buffer.from(contents).toString()
+        .replace(/\.less(['"])/g, (_, p) => '.css' + p)
+        .replace(/\.json(['"])/g, (_, p) => '.js' + p);
     }
     gulpMemFs.fs.writeFileSync(p, contents)
   });

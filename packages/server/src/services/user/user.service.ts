@@ -22,9 +22,28 @@ export class UserService {
     'ban':     0b0000000,
   };
 
+  calcRole(roles: string | string[]) {
+    const role = (typeof roles === 'string' ? [roles] : roles).reduce((prev, curr) => (this.ROLE_MAP[curr] ?? 0) | prev, 0);
+    return role;
+  }
+
   matchRole(user: User.User, roles: string[]) {
     const calculatedRole = this.calcRole(roles) | (this.internalConfig.roles[user.id] ?? 0);
     return !!(calculatedRole & user.role);
+  }
+
+  async insert(payload: User.User): Promise<User.User> {
+    const result = await this.provider.insert({
+      from: 'keekijanai_user',
+      payload,
+    });
+    const inserted = result.body?.[0];
+    if (result.error || !inserted) {
+      throw Error(`insert user "${payload.id}" fail. ` + result.error?.message);
+    }
+    
+    debug('upsert success, params=%j', inserted);
+    return inserted;
   }
 
   async upsert(params: { id: string; } & Partial<User.User>): Promise<User.User> {
@@ -36,8 +55,7 @@ export class UserService {
     
     const payload = result.body?.[0];
     if (result.error || !payload) {
-      debug('upsert error, payload=%o', payload);
-      throw Error(`upsert user "${params.id}" fail.` + result.error?.message);
+      throw Error(`upsert user "${params.id}" fail. ` + result.error?.message);
     }
     
     debug('upsert success, params=%j', payload);
@@ -55,7 +73,7 @@ export class UserService {
         }
       });
     if (result.body?.length !== 1) {
-      throw Error(`get user fail where id="${id}`);
+      throw Error(`get user fail where id="${id}" ` + result);
     }
   
     const payload = result.body[0];
@@ -82,9 +100,10 @@ export class UserService {
     }
   }
 
-  private calcRole(roles: string | string[]) {
-    const role = (typeof roles === 'string' ? [roles] : roles).reduce((prev, curr) => (this.ROLE_MAP[curr] ?? 0) | prev, 0);
-    return role;
+  async TEST__delete() {
+    await this.provider.delete({
+      from: 'keekijanai_user',
+    });
   }
 
   @Init('config')

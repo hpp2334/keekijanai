@@ -1,3 +1,7 @@
+import joi from 'joi';
+import { ResponseError } from '../error';
+import { hookMiddleware, MiddlewareType } from '../middleware';
+import { Route, Validation } from './type';
 
 const controllerBase = {
   $$type: 'controller',
@@ -11,16 +15,42 @@ export function ControllerDecorator(prefix: string) {
   }
 }
 
-export function RouteDecorator(path: string, method: 'GET' | 'POST' | 'DELETE' | 'PUT' = 'GET', opts: { onlyDEBUG?: boolean } = {}) {
+export function RouteDecorator(
+  path: string,
+  method: 'GET' | 'POST' | 'DELETE' | 'PUT' = 'GET',
+  opts: {
+    onlyDEBUG?: boolean;
+    validation?: Validation;
+  } = {}
+) {
   return function (target: any, propKey: string) {
     if (opts.onlyDEBUG && !process.env.DEBUG?.startsWith('keekijanai')) {
       return;
     }
-    const routes = target.$$routes = target.$$routes ?? [];
+
+    const routes: Array<Route> = target.$$routes = target.$$routes ?? [];
+    const routeHandler = target[propKey];
     routes.push({
       path,
       method,
-      route: target[propKey]
+      route: opts.validation
+        ? hookMiddleware(validationMiddlewareFactory(opts.validation), routeHandler)
+        : routeHandler,
     });
   }
+}
+
+function validationMiddlewareFactory(validation: Validation): MiddlewareType.Middleware {
+  const validationMiddleware: MiddlewareType.Middleware = async (ctx, next) => {
+    try {
+      if (validation) {
+        await validation.query?.validateAsync(ctx.req.query);
+        await validation.body?.validateAsync(ctx.req.body);
+      }
+    } catch (err) {
+      throw new ResponseError(err.message);
+    }
+    await next();
+  }
+  return validationMiddleware;
 }

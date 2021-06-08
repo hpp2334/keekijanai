@@ -4,9 +4,9 @@ import path from 'path';
 import { setup } from 'keekijanai-server';
 import { getVercelSupabasePreset, utils, VercelSupabasePresetOptions } from 'keekijanai-server/dist/presets/vercel-supabase';
 
-const IS_DEV = process.env.NODE_ENV === 'development';
+const IS_DEV = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
-const presetConfig: VercelSupabasePresetOptions = {
+export const presetConfig: VercelSupabasePresetOptions = {
   supabase: {
     url: 'SHOULD_BE_OVERWRITTEN',
     appKey: 'SHOULD_BE_OVERWRITTEN',
@@ -15,6 +15,9 @@ const presetConfig: VercelSupabasePresetOptions = {
     auth: {
       jwtSecret: 'dasf156as156d@#%@#%261561',
       maxAge: 12 * 60 * 60 * 1000,
+      legacy: {
+        secret: 'klj3l21!@#%!@#2d23d2323',
+      },
       oauth2: {
         platforms: {
           'github': {

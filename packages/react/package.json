@@ -25,6 +25,7 @@
     "i18next-browser-languagedetector": "^6.1.1",
     "immutable": "^4.0.0-rc.12",
     "jelly-util-tree-map": "^0.0.3",
+    "joi": "^17.4.0",
     "keekijanai-client-core": "^0.0.3",
     "keekijanai-type": "^0.0.3",
     "lodash": "^4.17.21",

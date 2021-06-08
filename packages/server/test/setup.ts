@@ -1,8 +1,6 @@
-import { runServer, closeServer } from "../dev/server";
-import { requestHandler } from "../dev/requestHandler";
-import { requester } from './utils/requester';
+import { runServer } from "./utils/server";
 
 export default async () => {
-  runServer(requestHandler);
+  runServer();
 };
 

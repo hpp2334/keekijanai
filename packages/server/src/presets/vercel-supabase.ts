@@ -27,6 +27,10 @@ export interface VercelSupabasePresetOptions {
       jwtSecret: string,
       /** jwt maxAge */
       maxAge?: number;
+      legacy?: {
+        secret: string;
+        saltRounds?: number;
+      };
       oauth2?: {
         /** callback page path in client */
         callback: string,

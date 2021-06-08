@@ -1,12 +1,7 @@
-import React from 'react'
-import { getClient } from 'keekijanai-react';
+import { applyOptions } from './apply-react-client-config';
 
 export const wrapRootElement = ({ element }, pluginOptions) => {
-  const options = { ...pluginOptions };
-  delete options.plugins;
-  if (Object.keys(options).length > 0) {
-    getClient().updateConfig(options);
-  }
+  applyOptions(pluginOptions);
 
   return element;
 }

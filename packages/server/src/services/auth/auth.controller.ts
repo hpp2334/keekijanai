@@ -1,8 +1,9 @@
+import joi from 'joi';
 import { ContextType } from '@/core/context';
 import { Controller, ControllerType, Route } from '@/core/controller';
 import { InjectService } from "@/core/service";
 
-import { authError, AuthService } from "@/services/auth";
+import { authError, AuthService, authValidaton } from "@/services/auth";
 
 const debug = require('debug')('keekijanai:controller:auth');
 
@@ -11,18 +12,46 @@ export interface AuthController extends ControllerType.ControllerBase {}
 @Controller('/auth')
 export class AuthController {
   @InjectService('auth')    authService!: AuthService;
-
-  @Route('/login')
-  async auth(ctx: ContextType.Context) {
-    const { provider, usename, password } = ctx.req.query || {};
-    debug('oauth2GetCode: provider="%s"', provider);
-
-    if (provider) {
-      const callbackUrl = await this.authService.auth('oauth2', provider);
-      await ctx.res.redirect(callbackUrl);
-    } else {
-      await this.authService.auth('legacy', usename, password);
+  
+  @Route('/legacyRegister', 'POST', {
+    validation: {
+      body: joi.object({
+        userID: authValidaton.userID,
+        password: authValidaton.password,
+      })
     }
+  })
+  async legacyRegister(ctx: ContextType.Context) {
+    const { userID, password } = ctx.req.body ?? {};
+    const result = await this.authService.legacyRegister(userID, password);
+    ctx.res.status = 200;
+  }
+
+  @Route('/legacyAuth', 'POST', {
+    validation: {
+      body: joi.object({
+        userID: authValidaton.userID,
+        password: authValidaton.password,
+      })
+    }
+  })
+  async legacyAuth(ctx: ContextType.Context) {
+    const { userID, password } = ctx.req.body ?? {};
+    const result = await this.authService.legacyAuth(userID, password);
+    ctx.res.body = result;
+  }
+
+  @Route('/getCode', 'GET', {
+    validation: {
+      query: joi.object({
+        provider: joi.string().required(),
+      }).unknown(true)
+    }
+  })
+  async oauth2GetCode(ctx: ContextType.Context) {
+    const { provider } = ctx.req.query || {};
+    const callbackUrl = await this.authService.oauth2GetCode(provider);
+    ctx.res.redirect(callbackUrl);
   }
 
   @Route('/accessToken')
@@ -52,4 +81,5 @@ export class AuthController {
     const list = ctx.req.body;
     ctx.res.body = await this.authService.TEST__prepare(list);
   }
+
 }

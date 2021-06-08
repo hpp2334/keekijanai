@@ -1,4 +1,4 @@
-import { appRequest } from "../../dev/request";
+import { appRequest } from "./request-core";
 
 export type ValidUser = 'admin1' | 'user2';
 

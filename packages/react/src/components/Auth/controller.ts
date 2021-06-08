@@ -3,7 +3,7 @@ import { Auth, User } from 'keekijanai-type';
 import { tap } from 'rxjs/operators';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { createNotNilContextState, useMemoExports, useRequestState } from '../../util';
-import { createStateContext } from 'react-use';
+import _ from 'lodash';
 
 
 const authContext = createContext({
@@ -48,5 +48,23 @@ export function useAuth() {
     oauth,
   });
 
+  return exports;
+}
+
+export function useLegacyAuth() {
+  const { authService } = useContext(authContext);
+  const { legacyRegister, legacyAuth } = authService;
+
+  const register = legacyRegister;
+  const auth = useCallback(
+    (userID: string, password: string) => {
+      return legacyAuth(userID, password)
+    }, [legacyAuth]
+  );
+
+  const exports = useMemoExports({
+    register,
+    auth,
+  });
   return exports;
 }

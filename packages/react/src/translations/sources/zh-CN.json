@@ -1,4 +1,4 @@
-export default {
+{
   "YES": "是",
   "NO": "否",
 
@@ -6,7 +6,12 @@ export default {
   "LOGIN": "登录",
   "LOGOUT": "登出",
   "CONFIRM_LOGOUT": "确认登出？",
-  "CHOOSE_ONE_OF_LOGIN_METHOD": "请选择一种登录方式",
+  "LOGIN_TO_CONTINUE": "登录以继续",
+  "REGISTER": "注册",
+  "USER_ID": "用户 ID",
+  "PASSWORD": "密码",
+  "PASSWORD_CONFIRM": "确认密码",
+  "REGISTER_SUCCESSFULLY": "注册成功",
   
   "CONFIRM": "确认",
   "CANCEL": "取消",

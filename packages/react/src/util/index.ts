@@ -7,6 +7,8 @@ export { withContexts, createNotNilContextState } from './context';
 
 export const noop: (...args: any[]) => any = () => {};
 
+export const handleStopPropagation = (ev: any) => { ev.stopPropagation(); }
+
 export function toSearch(obj: any) {
   for (const key in obj) {
     obj[key] = encodeURIComponent(obj[key]);
@@ -57,8 +59,10 @@ export function useMemoExports<T extends {}>(obj: T) {
   return memozied;
 }
 
-export function useRequestState() {
-  const [loading, setLoading] = useState<'loading' | 'done' | 'error'>('loading');
+
+type ReqState = 'loading' | 'done' | 'error';
+export function useRequestState(init?: ReqState) {
+  const [loading, setLoading] = useState<ReqState>(init ?? 'loading');
   const [lastError, setLastError] = useState();
 
   const toDone = useCallback(() => {

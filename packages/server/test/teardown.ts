@@ -1,4 +1,4 @@
-import { closeServer } from "../dev/server";
+import { closeServer } from "./utils/server";
 
 export default async () => {
   closeServer();

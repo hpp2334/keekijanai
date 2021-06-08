@@ -1,7 +1,9 @@
-import { Auth } from "keekijanai-type";
+import { Auth, User } from "keekijanai-type";
 
 import { URLSearchParams } from 'url';
 import _, { noop } from "lodash";
+import Joi from 'joi';
+import bcrypt from 'bcrypt';
 
 import { oauth2ServiceFactory, oauth2ServiceConstructors } from "@/utils/oauth2";
 import { NotImplement } from "@/utils/decorators";
@@ -13,10 +15,15 @@ import type { TimeService } from '@/services/time';
 
 import { mountUser } from "./middewares";
 import { OAuth2Item } from "./type";
+import { ResponseError } from "@/core/error";
 
 interface Config {
   jwtSecret: string,
   maxAge: number;
+  legacy: {
+    secret: string;
+    saltRounds: number;
+  };
   oauth2: {
     platform(provider: string): OAuth2Item;
     callback: string;
@@ -37,45 +44,22 @@ export class AuthService {
   @InjectService('user')  userService!: UserService;
   @InjectService('time')  timeService!: TimeService;
 
-  @NotImplement()
-  legacyAuth = noop;
-
   get user(): Auth.CurrentUser {
     return this.ctx.state.user;
-  }
-
-  async auth (type: 'legacy' | 'oauth2', ...args: any[]) {
-    debug('type = "%s", args = %o', type, args);
-    switch (type) {
-      case 'legacy': {
-        const [username, password] = args as [string, string];
-        this.legacyAuth();
-        return null as any;
-      }
-      case 'oauth2': {
-        const [provider] = args as [string];
-        return await this.oauth2GetCode(provider);
-      }
-      default: {
-        throw Error(`not supported`);
-      }
-    }
   }
 
   async getCurrentUser(jwtString?: string) {
     const jwtSecret = this.config.jwtSecret;
 
-    if (typeof jwtString !== 'string') {
-      return {
-        isLogin: false,
-      }
-    }
-
     try {
-      await jwt.verify(jwtString, jwtSecret);
-      const payload = (jwt as any).decode(jwtString);
+      if (typeof jwtString !== 'string') {
+        throw Error("jwt string is not a string");
+      }
 
-      if (!payload || !payload.data) {
+      await jwt.verify(jwtString, jwtSecret);
+      const payload = jwt.decode(jwtString);
+
+      if (payload === null || typeof payload === 'string' || !payload.data) {
         throw Error('decoded info is undefined');
       }
 
@@ -93,6 +77,51 @@ export class AuthService {
     return {
       isLogin: false,
     };
+  }
+
+  async legacyRegister(userID: string, password: string) {
+    debug('legacy register with userID = %s, password = %s', userID, password);
+    const legacyConfig = this.config.legacy;
+    const encrypted = await bcrypt.hash(
+      password + legacyConfig.secret,
+      legacyConfig.saltRounds,
+    );
+    try {
+      await this.userService.insert({
+        id: userID,
+        name: userID,
+        password: encrypted,
+        role: this.userService.calcRole(['normal'])
+      });
+    } catch (err) {
+      console.error(err);
+      throw new ResponseError('user already exists. try another user id.', 400);
+    }
+    return;
+  }
+
+  async legacyAuth(userID: string, password: string) {
+    const legacyConfig = this.config.legacy;
+    let user: User.User;
+    try {
+      user = await this.userService.get(userID, {
+        includePassword: true,
+      });
+    } catch (err) {
+      console.error(err);
+      throw new ResponseError('user not found', 400);
+    }
+
+    const matched = await bcrypt.compare(
+      password + legacyConfig.secret,
+      user.password!,
+    );
+    if (!matched) {
+      throw new ResponseError('password not match!', 400);
+    }
+
+    const result = await this.getJwt({ id: userID });
+    return result;
   }
 
   async oauth2GetCode(provider: string) {
@@ -121,7 +150,6 @@ export class AuthService {
     debug('get user profile %j', userProfile);
 
     const maxAge = this.config.maxAge;
-
     const currentTime = await this.timeService.getTime();
   
     const jwtString: string = await jwt.sign(
@@ -188,11 +216,29 @@ export class AuthService {
     return service;
   }
 
+  private async getJwt(payload: any) {
+    const maxAge = this.config.maxAge;
+    const currentTime = await this.timeService.getTime();
+    const jwtString: string = await jwt.sign(
+      {
+        data: JSON.stringify(payload),
+        exp: Math.floor((currentTime + maxAge) / 1000),
+      },
+      this.config.jwtSecret,
+    ) as string;
+
+    return {
+      jwt: jwtString,
+      maxAge,
+    };
+  }
+
   @Init('config')
   setInternalConfig(config: any) {
     if (!config) {
       throw Error(`config should be set for auth service`);
     }
+    
     if (!config?.jwtSecret) {
       throw Error(`"jwtSecret" should be set for auth service.`);
     }
@@ -201,6 +247,16 @@ export class AuthService {
     this.config = {
       jwtSecret: config.jwtSecret,
       maxAge: config?.maxAge || 12 * 60 * 60 * 1000,
+      get legacy() {
+        if (!config.legacy) {
+          throw Error(`"legacy" should be set when use legacy methods`);
+        }
+        const legacy = config.legacy;
+        return {
+          secret: legacy.secret,
+          saltRounds: legacy.saltRounds ?? 10,
+        };
+      },
       get oauth2() {
         if (!_oauth2) {
           throw Error(`"oauth2" should be set when use oauth2 methods`);
@@ -223,6 +279,6 @@ export class AuthService {
   }
 
   static getUserIDfromOAuth2(provider: string, id: string) {
-    return `${provider}____${id}`;
+    return `$$${provider}____${id}`;
   }
 }

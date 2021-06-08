@@ -27,4 +27,9 @@ export class UserController {
     const result = await this.userService.get(id);
     ctx.res.body = result;
   }
+
+  @Route('/test__clear', 'DELETE', { onlyDEBUG: true })
+  async TEST__clear(ctx: ContextType.Context) {
+    await this.userService.TEST__delete();
+  }
 }

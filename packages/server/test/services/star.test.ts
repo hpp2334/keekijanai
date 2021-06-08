@@ -1,5 +1,4 @@
-import fetch from "node-fetch";
-import { appRequest } from "../../dev/request";
+/// <reference types="../../node_modules/@types/jest" />
 import { requester, ValidUser } from "../utils/requester";
 import { Response } from "node-fetch";
 

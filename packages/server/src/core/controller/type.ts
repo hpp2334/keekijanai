@@ -1,3 +1,4 @@
+import joi from 'joi';
 import { ClassType } from '@/type/util';
 import { ContextType } from '../context';
 
@@ -21,6 +22,11 @@ export interface Route {
   path: string;
   method: string;
   route: RouteHandler;
+}
+
+export interface Validation {
+  query?: joi.ObjectSchema;
+  body?: joi.ObjectSchema;
 }
 
 export type ControllerConstructor = ClassType<ControllerBase>;

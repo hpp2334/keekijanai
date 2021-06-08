@@ -1,3 +1,4 @@
+/// <reference types="../../node_modules/@types/jest" />
 import { requester } from "../utils/requester";
 
 jest.setTimeout(50 * 1000);
