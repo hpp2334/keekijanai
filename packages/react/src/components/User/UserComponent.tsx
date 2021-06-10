@@ -2,6 +2,7 @@ import { Skeleton, Typography } from 'antd';
 import clsx from 'clsx';
 import { User } from 'keekijanai-type';
 import React from 'react'
+import { FetchResponse } from '../../util/request';
 import { TranslationContext } from '../../translations';
 import { Avatar } from './Avatar'
 import { UserHookObject } from './controller'
@@ -9,8 +10,7 @@ import { UserHookObject } from './controller'
 import './UserComponent.css';
 
 interface UserComponentProps {
-  user: User.User | undefined;
-  loading: UserHookObject['loading'];
+  userRsp: FetchResponse<User.User>;
 
   avatarSize?: number;
   showAvatar?: boolean;
@@ -25,15 +25,15 @@ interface UserComponentProps {
 }
 
 export function UserComponent(props: UserComponentProps) {
-  const { user, loading, avatarSize, showAvatar = true, avatarClassName, avatarStyle, userNameClassName, userNameStyle, containerClassName, containerStyle } = props;
+  const { userRsp, avatarSize, showAvatar = true, avatarClassName, avatarStyle, userNameClassName, userNameStyle, containerClassName, containerStyle } = props;
 
   return (
     <TranslationContext>
       <span className={clsx('kkjn__user-component', containerClassName)} style={containerStyle}>
-        {showAvatar && <Avatar user={user} loading={loading} size={avatarSize} className={clsx(avatarClassName)} style={avatarStyle} />}
-        {loading === 'loading' && <Skeleton.Input className={clsx("kkjn__username", userNameClassName)} style={{ width: '50px' }} size='small' active />}
-        {loading === 'done' && user && (
-          <Typography.Text className={clsx("kkjn__username", userNameClassName)} style={userNameStyle}>{user.name}</Typography.Text>
+        {showAvatar && <Avatar userRsp={userRsp} size={avatarSize} className={clsx(avatarClassName)} style={avatarStyle} />}
+        {(userRsp.stage === 'pending' || userRsp.stage === 'requesting') && <Skeleton.Input className={clsx("kkjn__username", userNameClassName)} style={{ width: '50px' }} size='small' active />}
+        {userRsp.stage === 'done' && !!userRsp.data && (
+          <Typography.Text className={clsx("kkjn__username", userNameClassName)} style={userNameStyle}>{userRsp.data.name}</Typography.Text>
         )}
       </span>
     </TranslationContext>

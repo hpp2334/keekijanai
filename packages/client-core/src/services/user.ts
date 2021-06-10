@@ -33,9 +33,9 @@ export class UserService extends Service {
           ...ids.map(id => this.get(id))
         ).pipe(
           switchMapTo(of(data)),
+          last(),
         )
       }),
-      last(),
     )
 }
 

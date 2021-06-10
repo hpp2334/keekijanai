@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { navigate } from 'gatsby';
-import { useAuth } from 'keekijanai-react';
+import { useOAuth2 } from 'keekijanai-react';
 
 export default function Callback() {
-  const auth = useAuth();
+  const auth = useOAuth2();
 
   useEffect(() => {
     setTimeout(() => {

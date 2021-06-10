@@ -37,15 +37,8 @@ export class CommentCachableService extends Service {
       .create(comment)
       .pipe(
         tap(() => {
-          const parentNode = this._itemNodeMap.get(parentId) as TreeNode<Comment.Get> | undefined;
-          if (parentId !== undefined) {
-            parentNode?.deleteValue();
-            this.get(parentId).subscribe(_.noop);
-          }
-          if (parentNode) {
-            parentNode.access([take])?.children?.forEach(childNode => childNode.deleteValue());
-            this.list(parentId, 0).subscribe(_.noop);
-          }
+          const parentNode = this._itemNodeMap.get(parentId)?.access([take], true) as TreeNode<Comment.Get> | undefined;
+          this._clearCache(parentNode);
         }),
       )
     return result;
@@ -58,22 +51,11 @@ export class CommentCachableService extends Service {
         tap(() => {
           const node = this._itemNodeMap.get(commentId) as TreeNode<Comment.Get> | undefined;
           this._itemNodeMap.delete(commentId);
-          if (node?.hasValue()) {
-            const comment = node.getValue()!;
-            const parId = comment?.parentId;
-            const skip = Number(node.parent?.parentKey);
-
-            if (typeof parId !== 'undefined') {
-              
-              const parNode = this._itemNodeMap.get(parId);
-              if (parNode) {
-                parNode.deleteValue();
-                this.get(parId).subscribe(_.noop);
-              }
-
-              node.parent?.parent?.children?.forEach(childNode => childNode.deleteValue());
-              this.list(parId, skip).subscribe(_.noop);
-            }
+          if (node && node.parentKey && node.parent) {
+            node.parent.children?.delete(node.parentKey);
+          }
+          if (node) {
+            this._clearCache(node.parent);
           }
         })
       )
@@ -99,9 +81,22 @@ export class CommentCachableService extends Service {
     return result;
   }
 
-  private _list = (parentId: number | undefined, skip: number, cacheLeft: number): Observable<Comment.List> => {
+  list = (parentId: number | undefined, skip: number): Observable<Comment.List> => {
+    const result = this._list(parentId, skip, 2);
+    return result;
+  }
+
+  private _clearCache = (node: TreeNode<any> | null | undefined) => {
+    node?.children?.forEach(node => node.deleteValue());
+    while (node) {
+      node.deleteValue();
+      node = node.parent;
+    }
+  }
+
+  private _list = (id: number | undefined, skip: number, cacheLeft: number): Observable<Comment.List> => {
     const take = this.options.grouping.take;
-    const baseNode = this._itemNodeMap.get(parentId);
+    const baseNode = this._itemNodeMap.get(id);
     const node = baseNode?.access([take, skip], true) as TreeNode<Comment.List> | undefined;
   
     // Cache
@@ -110,6 +105,7 @@ export class CommentCachableService extends Service {
         .map(v => v.getValue()!)
         .sort((a, b) => b.id - a.id);
       const value = node.getValue()!;
+      console.log('id', id, skip, comments)
       return of({
         ...value,
         comments,
@@ -117,7 +113,7 @@ export class CommentCachableService extends Service {
     }
 
     let result = this.commentService
-      .list(parentId, { take, skip })
+      .list(id, { take, skip })
       .pipe(
         tap(list => {
           if (node) {
@@ -147,7 +143,7 @@ export class CommentCachableService extends Service {
             if (nextSkip < 0 || nextSkip * take >= list.total) {
               return;
             }
-            this._list(parentId, nextSkip, cacheLeft - 1).subscribe(_.noop);
+            this._list(id, nextSkip, cacheLeft - 1).subscribe(_.noop);
           });
         }),
         // pre cache child comments
@@ -160,11 +156,6 @@ export class CommentCachableService extends Service {
         })
       )
     }
-    return result;
-  }
-
-  list = (parentId: number | undefined, skip: number): Observable<Comment.List> => {
-    const result = this._list(parentId, skip, 2);
     return result;
   }
 }

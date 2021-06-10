@@ -10,6 +10,7 @@ import { authModal } from './AuthModal';
 import { UserComponent } from '../User/UserComponent';
 import clsx from 'clsx';
 import { TranslationContext } from '../../translations';
+import { useFetchResponse } from '../../util/request';
 
 
 export interface LoginProps {
@@ -17,35 +18,28 @@ export interface LoginProps {
 }
 
 interface HaveLogoutedProps {
-  user: Auth.CurrentUser;
 }
 interface HaveLoginedProps {
-  user: Auth.CurrentUser;
-  loading: 'loading' | 'done' | 'error';
-  forceUpdate: () => void;
+  user: Auth.LoginedCurrentUser;
+  onLogout: () => void;
 }
 
 function HaveLogined(props: HaveLoginedProps) {
-  const authHook = useAuth();
   const { t } = useTranslation();
-  const { user, loading, forceUpdate } = props;
-
-  const handleLogout = () => {
-    authHook.logout();
-    forceUpdate();
-  };
+  const { user, onLogout } = props;
+  const userRsp = useFetchResponse(user);
 
   return (
     <div className='kkjn__logined'>
-      <UserComponent user={user.isLogin ? user : undefined} loading={loading} containerClassName="kkjn__user-indicator" />
+      <UserComponent userRsp={userRsp} containerClassName="kkjn__user-indicator" />
       <Popconfirm
         placement="top"
         title={t("CONFIRM_LOGOUT")}
-        onConfirm={handleLogout}
+        onConfirm={onLogout}
         okText={t("YES")}
         cancelText={t("NO")}
       >
-        <Button disabled={loading === 'loading'} size='small'>{t("LOGOUT")}</Button>
+        <Button size='small'>{t("LOGOUT")}</Button>
       </Popconfirm>
     </div>
   );
@@ -65,16 +59,18 @@ export const Login = withContexts<LoginProps>(
   TranslationContext,
 )(function (props) {
   const { className } = props;
-  const forceUpdate = useForceUpdate();
-  const { user, loading } = useAuth();
+  const { authRsp, logout } = useAuth();
 
   return (
     <div className={clsx('kkjn__auth', className)}>
-      {
-        (user.isLogin || loading === 'loading')
-          ? <HaveLogined user={user} loading={loading} forceUpdate={forceUpdate} />
-          : <HaveLogouted user={user} />
-      }
+      {(() => authRsp.stage === 'pending' || authRsp.stage === 'requesting'
+          ? (<UserComponent userRsp={authRsp} containerClassName="kkjn__user-indicator" />)
+          : (authRsp.error || !authRsp.data)
+            ? (<div>login error</div>)
+            : authRsp.data.isLogin
+              ? (<HaveLogined user={authRsp.data} onLogout={logout} />)
+              : (<HaveLogouted />)
+      )()}
     </div>
   )
 })

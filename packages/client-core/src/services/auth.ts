@@ -22,7 +22,7 @@ export class AuthService extends Service {
     getCode: '/auth/getCode',
   };
   private jwtInfo: JwtInfo | undefined;
-  user$ = new BehaviorSubject<Auth.CurrentUser>({ isLogin: false });
+  user$ = new BehaviorSubject<Auth.CurrentUser | null>(null);
 
   constructor() {
     super();
@@ -78,7 +78,7 @@ export class AuthService extends Service {
     )
   }
 
-  oauth = (provider: string) => {
+  oauth2 = (provider: string) => {
     if (typeof window !== 'undefined') {
       lastPageEntry.setItem(window.location.pathname);
       const url = this.client.requester.getURI({

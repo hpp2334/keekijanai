@@ -7,7 +7,7 @@ import _ from 'lodash';
 
 import './AuthModal.css'
 import { singletonModalManager } from '../Base/SingletonModal';
-import { useAuth, useLegacyAuth } from './controller';
+import { useAuth, useLegacyAuth, useOAuth2 } from './controller';
 import { AuthService } from 'keekijanai-client-core';
 import { TranslationContext } from '../../translations';
 import { handleStopPropagation, useRequestState, withContexts } from '../../util';
@@ -57,15 +57,11 @@ export const authModal = singletonModalManager.register(SingletonAuthComponent);
 function OAuth2(props: OAuth2Props) {
   const { providers: providerList } = props;
   const providers = useMemo(() => Object.fromEntries(providerList.map(t => [t, true])), []);
-  const { oauth } = useAuth();
-  
-  const handleLogin = useCallback((provider: string) => {
-    oauth(provider);
-  }, [oauth])
+  const { oauth2 } = useOAuth2();
 
   return (
     <div>
-      {providers.github && <Button size='large' onClick={_.partial(handleLogin, 'github')}>Continue with Github <GithubOutlined /></Button>}
+      {providers.github && <Button size='large' onClick={_.partial(oauth2, 'github')}>Continue with Github <GithubOutlined /></Button>}
     </div>
   )
 }

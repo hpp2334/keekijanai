@@ -12,23 +12,37 @@ interface ViewProps {
   scope: string;
 }
 
-export const View = withContexts<ViewProps>(
-  TranslationContext,
-  ViewProvider,
-)(function (props) {
-  const viewHookObject = useView();
+const ViewCore = function () {
+  const { viewRsp } = useView();
 
   return (
     <div className="kkjn__view">
       <EyeOutlined />
       <div className="kkjn__count">
-        {viewHookObject.loading === 'loading' && <Skeleton.Input active style={{ width: '50px' }} size='small' />}
-        {viewHookObject.loading === 'done' && viewHookObject.view !== undefined && (
+        {(viewRsp.stage === 'requesting' || viewRsp.stage === 'pending') && <Skeleton.Input active style={{ width: '50px' }} size='small' />}
+        {viewRsp.stage === 'error' && (
           <Typography.Text>
-            {viewHookObject.view}
+            NULL
+          </Typography.Text>
+        )}
+        {viewRsp.stage === 'done' && (
+          <Typography.Text>
+            {viewRsp.data.view}
           </Typography.Text>
         )}
       </div>
     </div>
   )
-})
+}
+
+export function View(props: ViewProps) {
+  const { scope } = props;
+
+  return (
+    <TranslationContext>
+      <ViewProvider scope={scope}>
+        <ViewCore />
+      </ViewProvider>
+    </TranslationContext>
+  )
+}

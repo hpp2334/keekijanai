@@ -1,8 +1,10 @@
 import { UserService } from 'keekijanai-client-core';
 import { User } from 'keekijanai-type';
+import { useObservable, useSubscription } from 'observable-hooks';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { forkJoin, of } from 'rxjs';
-import { map, switchMapTo, tap } from 'rxjs/operators';
+import { filter, map, mergeMap, switchMapTo, tap } from 'rxjs/operators';
+import { FetchResponse, INIT_PENDING_FETCH_RESPONSE, mapToRsp } from '../../util/request';
 import { createNotNilContextState, useMemoExports, useRequestState } from '../../util';
 
 export const userContext = createContext({
@@ -11,31 +13,23 @@ export const userContext = createContext({
 
 export function useUser(id: string | undefined) {
   const { userService } = useContext(userContext);
-  const [user, setUser] = useState<User.User>();
-  const reqState = useRequestState();
-  const { loading, lastError } = reqState;
+  const [userRsp, setUserRsp] = useState<FetchResponse<User.User>>(INIT_PENDING_FETCH_RESPONSE);
 
-  const update = useCallback((id: string) => {
-    userService
-      .get(id)
-      .subscribe({
-        next: user => {
-          setUser(user);
-          reqState.toDone();
-        },
-        error: err => {
-          reqState.toError(err);
-        }
-      });
-  }, []);
+  const userRsp$ = useObservable<FetchResponse<User.User>, [string | undefined]>(
+    inputs$ => inputs$.pipe(
+      filter(([id]) => typeof id === 'string'),
+      mergeMap(([id]) => userService
+        .get(id as string)
+        .pipe(
+          mapToRsp(),
+        )
+      )
+    ),
+    [id]
+  )
+  useSubscription(userRsp$, setUserRsp);
 
-  useEffect(() => {
-    if (id !== undefined) {
-      update(id);
-    }
-  }, [id]);
-
-  const exports = useMemoExports({ user, loading, lastError, update });
+  const exports = useMemoExports({ userRsp });
   return exports;
 }
 

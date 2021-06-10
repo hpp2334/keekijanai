@@ -7,6 +7,16 @@ export type ProviderProps <CTX_PROPS = never> = {
 type ProviderWithoutProps = (props: Omit<ProviderProps, 'ctxProps'>) => JSX.Element;
 type ProviderWithProps<CTX_PROPS> = (props: ProviderProps<CTX_PROPS>) => JSX.Element;
 
+export function useNotNilContextValueFactory <T>(context: React.Context<T | null>) {
+  return () => {
+    const value = useContext(context);
+    if (value === null) {
+      throw Error("context value is null");
+    }
+    return value;
+  }
+}
+
 export function createNotNilContextState<T>(initHandler: () => T): [() => T, ProviderWithoutProps];
 export function createNotNilContextState<T, CTX_PROPS>(initHandler: (props: CTX_PROPS) => T): [() => T, ProviderWithProps<CTX_PROPS>];
 
@@ -15,13 +25,7 @@ export function createNotNilContextState<T, CTX_PROPS>(
 ): [() => T, (props: ProviderProps<CTX_PROPS>) => JSX.Element] {
   const context = React.createContext<T | null>(null);
 
-  const useNotNilContextValue = (): T => {
-    const value = useContext(context);
-    if (value === null) {
-      throw Error("context value is null");
-    }
-    return value;
-  }
+  const useNotNilContextValue = useNotNilContextValueFactory(context);
 
   function Provider(props: ProviderProps<CTX_PROPS>) {
     const { children } = props;

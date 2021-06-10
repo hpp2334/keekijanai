@@ -1,9 +1,12 @@
 import { AuthService } from 'keekijanai-client-core';
 import { Auth, User } from 'keekijanai-type';
-import { tap } from 'rxjs/operators';
+import { catchError, filter, mergeMap, startWith, tap } from 'rxjs/operators';
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 import { createNotNilContextState, useMemoExports, useRequestState } from '../../util';
 import _ from 'lodash';
+import { useObservableState } from 'observable-hooks';
+import { of } from 'rxjs';
+import { FetchResponse, mapToRsp, INIT_PENDING_FETCH_RESPONSE } from '../../util/request';
 
 
 const authContext = createContext({
@@ -12,42 +15,34 @@ const authContext = createContext({
 
 export function useAuth() {
   const { authService } = useContext(authContext);
-  const [user, setUser] = useState<Auth.CurrentUser>({ isLogin: false });
-  const loadingState = useRequestState();
-  const { loading } = loadingState;
+  const { user$, logout } = authService;
 
-  useEffect(() => {
-    const subscription = authService.user$
+  const [authRsp] = useObservableState<FetchResponse<Auth.CurrentUser>, void>(
+    () => user$
+      .asObservable()
       .pipe(
-        tap(loadingState.toDone)
-      )
-      .subscribe(setUser);
-    return () => {
-      subscription.unsubscribe();
-    }
-  }, []);
-
-  const update = useCallback(() => {
-    loadingState.toloading();
-    authService.updateCurrent().subscribe(loadingState.toDone);
-  }, []);
-
-  const logout = authService.logout;
-  const oauth = authService.oauth;
-
-  const onCallback = useCallback((cb: (redirect?: string) => void) => {
-    update();
-    authService.onCallback(cb);
-  }, [update]);
+        filter(x => x !== null) as any,
+        mapToRsp(),
+      ),
+      INIT_PENDING_FETCH_RESPONSE
+  );
 
   const exports = useMemoExports({
-    user,
-    loading,
-    onCallback,
+    authRsp,
     logout,
-    oauth,
   });
 
+  return exports;
+}
+
+export function useOAuth2() {
+  const { authService } = useContext(authContext);
+  const { oauth2, onCallback } = authService;
+
+  const exports = useMemoExports({
+    oauth2,
+    onCallback,
+  });
   return exports;
 }
 
@@ -56,11 +51,7 @@ export function useLegacyAuth() {
   const { legacyRegister, legacyAuth } = authService;
 
   const register = legacyRegister;
-  const auth = useCallback(
-    (userID: string, password: string) => {
-      return legacyAuth(userID, password)
-    }, [legacyAuth]
-  );
+  const auth = legacyAuth;
 
   const exports = useMemoExports({
     register,

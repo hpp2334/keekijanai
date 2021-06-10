@@ -3,7 +3,7 @@ import { MonoTypeOperatorFunction, Observable, Observer, Subject } from 'rxjs';
 import { useMountedState, useUnmount } from 'react-use';
 import { takeUntil, take } from 'rxjs/operators';
 
-export { withContexts, createNotNilContextState } from './context';
+export { withContexts, createNotNilContextState, useNotNilContextValueFactory } from './context';
 
 export const noop: (...args: any[]) => any = () => {};
 
@@ -15,6 +15,8 @@ export function toSearch(obj: any) {
   }
   return new URLSearchParams(obj);
 }
+
+export const incrReducer = (state: number) => state + 1; 
 
 export function useIsMount() {
   let isMount = true;

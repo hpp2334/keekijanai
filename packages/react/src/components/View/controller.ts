@@ -1,48 +1,28 @@
-import { ViewService } from 'keekijanai-client-core';
-import { useCallback, useEffect, useState } from 'react';
-import { createNotNilContextState, useMemoExports, useRequestState } from '../../util';
+import { View } from 'keekijanai-type';
+import { useObservable, useSubscription } from 'observable-hooks';
+import { useState } from 'react';
+import { FetchResponse, INIT_PENDING_FETCH_RESPONSE, mapToRsp } from '../../util/request';
+import { useMemoExports } from '../../util';
+import { useViewContextValue } from './context';
 
-interface ContextValue {
-  viewService: ViewService;
-}
-
-const [useViewContextValue, ViewProvider] = createNotNilContextState<ContextValue, { scope: string }>(
-  (props) => ({
-    viewService: new ViewService(props.scope),
-  })
-);
-
-export {
-  useViewContextValue,
-  ViewProvider
-}
+export { ViewProvider, useViewContextValue } from './context';
 
 export function useView() {
-  const [view, setView] = useState<number>();
-  const reqState = useRequestState();
+  const [viewRsp, setViewRsp] = useState<FetchResponse<View.Get>>(INIT_PENDING_FETCH_RESPONSE);
   const { viewService } = useViewContextValue();
-  const { loading } = reqState;
-
-  const update = useCallback(() => {
-    reqState.toloading();
-    viewService
+  const view$ = useObservable(
+    () => viewService
       .get()
-      .subscribe({
-        next: res => {
-          setView(res.view);
-          reqState.toDone();
-        }
-      })
-  }, []);
+      .pipe(
+        mapToRsp(),
+      ),
+    []
+  );
 
-  useEffect(() => {
-    update();
-  }, [update]);
+  useSubscription(view$, setViewRsp);
 
   const exports = useMemoExports({
-    view,
-    loading,
-    update,
+    viewRsp
   });
   return exports;
 }
