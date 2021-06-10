@@ -1,4 +1,10 @@
 .kkjn__avatar {
   border-radius: 100%;
   overflow: hidden;
+
+  line-height: 0;
+}
+
+.kkjn__avatar img {
+  vertical-align: bottom;
 }

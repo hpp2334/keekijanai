@@ -24,7 +24,7 @@ export function Avatar(props: AvatarProps) {
       <span className="kkjn__avatar">
         {(userRsp.stage === 'pending' || userRsp.stage === 'requesting') && <Skeleton.Avatar shape='circle' size={size} active />}
         {userRsp.stage === 'done' && !!userRsp.data && (
-          <img className={clsx(className)} style={style} width={size + 'px'} height={size + 'px'} src={userRsp.data.avatarUrl}></img>
+          <img className={clsx(className)} style={style} width={size} height={size} src={userRsp.data.avatarUrl}></img>
         )}
       </span>
     </TranslationContext>

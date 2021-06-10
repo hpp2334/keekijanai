@@ -1,5 +1,5 @@
 import './Comment.css';
-import React, { useState, useCallback, useMemo, useEffect } from 'react'
+import React, { useState, useCallback, useMemo } from 'react'
 import { Popover, Button, Typography, List, ConfigProvider, Popconfirm, notification, Badge, Space, Skeleton } from 'antd';
 import { Translation, useTranslation } from 'react-i18next';
 import {
@@ -8,23 +8,24 @@ import {
 } from './controller';
 import { useAuth } from '../Auth/controller';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
-import loadable from '@loadable/component';
 import { Comment as TypeComment } from 'keekijanai-type';
 import { sprintf } from 'sprintf-js';
-import { CommentOutlined, DeleteOutlined, RetweetOutlined, SendOutlined, SmileOutlined, WarningOutlined } from '@ant-design/icons';
-import { noop, useSwitch, useUnmountCancel, withContexts } from '../../util';
+import { CommentOutlined, DeleteOutlined, RetweetOutlined, SmileOutlined, WarningOutlined } from '@ant-design/icons';
+import { useUnmountCancel } from '../../util';
 import { useUser } from '../User/controller';
 import { format } from 'date-fns-tz';
 import clsx from 'clsx';
 import { UserComponent } from '../User/UserComponent';
 import { authModal } from '../Auth/AuthModal';
 import { tap } from 'rxjs/operators';
-import _, { startsWith } from 'lodash';
+import _ from 'lodash';
 import { Observable } from 'rxjs';
 import { TranslationContext } from '../../translations';
-import { FetchResponse, useFetchResponse } from '../../util/request';
+import { FetchResponse, getRspError, useFetchResponse } from '../../util/request';
+import { CommentEditor, CommentEditorContent } from './CommentEditor';
+import { Avatar } from '../User';
+import { useHover } from 'react-use';
 
-const Editor = loadable(() => import('react-draft-wysiwyg' as any).then(v => v.Editor));
 
 export interface CommentProps {
   /** 列表 id，如可取 location.pathname */
@@ -80,14 +81,14 @@ function ReadonlyEditor(props: ReadonlyEditorProps) {
     return EditorState.createWithContent(contentState);
   }, [comment]);
   
-  return !comment ? null : (
-    <Editor
-      readOnly={true}
-      toolbarHidden={true}
-      editorState={editorState}
-      onChange={noop}
-      editorClassName={clsx("kkjn__content", className)}
-    />
+  return (
+    <div className={className}>
+      <CommentEditorContent
+        readonly={true}
+        editorState={editorState}
+        onEditorStateChange={_.noop}
+      />
+    </div>
   )
 }
 
@@ -144,6 +145,7 @@ function ReferenceComment(props: ReferenceCommentProps) {
 function CommentPost(props: CommentPostProps) {
   const { placeholder, onPost, onCancel } = props;
   const { t } = useTranslation();
+  const { authRsp } = useAuth();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
   const [posting, setPosting] = useState(false);
   const unmountCancel = useUnmountCancel();
@@ -172,38 +174,32 @@ function CommentPost(props: CommentPostProps) {
           onCancel?.();
         },
         error: (err) => {
-          notification.error({
-            message: err?.response?.error ?? err?.message ?? err,
-          });
+          const error = getRspError(err);
+          if (error !== null) {
+            notification.error({
+              message: error,
+            });
+          }
         },
       })
   };
 
+  if (authRsp.stage === 'done' && !authRsp.data.isLogin) {
+    return null;
+  }
+
   return (
     <div className="kkjn__comment-post">
-      <Editor
-        // ref={refEditor}
-        editorClassName="kkjn__editor"
-        toolbarClassName="kkjn__toolbar"
+      <Avatar userRsp={authRsp as any} size={30} />
+      <CommentEditor
+        className="kkjn__editor"
         editorState={editorState}
         onEditorStateChange={setEditorState}
+        posting={posting}
         placeholder={placeholder ?? t("COMMENT_PLACEHOLDER")}
+        onSubmit={handleSubmit}
+        onClose={onCancel}
       />
-      <div className='kkjn__panel'>
-        <Space>
-          {onCancel && <Button disabled={posting} onClick={onCancel} size='small'>{t("CANCEL")}</Button>}
-          <Button
-            disabled={!editorState.getCurrentContent().hasText()}
-            loading={posting}
-            type='primary'
-            onClick={handleSubmit}
-            icon={<SendOutlined />}
-            size='small'
-          >
-            {t("POST_COMMENT")}
-          </Button>
-        </Space>
-      </div>
     </div>
   )
 }
@@ -268,13 +264,14 @@ function CommentItem(props: CommentItemProps) {
   }, [reply]);
 
   const styleCommentList = useMemo((): React.CSSProperties => ({
-    marginLeft: (comment.parentId ? 2 : 1) * 20 + 'px',
+    marginLeft: (comment.parentId ? 1 : 0) * 70 + 'px',
   }), []);
   
   return (
-    <div className="kkjn__comment-item">
+    <div className="kkjn__comment-item"
+    >
       <CommentHeader commentRsp={commentRsp} showReference={comment.parentId !== comment.referenceId} />
-      <ReadonlyEditor comment={comment} />
+      <ReadonlyEditor comment={comment} className="kkjn__content" />
       <div className="kkjn__panel">
         {authRsp.data?.isLogin && (authRsp.data.id === comment.userId || authRsp.data.role === 0b11) && (
           <Popconfirm

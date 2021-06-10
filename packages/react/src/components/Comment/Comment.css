@@ -1,5 +1,4 @@
 @import 'draft-js/dist/Draft.css';
-@import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 
 .kkjn__comment {
 
@@ -13,43 +12,14 @@
 }
 
 .kkjn__comment .kkjn__comment-post {
-  margin-top: 20px;
+  margin-top: 10px;
+  display: flex;
+  align-items: flex-start;
 }
 
 .kkjn__comment .kkjn__comment-post .kkjn__editor {
-  border: 1px solid rgb(233, 233, 233);
-  padding: 10px;
-  min-height: 10rem;
-}
-
-.kkjn__comment .kkjn__comment-post .kkjn__toolbar {
-  color: black;
-  margin-bottom: 0;
-}
-
-.kkjn__comment .kkjn__comment-post .kkjn__toolbar .rdw-option-wrapper {
-  border: none;
-}
-
-.kkjn__comment .kkjn__comment-post .kkjn__toolbar .rdw-option-wrapper .rdw-option-wrapper img {
-}
-
-.kkjn__comment .kkjn__comment-post .kkjn__toolbar .rdw-option-wrapper:hover {
-  border: none;
-  outline: none;
-  background-color: #eee;
-  box-shadow: none;
-}
-
-.kkjn__comment .kkjn__comment-post .kkjn__toolbar .rdw-dropdown-wrapper a {
-  color: black;
-}
-
-.kkjn__comment .kkjn__comment-post .kkjn__panel {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  margin: 5px 0;
+  margin-left: 10px;
+  flex-grow: 1;
 }
 
 .kkjn__comment .kkjn__sub-list {
@@ -108,7 +78,6 @@
 .kkjn__comment .kkjn__comment-item .kkjn__content {
   margin: 2px 0;
   padding-left: 25px; 
-  line-height: 0.5rem;
 }
 
 .kkjn__comment .kkjn__comment-item .kkjn__panel {

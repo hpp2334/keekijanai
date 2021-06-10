@@ -105,7 +105,6 @@ export class CommentCachableService extends Service {
         .map(v => v.getValue()!)
         .sort((a, b) => b.id - a.id);
       const value = node.getValue()!;
-      console.log('id', id, skip, comments)
       return of({
         ...value,
         comments,
