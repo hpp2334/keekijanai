@@ -30,6 +30,9 @@ let _cachedMint: any = null;
 
 export interface CommentService extends ServiceType.ServiceBase {}
 
+const TABLE_NAME = 'keekijanai_comment';
+const TABLE_KEYS = ['id'];
+
 @Service({
   key: 'comment'
 })
@@ -51,10 +54,11 @@ export class CommentService {
 
   async get(id: number): Promise<Comment.Get> {
     const result = await this.provider.select({
-      from: 'keekijanai_comment',
+      from: TABLE_NAME,
       where: {
         id: [['=', id]]
-      }
+      },
+      keys: TABLE_KEYS,
     });
 
     if (result.error || !Array.isArray(result.body)) {
@@ -86,8 +90,9 @@ export class CommentService {
       }
     }
     const result = await this.provider.insert({
-      from: 'keekijanai_comment',
+      from: TABLE_NAME,
       payload: comment,
+      keys: TABLE_KEYS,
     });
     if (result.error || result.body?.length !== 1) {
       throw Error(`Create comment fail. ` + result.error?.message);
@@ -108,7 +113,7 @@ export class CommentService {
 
   async list(scope: string, parentId: number | undefined, grouping: Grouping) {
     const result = await this.provider.select({
-      from: 'keekijanai_comment',
+      from: TABLE_NAME,
       count: 'exact',
       where: {
         'scope': [['=', scope]],
@@ -119,6 +124,7 @@ export class CommentService {
       ],
       skip: grouping.skip,
       take: grouping.take,
+      keys: TABLE_KEYS,
     });
     if (result.error) {
       throw Error(`List comments fail. ` + JSON.stringify(result.error));
@@ -159,10 +165,11 @@ export class CommentService {
   private async updateChildCounts(id: number, delta: number = 1) {
     if (id) {
       const result = await this.provider.select({
-        from: 'keekijanai_comment',
+        from: TABLE_NAME,
         where: {
           'id': [['=', id]],
-        }
+        },
+        keys: TABLE_KEYS,
       });
       if (result.error || result.body?.length !== 1) {
         throw Error('query commment fail');
@@ -171,13 +178,14 @@ export class CommentService {
       const { childCounts } = result.body[0];
 
       const rsp = await this.provider.update({
-        from: 'keekijanai_comment',
+        from: TABLE_NAME,
         where: {
           id: [['=', id.toString()]],
         },
         payload: {
           childCounts: childCounts + delta,
-        }
+        },
+        keys: TABLE_KEYS,
       });
     }
   }

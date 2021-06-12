@@ -27,6 +27,7 @@ export class ViewService {
         clientId,
       },
       upsert: true,
+      keys: ['client_id', 'scope'],
     });
     if (result.error) {
       throw result.error;

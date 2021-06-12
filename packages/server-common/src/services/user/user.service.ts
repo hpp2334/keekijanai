@@ -21,6 +21,9 @@ type InternalConfig = {
 
 export interface UserService extends ServiceType.ServiceBase {}
 
+const TABLE_NAME = 'keekijanai_user';
+const TABLE_KEYS = ['id'];
+
 @Service({
   key: 'user',
 })
@@ -45,8 +48,9 @@ export class UserService {
 
   async insert(payload: User.User): Promise<User.User> {
     const result = await this.provider.insert({
-      from: 'keekijanai_user',
+      from: TABLE_NAME,
       payload,
+      keys: TABLE_KEYS,
     });
     const inserted = result.body?.[0];
     if (result.error || !inserted) {
@@ -59,9 +63,10 @@ export class UserService {
 
   async upsert(params: { id: string; } & Partial<User.User>): Promise<User.User> {
     const result = await this.provider.update({
-      from: 'keekijanai_user',
+      from: TABLE_NAME,
       payload: params,
       upsert: true,
+      keys: TABLE_KEYS,
     });
     
     const payload = result.body?.[0];
@@ -78,11 +83,12 @@ export class UserService {
     shouldExists?: SE,
   }): Promise<SE extends false ? User.User | undefined : User.User> {
     const result = await this.provider.select({
-        from: 'keekijanai_user',
+        from: TABLE_NAME,
         columns: ['*'],
         where: {
           id: [['=', id]]
-        }
+        },
+        keys: TABLE_KEYS,
       });
     if ((result.body?.length ?? 0) > 1) {
       throw Error(`get user result length more than 1, where id="${id}"`);

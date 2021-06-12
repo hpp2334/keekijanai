@@ -12,6 +12,9 @@ import _ from 'lodash';
 
 export interface StarService extends ServiceType.ServiceBase {}
 
+const TABLE_NAME = 'keekijanai_star';
+const TABLE_KEYS = ['scope', 'user_id'];
+
 @Service({
   key: 'star',
 })
@@ -23,13 +26,14 @@ export class StarService {
     const user = this.authService.current(true);
 
     const result = await this.provider.update({
-      from: 'keekijanai_star',
+      from: TABLE_NAME,
       payload: {
         scope,
         star,
         user_id: user.id,
       },
       upsert: true,
+      keys: TABLE_KEYS,
     });
     if (result.error) {
       throw Error(result.error?.message);
@@ -90,7 +94,8 @@ export class StarService {
         ..._.mapValues(extraWhere, (v) => {
           return [['=', v]] as ProviderType.Where[string];
         }),
-      } as ProviderType.Where
+      } as ProviderType.Where,
+      keys: TABLE_KEYS,
     };
     return this.provider.select(params);
   }

@@ -62,7 +62,7 @@ export class AuthService {
 
   current <T extends boolean>(needLogin: T): T extends true ? Auth.LoginedCurrentUser : Auth.CurrentUser {
     const user = this.user;
-    if (user.isLogin && needLogin) {
+    if (!user.isLogin && needLogin) {
       throw authError.userNeedLogin;
     }
     return user as any;
