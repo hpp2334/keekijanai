@@ -2,11 +2,22 @@ import { User } from 'keekijanai-type';
 
 import { Init, Service, ServiceType } from 'keekijanai-server-core';
 import _ from 'lodash';
+import { O } from 'ts-toolbelt';
 const debug = require('debug')('keekijanai:service:user');
 
-interface Config {
-  roles: Record<string, number>;
+export interface Config {
+  /**
+   * @example
+   * roles: {
+   *   [AuthUtils.getUserIDfromOAuth2('provider', 'example_user')]: ['admin']
+   * }
+   */
+  roles?: Record<string, string | string[]>;
 }
+
+type InternalConfig = {
+  roles: Record<string, number>;
+};
 
 export interface UserService extends ServiceType.ServiceBase {}
 
@@ -14,7 +25,7 @@ export interface UserService extends ServiceType.ServiceBase {}
   key: 'user',
 })
 export class UserService {
-  private internalConfig!: Config;
+  private internalConfig!: InternalConfig;
 
   private ROLE_MAP: Record<string, number | undefined> = {
     'admin':   0b0000010,
@@ -110,8 +121,8 @@ export class UserService {
   }
 
   @Init('config')
-  setInternalConfig(config: any) {
-    let roles: Exclude<Config['roles'], undefined> = {};
+  setInternalConfig(config: Config) {
+    let roles: InternalConfig['roles'] = {};
     if (config?.roles) {
       if (!_.isObjectLike(config.roles)) {
         throw Error('"roles" should be an object when configured.');

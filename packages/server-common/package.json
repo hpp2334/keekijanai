@@ -17,6 +17,7 @@
     "node-telegram-bot-api": "^0.53.0",
     "proxy-agent": "^4.0.1",
     "reflect-metadata": "^0.1.13",
+    "ts-toolbelt": "^9.6.0",
     "uuid": "^8.3.2",
     "yargs": "^17.0.1"
   },
@@ -51,9 +52,6 @@
     "through2": "^2.0.5",
     "ts-node": "^9.1.1",
     "typescript": "^4.2.4"
-  },
-  "peerDependencies": {
-    "keekijanai-server-core": ">=0.1.0"
   },
   "scripts": {
     "test": "npm run build --skip-types && cross-env DEBUG=keekijanai:* jest",

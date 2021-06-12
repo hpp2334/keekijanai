@@ -7,6 +7,7 @@ import type { UserService } from "@/services/user";
 import type { AuthService } from '@/services/auth';
 import * as commentError from './error';
 import Mint from "mint-filter";
+import { O } from 'ts-toolbelt';
 
 const debug = require('debug')('keekijanai:service:comment');
 
@@ -19,9 +20,11 @@ type CommentDB = CommentDBCreate & {
   childCounts: number;
 }
 
-interface Config {
-  sensitive?: string[];
+export interface Config {
+  sensitive?: string[] | null;
 }
+
+type InternalConfig = O.Required<Config>
 
 let _cachedMint: any = null;
 
@@ -34,11 +37,13 @@ export class CommentService {
   @InjectService('notify')  notifyService!: NotifyService;
   @InjectService('user')    userService!: UserService;
   @InjectService('auth')    authService!: AuthService;
-  private config!: Config;
+  private config!: InternalConfig;
 
   @Init('config')
   setInternalConfig(config: any) {
-    this.config = {};
+    this.config = {
+      sensitive: null,
+    };
     if (config && Array.isArray(config.sensitive)) {
       this.config.sensitive = config.sensitive;
     }

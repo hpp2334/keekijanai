@@ -3,12 +3,12 @@ import { Vercel } from './platforms/vercel';
 import { Supabase } from "./providers/supabase";
 
 import {
-  AuthController, AuthService,
-  CommentController, CommentService,
-  NotifyService,
+  AuthController, AuthService, AuthServiceConfig,
+  CommentController, CommentService, CommentServiceConfig,
+  NotifyService, NotifyServiceConfig,
   StarController, StarService,
   TimeService,
-  UserController, UserService,
+  UserController, UserService, UserServiceConfig,
   ViewController, ViewService,
   DeviceService,
 } from 'keekijanai-server-common';
@@ -19,50 +19,10 @@ export interface VercelSupabasePresetOptions {
     appKey: string;
   },
   services: {
-    auth?: {
-      /** an unguessable string */
-      jwtSecret: string,
-      /** jwt maxAge */
-      maxAge?: number;
-      legacy?: {
-        secret: string;
-        saltRounds?: number;
-      };
-      oauth2?: {
-        /** callback page path in client */
-        callback: string,
-        platforms?: Record<string, {
-          appID: string;
-          appSecret: string;
-        }>;
-      }
-    },
-    notify?: {
-      /**
-       * @example
-       * notifiers: [
-       *   {
-       *     type: 'telegram',
-       *     token:  '123456' ,
-       *     chatID: '123456',
-       *   }
-       * ]
-       */
-      notifiers: Array<any>;
-    },
-    user?: {
-      /**
-       * @example
-       * roles: {
-       *   [getUserIDfromOAuth2('provider', 'example_user')]: ['admin']
-       * }
-       */
-      roles?: Record<string, string[] | string | number>;
-    },
-    comment?: {
-      /** comment sentitve words */
-      sensitive?: string[];
-    }
+    auth?: AuthServiceConfig,
+    notify?: NotifyServiceConfig,
+    user?: UserServiceConfig,
+    comment?: CommentServiceConfig,
   }
 }
 

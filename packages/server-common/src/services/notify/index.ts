@@ -1,1 +1,1 @@
-export { NotifyService } from './notify.service';
+export { NotifyService, Config as NotifyServiceConfig } from './notify.service';

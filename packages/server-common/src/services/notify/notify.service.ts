@@ -8,6 +8,7 @@ import _ from "lodash";
 import { getProxy } from "@/utils/fns";
 import { Memo } from "@/utils/decorators/memo";
 import Aigle from 'aigle';
+import { O } from 'ts-toolbelt';
 
 interface TelegramNotify {
   type: 'telegram',
@@ -15,9 +16,21 @@ interface TelegramNotify {
   chatID: string;
 }
 
-interface Config {
-  notifiers: Array<TelegramNotify>;
+export interface Config {
+  /**
+   * @example
+   * notifiers: [
+   *   {
+   *     type: 'telegram',
+   *     token:  '123456' ,
+   *     chatID: '123456',
+   *   }
+   * ]
+   */
+  notifiers?: Array<TelegramNotify>;
 }
+
+type InternalConfig = O.Required<Config>;
 
 const debug = require('debug')('keekijanai:service:notify');
 
@@ -27,10 +40,10 @@ export interface NotifyService extends ServiceType.ServiceBase {}
   key: 'notify',
 })
 export class NotifyService {
-  private config!: Config;
+  private config!: InternalConfig;
 
   @Init('config')
-  setInternalConfig(config: any) {
+  setInternalConfig(config: Config) {
     if (config.notifiers && !Array.isArray(config?.notifiers)) {
       throw Error(`"notifiers" should be an array if set for notify service.`);
     }

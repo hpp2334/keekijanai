@@ -2,6 +2,7 @@ import { Auth } from "keekijanai-type";
 import { URLSearchParams } from 'url';
 import _ from "lodash";
 import bcrypt from 'bcrypt';
+import { O } from 'ts-toolbelt';
 
 import {
   Service, InjectService, Init, ServiceType,
@@ -19,18 +20,27 @@ import { OAuth2Item } from "./type";
 import * as authError from "./error";
 import { getUserIDfromOAuth2 } from "./utils";
 
-interface Config {
+export interface Config {
   jwtSecret: string,
   maxAge: number;
-  legacy: {
+  legacy?: {
     secret: string;
-    saltRounds: number;
+    saltRounds?: number;
   };
-  oauth2: {
-    platform(provider: string): OAuth2Item;
+  oauth2?: {
+    platform: Record<string, OAuth2Item>;
+    /** callback page path in client */
     callback: string;
   }
 }
+
+type _Patched = {
+  oauth2: {
+    platform: (provider: string) => OAuth2Item;
+  }
+}
+
+type InternalConfig = O.Assign<O.Required<Config, string, 'deep'>, [_Patched], 'deep'>;
 
 const debug = require('debug')('keekijanai:service:auth');
 
@@ -41,7 +51,7 @@ export interface AuthService extends ServiceType.ServiceBase {}
   middlewares: [mountUser]
 })
 export class AuthService {
-  private config!: Config;
+  private config!: InternalConfig;
 
   @InjectService('user')  userService!: UserService;
   @InjectService('time')  timeService!: TimeService;
