@@ -1,8 +1,8 @@
-import { VercelRequest, VercelResponse } from '@vercel/node';
 import { readFileSync } from 'fs';
 import path from 'path';
 import { setup } from 'keekijanai-server';
-import { getVercelSupabasePreset, utils, VercelSupabasePresetOptions } from 'keekijanai-server/dist/presets/vercel-supabase';
+import { AuthUtils } from 'keekijanai-server-common';
+import { getVercelSupabasePreset, VercelSupabasePresetOptions } from 'keekijanai-server-preset-vercel-supabase';
 
 const IS_DEV = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
 
@@ -30,7 +30,7 @@ export const presetConfig: VercelSupabasePresetOptions = {
     },
     user: {
       roles: {
-        [utils.getUserIDfromOAuth2('github', 'hpp2334')]: ['admin'],
+        [AuthUtils.getUserIDfromOAuth2('github', 'hpp2334')]: ['admin'],
       }
     },
     notify: {

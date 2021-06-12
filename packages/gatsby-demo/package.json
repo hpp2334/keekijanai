@@ -20,7 +20,8 @@
     "gatsby": "^3.4.1",
     "gatsby-plugin-keekijanai": "^0.0.5",
     "keekijanai-react": "^0.0.5",
-    "keekijanai-server": "^0.0.8",
+    "keekijanai-server-common": "^0.0.8",
+    "keekijanai-server-preset-vercel-supabase": "^0.0.8",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },
