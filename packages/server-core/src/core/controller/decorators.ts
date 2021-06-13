@@ -24,7 +24,7 @@ export function RouteDecorator(
   } = {}
 ) {
   return function (target: any, propKey: string) {
-    if (opts.onlyDEBUG && process.env.NODE_ENV !== 'test' && process.env.NODE_ENV === 'development') {
+    if (opts.onlyDEBUG && process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'development') {
       return;
     }
 
