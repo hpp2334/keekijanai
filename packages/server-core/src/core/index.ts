@@ -11,3 +11,4 @@ export {
   Service, InjectService, Init,
   ServiceType,
 } from './service';
+export { app } from './app';
