@@ -146,7 +146,14 @@ class WrapperProvider {
 }
 
 export class ProviderManager {
-  private _internalProviderMap: WeakMap<any, any> = new WeakMap();
+  private _internalProviderMap: Map<any, any> = new Map();
+
+  async closeAll() {
+    const providers = [...this._internalProviderMap.values()];
+    await Promise.allSettled(providers.map(async provider => {
+      await provider?.onClose();
+    }))
+  }
 
   getProvider(key: string, opts: WrapperProviderOptions): WrapperProvider {
     const internalProvider = this.getInternalProviderInstance(key);

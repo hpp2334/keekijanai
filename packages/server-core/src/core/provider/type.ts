@@ -7,6 +7,8 @@ export interface ProviderBase {
   insert<T = any>(params: InsertParams): Promise<Response<T>>;
   update<T = any>(params: UpdateParams): Promise<Response<T>>;
   delete(params: DeleteParams): Promise<Response>;
+
+  onClose?: () => Promise<void>;
 }
 
 export interface DecoratedProvider {

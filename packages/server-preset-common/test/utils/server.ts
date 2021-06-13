@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
 
-import { setup, ConfigType } from 'keekijanai-server-core';
+import { app, setup, ConfigType } from 'keekijanai-server-core';
 import {
   AuthController, AuthService, AuthServiceConfig,
   CommentController, CommentService, CommentServiceConfig,
@@ -98,8 +98,9 @@ export function runServer() {
   });
 }
 
-export function closeServer() {
+export async function closeServer() {
   if (server) {
+    await app.providerManager.closeAll();
     server.close();
   }
 }

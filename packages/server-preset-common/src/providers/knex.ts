@@ -159,6 +159,10 @@ class KnexProvider implements ProviderType.ProviderBase {
     }
   }
   
+  async onClose() {
+    await this.client.destroy();
+  }
+
   private handleResponse<T>(rsp: any) {
     const nextRsp: ProviderType.Response<T> = {
       body: rsp.body,
