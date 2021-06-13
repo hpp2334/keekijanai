@@ -69,6 +69,12 @@ const emitTypes = async () => {
     .pipe(gulp.dest('./dist'))
 }
 
+const test = async () => {
+  execSync(`npm run build -- --skip-types`, { stdio: 'inherit' });
+  execSync(`npm run jest -- --runTestsByPath ./test/services/auth.test.ts`, { stdio: 'inherit' });
+  execSync(`npm run jest -- --testPathIgnorePatterns ./test/services/auth.test.ts`, { stdio: 'inherit' });
+}
+
 const CLI_build = () => {
   const params = yargs(hideBin(process.argv)).argv;
   const skipTypes = params['skip-types'] ?? false;
@@ -84,5 +90,10 @@ const CLI_develop = async () => {
   )
 }
 
+const CLI_test = () => {
+  return gulp.series(test);
+}
+
 exports['build'] = CLI_build();
 exports['develop'] = CLI_develop;
+exports['test'] = CLI_test();

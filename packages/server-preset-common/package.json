@@ -45,7 +45,8 @@
     "typescript": "^4.2.4"
   },
   "scripts": {
-    "test": "npm run build -- --skip-types && cross-env DEBUG=keekijanai:* jest",
+    "test": "gulp test",
+    "jest": "cross-env DEBUG=keekijanai:* jest",
     "dev": "gulp develop",
     "build": "gulp build",
     "clean": "rimraf ./dist"

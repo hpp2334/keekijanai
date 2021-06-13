@@ -8,7 +8,8 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-  await requester.request('admin1', '/user/test__clear', {
+  const uid = Symbol();
+  await requester.request(uid, '/user/test__clear', {
     method: 'DELETE'
   })
 });
