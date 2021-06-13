@@ -54,11 +54,6 @@ const config = (() => {
           useNullAsDefault: true,
         },
         initSQL: './sqls/v0.1.sql',
-        log: {
-          error: message => {
-            console.error('[knex error]', message);
-          }
-        }
       } as KnexProviderConfig,
     }
   }
@@ -82,7 +77,9 @@ const config = (() => {
       ViewService,
     ],
     platform: Express,
-    provider: [Knex, options.providers.knex]
+    providers: {
+      default: [Knex, options.providers.knex]
+    },
   }
   return config;
 })(); 

@@ -33,16 +33,16 @@ class ConfigReader {
         throw Error('preset in config impossbily. It may be a bug');
       }
       this.internalConfig = _.merge(
-        _.omit(config, ['provider', 'services', 'controllers']),
+        _.omit(config, ['providers', 'services', 'controllers']),
         {
-          provider: this.fromProvider(config.provider),
+          providers: this.fromProviders(config.providers, {}),
           services: this.fromServiceList(config.services, new Map()),
           controllers: this.fromControllerList(config.controllers, new Map()),
         }
       );
     } else {
-      if (config.provider) {
-        internalConfig.provider = this.fromProvider(config.provider);
+      if (config.providers) {
+        internalConfig.providers = this.fromProviders(config.providers, {});
       }
       if (config.platform) {
         internalConfig.platform = config.platform;
@@ -60,8 +60,8 @@ class ConfigReader {
     return this.middlewares;
   }
 
-  private fromProvider(provider: ConfigBase['provider']): ConfigInternal['provider']{
-    return Array.isArray(provider) ? provider : [provider, undefined];
+  private fromProviders(providers: ConfigBase['providers'], to: ConfigInternal['providers']): ConfigInternal['providers'] {
+    return _.assign(to, _.mapValues(providers, v => Array.isArray(v) ? v : [v, undefined]))
   }
   private fromServiceList(services: ConfigBase['services'], to: ConfigInternal['services']) {
     services.forEach(service => {

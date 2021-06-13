@@ -11,7 +11,8 @@ export interface ConfigBase {
   maxAgeInSec?: number;
   controllers: ControllerType.ControllerConstructor[];
   services: ServicesList;
-  provider: ProviderType.ProviderConstructor | [ProviderType.ProviderConstructor, any];
+  /** key -> provider */
+  providers: Record<string, ProviderType.ProviderConstructor | [ProviderType.ProviderConstructor, any]>;
   platform: PlatformType.PlatformConstructor;
 }
 
@@ -20,7 +21,7 @@ export type Config = (Partial<ConfigBase> & {
 }) | ConfigBase;
 
 export type ConfigInternal = Omit<ConfigBase, 'provider' | 'platform' | 'services' | 'controllers'> & {
-  provider: [ProviderType.ProviderConstructor, any];
+  providers: Record<string, [ProviderType.ProviderConstructor, any]>;
   platform: PlatformType.PlatformConstructor;
   services: Map<string, [ServiceType.ServiceConstructor, any]>;
   controllers: Map<string, ControllerType.ControllerConstructor>;

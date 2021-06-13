@@ -12,9 +12,6 @@ import _ from 'lodash';
 
 export interface StarService extends ServiceType.ServiceBase {}
 
-const TABLE_NAME = 'keekijanai_star';
-const TABLE_KEYS = ['scope', 'user_id'];
-
 @Service({
   key: 'star',
 })
@@ -22,18 +19,23 @@ export class StarService {
   @InjectService('auth')    authService!: AuthService;
   @InjectService('user')    userService!: UserService;
 
+  private provider = this.providerManager.getProvider('star', {
+    table: {
+      from: 'keekijanai_star',
+      keys: ['scope', 'user_id'],
+    },
+  });
+
   async post(scope: string, star: Star.StarType): Promise<Star.Get> {
     const user = this.authService.current(true);
 
     const result = await this.provider.update({
-      from: TABLE_NAME,
       payload: {
         scope,
         star,
         user_id: user.id,
       },
       upsert: true,
-      keys: TABLE_KEYS,
     });
     if (result.error) {
       throw Error(result.error?.message);
@@ -75,7 +77,6 @@ export class StarService {
     }
 
     const result = await this.provider.delete({
-      from: 'keekijanai_star',
       where: {
         scope: [['=', scope]]
       }
@@ -95,7 +96,6 @@ export class StarService {
           return [['=', v]] as ProviderType.Where[string];
         }),
       } as ProviderType.Where,
-      keys: TABLE_KEYS,
     };
     return this.provider.select(params);
   }

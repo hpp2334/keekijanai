@@ -36,7 +36,7 @@ export interface SelectParams {
   where?: Where;
   skip?: number;
   take?: number;
-  keys?: string[];
+  keys: string[];
 }
 
 export interface UpdateParams {
@@ -44,7 +44,7 @@ export interface UpdateParams {
   where?: Where;
   payload: any;
   upsert?: boolean;
-  keys?: string[];
+  keys: string[];
 }
 
 export interface InsertParams {

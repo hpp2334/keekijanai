@@ -92,7 +92,7 @@ export class AuthService {
       };
 
     } catch (err) {
-      debug('getCurrentUser error. %o', err);
+      debug('getCurrentUser error. %O', err);
     }
 
     return {

@@ -17,24 +17,30 @@ export class ViewService {
   @InjectService('auth')      authService!: AuthService;
   @InjectService('user')      userService!: UserService;
 
+
+  private provider = this.providerManager.getProvider('view', {
+    table: {
+      from: 'keekijanai_view',
+      keys: ['client_id', 'scope'],
+    },
+  })
+
   async get(scope: string): Promise<View.Get> {
     const clientId = this.deviceService.id;
+    
 
     const result = await this.provider.update({
-      from: 'keekijanai_view',
       payload: {
         scope,
         clientId,
       },
       upsert: true,
-      keys: ['client_id', 'scope'],
     });
     if (result.error) {
       throw result.error;
     }
 
     const rsp = await this.provider.select({
-      from: 'keekijanai_view',
       count: 'exact',
       where: {
         scope: [['=', scope]]
@@ -49,7 +55,6 @@ export class ViewService {
       throw viewError.forbidden;
     }
     await this.provider.delete({
-      from: 'keekijanai_view',
       where: {
         scope: [['=', scope]]
       }

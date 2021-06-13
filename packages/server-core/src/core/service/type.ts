@@ -1,5 +1,5 @@
 import { ClassType } from '@/type/util';
-import { providerManager } from '@/core/provider';
+import { providerManager, ProviderManager } from '@/core/provider';
 import { ContextType } from '../context';
 import { MiddlewareType } from '../middleware';
 
@@ -10,10 +10,7 @@ export interface Init {
 
 class ServiceBase {
   ctx!: ContextType.Context;
-
-  get provider() {
-    return providerManager;
-  }
+  providerManager!: ProviderManager;
 }
 
 export interface DecoratedService {

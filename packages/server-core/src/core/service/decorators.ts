@@ -5,7 +5,7 @@ import { ServiceDecoratorParams } from "./type";
 
 const serviceBase = {
   $$type: 'service',
-  provider: providerManager
+  providerManager,
 }
 
 export function ServiceDecorator(params: ServiceDecoratorParams) {

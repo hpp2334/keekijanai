@@ -5,7 +5,9 @@ function memoFunc(context: any, handler: Function) {
     if (args.length === 0) {
       handler.apply(context);
     } else {
-      const argStr = args.reduce((prev, s) => prev + s + '_$#', '');
+      const argStr = args.length === 1
+        ? args[0]
+        : args.reduce((prev, s) => prev + s + '_$#', '');
       if (map.has(argStr)) {
         return map.get(argStr);
       } else {
