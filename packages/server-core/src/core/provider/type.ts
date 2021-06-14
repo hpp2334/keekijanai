@@ -52,11 +52,13 @@ export interface UpdateParams {
 export interface InsertParams {
   from: string;
   payload: any;
+  keys: string[];
 }
 
 export interface DeleteParams {
   from: string;
   where?: Where;
+  keys: string[];
 }
 
 export interface Response<T = any> {

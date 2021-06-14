@@ -10,7 +10,9 @@ module.exports = {
       options: {
         core: {
           route: {
-            root: '/api/blog-common',
+            root: process.env.USE_SUPABASE
+              ? '/api/blog-common'
+              : '/api/local-dev',
           },
         },
         authModal: {

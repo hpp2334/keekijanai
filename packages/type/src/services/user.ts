@@ -8,3 +8,9 @@ export interface User {
   lastLogin?: number;
   email?: string;
 }
+
+export interface UserRole {
+  id: string;
+  scope: string;
+  role: number;
+}

@@ -1,4 +1,3 @@
-import TelegramBot from 'node-telegram-bot-api';
 
 import {
   Init, Service, ServiceType,
@@ -6,7 +5,6 @@ import {
 
 import _ from "lodash";
 import { getProxy } from "@/utils/fns";
-import { Memo } from "@/utils/decorators/memo";
 import Aigle from 'aigle';
 import { O } from 'ts-toolbelt';
 
@@ -41,6 +39,7 @@ export interface NotifyService extends ServiceType.ServiceBase {}
 })
 export class NotifyService {
   private config!: InternalConfig;
+  private _cache: Map<any, any> = new Map();
 
   @Init('config')
   setInternalConfig(config: Config) {
@@ -73,21 +72,20 @@ export class NotifyService {
     return this.config.notifiers.length > 0;
   }
 
-  @Memo()
-  private getTelegramSendMessageHandler(token: string, chatID: string) {
-    const proxy = getProxy();
-    const bot = new TelegramBot(token, {
-      request: proxy ? {
-        proxy,
-      } as any : undefined,
-    });
-    return async (msg: string) => {
-      bot.sendMessage(chatID, msg);
-    };
-  }
-
   private async telegramNotify(token: string, chatID: string, msg: string) {
-    const sendMsg = this.getTelegramSendMessageHandler(token, chatID)
-    await sendMsg(msg);
+    const cacheKey = '__tg__' + token;
+    let bot = this._cache.get(cacheKey);
+    if (!bot) {
+      const { default: TelegramBot } = await import('node-telegram-bot-api');
+      const proxy = getProxy();
+      bot = new TelegramBot(token, {
+        request: proxy ? {
+          proxy,
+        } as any : undefined,
+      });
+      this._cache.set(cacheKey, bot);
+    }
+
+    await bot.sendMessage(chatID, msg);
   }
 }

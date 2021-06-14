@@ -1,9 +1,11 @@
-import { User } from 'keekijanai-type';
+import { User, UserRole } from 'keekijanai-type';
 
 import { Init, Service, ServiceType } from 'keekijanai-server-core';
 import _ from 'lodash';
 import { O } from 'ts-toolbelt';
 const debug = require('debug')('keekijanai:service:user');
+
+type INTERNAL_ROLE = 'admin' | 'normal' | 'ban';
 
 export interface Config {
   /**
@@ -12,7 +14,7 @@ export interface Config {
    *   [AuthUtils.getUserIDfromOAuth2('provider', 'example_user')]: ['admin']
    * }
    */
-  roles?: Record<string, string | string[]>;
+  roles?: Record<string, INTERNAL_ROLE | INTERNAL_ROLE[]>;
 }
 
 type InternalConfig = {
@@ -27,31 +29,83 @@ export interface UserService extends ServiceType.ServiceBase {}
 export class UserService {
   private internalConfig!: InternalConfig;
 
-  private ROLE_MAP: Record<string, number | undefined> = {
+  private ROLE_MAP: Record<INTERNAL_ROLE, number> = {
     'admin':   0b0000010,
     'normal':  0b0000001,
     'ban':     0b0000000,
   };
 
-  private provider = this.providerManager.getProvider('user', {
-    table: {
-      from: 'keekijanai_user',
-      keys: ['id'],
-    },
-  });
+  private providers = {
+    user: this.providerManager.getProvider('user', {
+      table: {
+        from: 'keekijanai_user',
+        keys: ['id'],
+      },
+    }),
+    userRole: this.providerManager.getProvider('user-role', {
+      table: {
+        from: 'keekijanai_user_role',
+        keys: ['id', 'scope'],
+      },
+    }),
+  };
 
-  calcRole(roles: string | string[]) {
-    const role = (typeof roles === 'string' ? [roles] : roles).reduce((prev, curr) => (this.ROLE_MAP[curr] ?? 0) | prev, 0);
+  calcRole(roles: INTERNAL_ROLE | INTERNAL_ROLE[]): number {
+    const role = this._calcRole(this.ROLE_MAP, roles);
     return role;
   }
 
-  matchRole(user: User.User, roles: string[]) {
+  matchRole(user: User.User, roles: INTERNAL_ROLE[]): boolean {
     const calculatedRole = this.calcRole(roles) | (this.internalConfig.roles[user.id] ?? 0);
     return !!(calculatedRole & user.role);
   }
 
+  async matchScopeRole(scope: string, roleMap: Record<string, number>, user: User.User, roles: string | string[], useInternal?: INTERNAL_ROLE | INTERNAL_ROLE[]) {
+    let targetRole = this._calcRole(roleMap, roles);
+
+    const result = await this.providers.userRole.select<UserRole>({
+      columns: ['*'],
+      where: {
+        id: [['=', user.id]],
+        scope: [['=', scope]],
+      },
+    });
+    if (result.error) {
+      throw Error(`get user role with scope "${scope}" fail.`);
+    }
+    if (Array.isArray(result.body) && result.body.length === 1) {
+      const [scopeRole] = result.body;
+      const matched = !!(targetRole & scopeRole);
+      if (matched) {
+        return true;
+      }
+    }
+    if (useInternal !== undefined) {
+      return this.matchRole(user, typeof useInternal === 'string' ? [useInternal] : useInternal);
+    }
+    return false;
+  }
+
+  async updateScopeRole(scope: string, roleMap: Record<string, number>, user: User.User, roles: string | string[]) {
+    let targetRole = this._calcRole(roleMap, roles);
+
+    const result = this.providers.userRole.update({
+      where: {
+        id: [['=', user.id]],
+        scope: [['=', scope]],
+      },
+      payload: {
+        role: targetRole,
+      }
+    });
+    if (result.error || result.body?.length !== 1) {
+      throw Error(`update user role with scope "${scope}" to ${roles} fail.`);
+    }
+    return result.body?.[0];
+  }
+
   async insert(payload: User.User): Promise<User.User> {
-    const result = await this.provider.insert({
+    const result = await this.providers.user.insert({
       payload,
     });
     const inserted = result.body?.[0];
@@ -64,7 +118,7 @@ export class UserService {
   }
 
   async upsert(params: { id: string; } & Partial<User.User>): Promise<User.User> {
-    const result = await this.provider.update({
+    const result = await this.providers.user.update({
       payload: params,
       upsert: true,
     });
@@ -82,7 +136,7 @@ export class UserService {
     includePassword?: boolean,
     shouldExists?: SE,
   }): Promise<SE extends false ? User.User | undefined : User.User> {
-    const result = await this.provider.select({
+    const result = await this.providers.user.select({
         columns: ['*'],
         where: {
           id: [['=', id]]
@@ -109,7 +163,7 @@ export class UserService {
   }
 
   async delete(id: number) {
-    const result = await this.provider.delete({
+    const result = await this.providers.user.delete({
       where: {
         id: [['=', id]]
       }
@@ -121,7 +175,19 @@ export class UserService {
   }
 
   async TEST__delete() {
-    await this.provider.delete({ });
+    await this.providers.user.delete({ });
+  }
+
+  private _calcRole(roleMap: Record<string, number>, roles: string | string[]): number {
+    return (typeof roles === 'string' ? [roles] : roles).reduce(
+      (prev, roleStr) => {
+        if (!(roleStr in roleMap)) {
+          throw Error(`role "${roleStr}" not in roleMap`);
+        }
+        return prev | roleMap[roleStr];
+      },
+      0
+    );
   }
 
   @Init('config')

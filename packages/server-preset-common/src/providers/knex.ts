@@ -107,7 +107,7 @@ class KnexProvider implements ProviderType.ProviderBase {
         .insert(params.payload)
 
       const result = await request;
-      const insertedRsp = await this.handleSQLite3MutationResult(params.from, result);
+      const insertedRsp = await this.handleSQLite3MutationResult(params, result);
       // console.log('insert', result, insertedRsp);
       return insertedRsp;
     } catch (err) {
@@ -132,7 +132,7 @@ class KnexProvider implements ProviderType.ProviderBase {
       }
 
       const result = await request;
-      return await this.handleSQLite3MutationResult(params.from, result);
+      return await this.handleSQLite3MutationResult(params, result);
     } catch (err) {
       return this.handleError(err);
     }
@@ -143,6 +143,7 @@ class KnexProvider implements ProviderType.ProviderBase {
       const selectRsp = await this.select({
         from: params.from,
         where: params.where,
+        keys: params.keys,
       });
 
       let request = this.client 
@@ -186,10 +187,14 @@ class KnexProvider implements ProviderType.ProviderBase {
   }
 
   /** for sqlite3 */
-  private async handleSQLite3MutationResult(from: string, result: any[]) {
+  private async handleSQLite3MutationResult(params: {
+    from: string;
+    keys: string[];
+  }, result: any[]) {
     const [ rowid ] = result;
     const rsp = await this.select({
-      from,
+      from: params.from,
+      keys: params.keys,
       where: {
         rowid: [['=', rowid]],
       }

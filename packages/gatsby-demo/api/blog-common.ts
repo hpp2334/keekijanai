@@ -52,8 +52,10 @@ export const presetConfig: VercelSupabasePresetOptions = {
 if (IS_DEV) {
   const jsonText = readFileSync(path.resolve(__dirname, '../secret.json'), 'utf-8');
   const json = JSON.parse(jsonText);
-  presetConfig.supabase = json.supabase;
-  presetConfig.services.auth.oauth2.platforms.github = json.github;
+  presetConfig.supabase.url = json.SUPABASE_URL;
+  presetConfig.supabase.appKey = json.SUPABASE_APPKEY;
+  presetConfig.services.auth.oauth2.platforms.github.appID = json.GITHUB_APP_ID;
+  presetConfig.services.auth.oauth2.platforms.github.appSecret = json.GITHUB_APP_SECRET;
 }
 
 const config = getVercelSupabasePreset(presetConfig);

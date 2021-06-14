@@ -5,8 +5,11 @@ import {
   PlatformType,
   MiddlewareType,
 } from 'keekijanai-server-core';
+import { performance } from "perf_hooks";
 
 const debug = require('debug')('keekijanai:platform:vercel');
+
+const IS_DEV = process.env.NODE_ENV === 'development';
 
 export class Vercel implements PlatformType.Platform {
   toAPIFactory: PlatformType.Platform['toAPIFactory'] = (handle) => {
@@ -19,7 +22,11 @@ export class Vercel implements PlatformType.Platform {
   }
 
   handleResponse: MiddlewareType.Middleware = async (ctx, next) => {
-    debug('in middleware [handleResponse]');
+    let lastTime = 0;
+    // Only record running time in dev
+    if (IS_DEV) {
+      lastTime = performance.now();
+    }
     try {
       await next();
   
@@ -29,6 +36,10 @@ export class Vercel implements PlatformType.Platform {
   
       ctx.res._res.status(typeof ctx.res.status === 'number' ? ctx.res.status : (ctx.res.body ? 200 : 404));
       ctx.res._res.send(ctx.res.body);
+
+      if (IS_DEV) {
+        debug('request total time: %d ms', performance.now() - lastTime);
+      }
     } catch (err) {
       if (err instanceof ResponseError) {
         ctx.res._res.status(err.code);

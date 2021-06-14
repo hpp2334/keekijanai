@@ -43,7 +43,7 @@ class WrapperProvider {
     
     const resolvedParams: InsertParams = {
       ...params,
-      ..._.pick(tableOpts, ['from']),
+      ...tableOpts,
     };
     const normalizedParams = !transformCamel ? resolvedParams : this.transformInsertParams(resolvedParams, _.snakeCase);
     const rsp = await provider.insert<T>(normalizedParams);
@@ -87,7 +87,7 @@ class WrapperProvider {
     const { table: tableOpts } = this.opts;
     const resolvedParams: DeleteParams = {
       ...params,
-      ..._.pick(tableOpts, ['from']),
+      ...tableOpts,
     };
 
     const normalizedParams = !transformCamel ? resolvedParams : this.transformDeleteParams(resolvedParams, _.snakeCase);

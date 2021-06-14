@@ -33,3 +33,10 @@ CREATE TABLE keekijanai_user (
   avatar_url varchar(200),
   email varchar(50)
 );
+
+CREATE TABLE keekijanai_user_role (
+  id varchar(50),
+  scope VARCHAR(50),
+  role int,
+  PRIMARY KEY(id, scope)
+)
