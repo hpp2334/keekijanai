@@ -36,7 +36,7 @@ class WrapperProvider {
     }
   }
 
-  async insert <T = any>(params: Omit<InsertParams, 'from'>) {
+  async insert <T = any>(params: Omit<InsertParams, 'from' | 'keys'>) {
     const provider = this.provider;
     const { transformCamel } = provider.options;
     const { table: tableOpts } = this.opts;
@@ -81,7 +81,7 @@ class WrapperProvider {
     return rsp;
   }
 
-  async delete(params: Omit<DeleteParams, 'from'>) {
+  async delete(params: Omit<DeleteParams, 'from' | 'keys'>) {
     const provider = this.provider;
     const { transformCamel } = provider.options;
     const { table: tableOpts } = this.opts;

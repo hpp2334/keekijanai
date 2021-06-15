@@ -38,13 +38,13 @@ export function useCommentList(
     [page, id === undefined ? mutationCounts : 0]
   );
 
-  const create = useCallback((comment: Pick<TypeComment.Create, 'content' | 'plainText'>) => {
+  const create = useCallback((comment: Pick<TypeComment.Create, 'content' | 'plainText'>, referenceId: number | undefined) => {
     return commentCachableService
       .create({
         ...comment,
         scope,
         parentId: id,
-        referenceId: id,
+        referenceId,
       })
       .pipe(
         tap(updateMutationCounts),
@@ -108,26 +108,10 @@ export function useComment(
       )
   }, [id]);
 
-  const reply = useCallback((created: Pick<TypeComment.Create, 'content' | 'plainText'>, asParent: boolean = true) => {
-    if (commentRsp.stage !== 'done') {
-      return throwError(() => Error('comment fetch not done. It\'s a bug.'));
-    }
-    return commentCachableService
-      .create({
-        ...created,
-        scope,
-        referenceId: id,
-        parentId: asParent ? id : commentRsp.data.parentId,
-      }).pipe(
-        tap(updateMutationCounts),
-      )
-  }, [id, commentRsp]);
-
   useSubscription(commentRsp$, setCommentRsp);
 
   const exports = useMemoExports({
     remove,
-    reply,
     userRsp,
     commentRsp
   });

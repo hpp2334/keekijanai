@@ -13,9 +13,10 @@ interface CommentEditorProps {
   onEditorStateChange: (editorState: EditorState) => void;
   placeholder?: string;
   readonly?: boolean;
-  onClose?: () => void;
+  onCancel?: () => void;
   onSubmit?: () => void;
   posting?: boolean;
+  collapsed?: boolean;
   className?: string;
 }
 
@@ -105,9 +106,10 @@ export function CommentEditor(props: CommentEditorProps) {
     editorState,
     onEditorStateChange,
     placeholder,
-    onClose,
+    onCancel,
     onSubmit,
     posting,
+    collapsed,
     className,
   } = props;
   const { t } = useTranslation();
@@ -138,7 +140,13 @@ export function CommentEditor(props: CommentEditorProps) {
   );
 
   return (
-    <div className={clsx("kkjn__comment-editor", className ?? "")}>
+    <div
+      className={clsx(
+        "kkjn__comment-editor",
+        collapsed ? "kkjn__collapsed" : "",
+        className ?? ""
+      )}
+    >
       <div className="kkjn__container" onClick={handleFocus}>
         <CommentEditorContent
           placeholder={placeholder}
@@ -160,10 +168,10 @@ export function CommentEditor(props: CommentEditorProps) {
           ))}
         </div>
         <div className="kkjn__toolbar-post">
-          {onClose && (
+          {onCancel && (
             <EditorButton
               label={t("CANCEL")}
-              onClick={onClose}
+              onClick={onCancel}
               disabled={posting}
             />
           )}

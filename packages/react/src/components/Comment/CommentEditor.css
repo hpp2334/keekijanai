@@ -10,6 +10,12 @@
 .kkjn__comment-editor .kkjn__container .DraftEditor-root {
   min-height: 60px;
   font-size: 14px;
+  cursor: text;
+  transition: min-height 0.1s;
+}
+
+.kkjn__comment-editor.kkjn__collapsed .kkjn__container .DraftEditor-root {
+  min-height: 20px;
 }
 
 .kkjn__comment-editor .kkjn__toolbar {
@@ -17,6 +23,10 @@
   justify-content: space-between;
   align-items: center;
   background: rgb(236, 236, 236);
+}
+
+.kkjn__comment-editor.kkjn__collapsed .kkjn__toolbar {
+  display: none;
 }
 
 .kkjn__comment-editor .kkjn__toolbar .kkjn__toolbar-style {

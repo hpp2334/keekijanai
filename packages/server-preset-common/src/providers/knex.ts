@@ -121,18 +121,26 @@ class KnexProvider implements ProviderType.ProviderBase {
       if (params.upsert) {
         request = this.client(params.from)
           .insert(params.payload)
-          .onConflict(params.keys) /** @todo CANNOT use 'id'  */
+          .onConflict(params.keys)
           .merge(params.payload)
       } else {
         request = this.client(params.from)
           .update(params.payload)
-      }
-      if (params.where) {
-        request = this.handleWhere(request, params.where);
+        if (params.where) {
+          request = this.handleWhere(request, params.where);
+        }
       }
 
       const result = await request;
-      return await this.handleSQLite3MutationResult(params, result);
+      const keysWhere = this.constructWhereFromKeys(params.keys, params.payload);
+      const rsp = keysWhere
+        ? await this.select({
+          from: params.from,
+          where: keysWhere,
+          keys: params.keys,
+        })
+        : await this.handleSQLite3MutationResult(params, result);
+      return rsp;
     } catch (err) {
       return this.handleError(err);
     }
@@ -215,6 +223,16 @@ class KnexProvider implements ProviderType.ProviderBase {
       default:
         return '*';
     }
+  }
+  private constructWhereFromKeys(keys: string[], payload: any): ProviderType.Where | null {
+    let where: ProviderType.Where = {};
+    for (const key of keys) {
+      if (!(key in payload)) {
+        return null;
+      }
+      where[key] = [['=', payload[key]]];
+    }
+    return where;
   }
   private handleWhere(request: any, where: ProviderType.Where) {
     let haveWhere = false;

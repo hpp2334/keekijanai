@@ -30,5 +30,7 @@
 
   "COPY_CODE": "Copy code",
   "SHOW_CODE": "Show the code",
-  "HIDE_CODE": "Hide the code"
+  "HIDE_CODE": "Hide the code",
+
+  "UNKNOWN_ERROR": "Unknown error"
 }

@@ -89,7 +89,7 @@ export class UserService {
   async updateScopeRole(scope: string, roleMap: Record<string, number>, user: User.User, roles: string | string[]) {
     let targetRole = this._calcRole(roleMap, roles);
 
-    const result = this.providers.userRole.update({
+    const result = await this.providers.userRole.update({
       where: {
         id: [['=', user.id]],
         scope: [['=', scope]],
@@ -119,13 +119,16 @@ export class UserService {
 
   async upsert(params: { id: string; } & Partial<User.User>): Promise<User.User> {
     const result = await this.providers.user.update({
+      where: {
+        id: [['=', params.id]]
+      },
       payload: params,
       upsert: true,
     });
     
     const payload = result.body?.[0];
     if (result.error || !payload) {
-      throw Error(`upsert user "${params.id}" fail. ` + result.error?.message);
+      throw Error(`upsert user "${params.id}" fail. ` + result.error?.message ?? result.error);
     }
     
     debug('upsert success, params=%j', payload);

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo, useCallback, useContext } from 're
 import { MonoTypeOperatorFunction, Observable, Observer, Subject } from 'rxjs';
 import { useMountedState, useUnmount } from 'react-use';
 import { takeUntil, take } from 'rxjs/operators';
+import _ from 'lodash';
 
 export { withContexts, createNotNilContextState, useNotNilContextValueFactory } from './context';
 
@@ -104,4 +105,18 @@ export function useUnmountCancel() {
   );
 
   return handler;
+}
+
+export function useHover() {
+  const [hovered, setHovered] = useState(false);
+
+  const onMouseEnter = useCallback(_.partial(setHovered, true), []);
+  const onMouseLeave = useCallback(_.partial(setHovered, false), []);
+
+  const props = {
+    onMouseEnter,
+    onMouseLeave,
+  };
+
+  return [hovered, props] as const;
 }

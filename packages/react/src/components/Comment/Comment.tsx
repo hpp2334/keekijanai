@@ -8,10 +8,10 @@ import {
 } from './controller';
 import { useAuth } from '../Auth/controller';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
-import { Comment as TypeComment } from 'keekijanai-type';
+import { Comment as TypeComment, User } from 'keekijanai-type';
 import { sprintf } from 'sprintf-js';
 import { CommentOutlined, DeleteOutlined, RetweetOutlined, SmileOutlined, WarningOutlined } from '@ant-design/icons';
-import { useUnmountCancel } from '../../util';
+import { useUnmountCancel, useHover } from '../../util';
 import { useUser } from '../User/controller';
 import { format } from 'date-fns-tz';
 import clsx from 'clsx';
@@ -19,12 +19,12 @@ import { UserComponent } from '../User/UserComponent';
 import { authModal } from '../Auth/AuthModal';
 import { tap } from 'rxjs/operators';
 import _ from 'lodash';
-import { Observable } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { TranslationContext } from '../../translations';
 import { FetchResponse, getRspError, useFetchResponse } from '../../util/request';
 import { CommentEditor, CommentEditorContent } from './CommentEditor';
 import { Avatar } from '../User';
-import { useHover } from 'react-use';
+import { useObservableCallback, useSubscription } from 'observable-hooks';
 
 
 export interface CommentProps {
@@ -41,21 +41,42 @@ interface CommentHeaderProps {
 interface CommentItemProps {
   comment: TypeComment.Get;
   showChildCounts?: boolean;
+  onClickReply?: (comment: TypeComment.Get, user: User.User) => void;
 }
 
-interface CommentListProps {
+interface CommentListCoreProps {
   id: number | undefined;
 
   showCommentListHeader?: boolean;
   showCommentReplyCounts?: boolean;
-  showPost?: boolean;
+
+  onItemClickReply?: (comment: TypeComment.Get, user: User.User) => void;
+
+  postChild?: (
+    create: (comment: Pick<TypeComment.Create, 'content' | 'plainText'>, referenceId: number | undefined) => Observable<any>
+  ) => React.ReactNode;
 
   className?: string;
   style?: React.CSSProperties;
 }
 
+interface RootCommentListProps {
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+interface ChildCommentListProps {
+  comment: TypeComment.Get;
+  user: User.User;
+  className?: string;
+  style?: React.CSSProperties;
+  replyClick$: Observable<any>;
+}
+
 interface CommentPostProps {
   placeholder?: string;
+  collapsed?: boolean;
+  onClick?: () => void;
   onPost: (comment: Pick<TypeComment.Create, 'content' | 'plainText'>) => Observable<any>;
   onCancel?: () => any;
 }
@@ -143,7 +164,7 @@ function ReferenceComment(props: ReferenceCommentProps) {
 }
 
 function CommentPost(props: CommentPostProps) {
-  const { placeholder, onPost, onCancel } = props;
+  const { placeholder, collapsed, onPost, onCancel, onClick } = props;
   const { t } = useTranslation();
   const { authRsp } = useAuth();
   const [editorState, setEditorState] = useState(() => EditorState.createEmpty());
@@ -189,59 +210,65 @@ function CommentPost(props: CommentPostProps) {
   }
 
   return (
-    <div className="kkjn__comment-post">
+    /** add "tabindex" to handle focus */
+    <div className="kkjn__comment-post" onClick={onClick}>
       <Avatar userRsp={authRsp as any} size={30} />
       <CommentEditor
         className="kkjn__editor"
         editorState={editorState}
         onEditorStateChange={setEditorState}
         posting={posting}
+        collapsed={collapsed}
         placeholder={placeholder ?? t("COMMENT_PLACEHOLDER")}
         onSubmit={handleSubmit}
-        onClose={onCancel}
+        onCancel={onCancel}
       />
     </div>
   )
 }
 
+const styleChildCommentList: React.CSSProperties = {
+  marginLeft: '30px',
+};
+
 function CommentItem(props: CommentItemProps) {
   const {
     comment,
+    onClickReply,
     showChildCounts = true
   } = props;
   const { t } = useTranslation();
   
   const { authRsp } = useAuth();
 
-  const { remove, reply } = useComment(comment.id);
+  const { remove } = useComment(comment.id);
   const commentRsp = useFetchResponse(comment);
   const { userRsp } = useUser(comment.userId);
 
-  const [replyPlaceHolderMainText] = useState(() => {
-    const raw = JSON.parse(comment.content);
-    const contentState = convertFromRaw(raw);
-    const editorState = EditorState.createWithContent(contentState);
-    const plainContent = editorState.getCurrentContent().getPlainText();
-    return plainContent;
-  });
-  const replyPlaceHolder = useMemo(() => {
-    return sprintf(t("REPLY_COMMENT_TO_USER"), userRsp.data?.name, replyPlaceHolderMainText);
-  }, [userRsp]);
+  const [hovered, hoverProps] = useHover();
 
   const [removing, setRemoving] = useState(false);
-  const [showReply, setShowReply] = useState(false);
+
+  const [emitClickReply, replyClick$] = useObservableCallback<any>(
+    event$ => event$,
+  );
 
   const handleClickReplyButton = useCallback(() => {
     if (authRsp.stage !== 'done') {
       console.error('It\'s a bug');
       return;
     }
+    if (userRsp.stage !== 'done') {
+      console.error('It\'s a bug');
+      return;
+    }
     if (authRsp.data.isLogin) {
-      setShowReply(prev => !prev);
+      onClickReply?.(comment, userRsp.data);
+      emitClickReply(null);
     } else {
       authModal.open();
     }
-  }, [authRsp, setShowReply]);
+  }, [authRsp]);
 
   const handleRemoveComment = useCallback(() => {
     setRemoving(true);
@@ -258,57 +285,40 @@ function CommentItem(props: CommentItemProps) {
       })
   }, [remove]);
 
-  const handleReply = useCallback((created: Pick<TypeComment.Create, 'content' | 'plainText'>) => {
-    const asParent = !comment.parentId;
-    return reply(created, asParent);
-  }, [reply]);
-
-  const styleCommentList = useMemo((): React.CSSProperties => ({
-    marginLeft: (comment.parentId ? 1 : 0) * 70 + 'px',
-  }), []);
   
   return (
-    <div className="kkjn__comment-item"
-    >
-      <CommentHeader commentRsp={commentRsp} showReference={comment.parentId !== comment.referenceId} />
-      <ReadonlyEditor comment={comment} className="kkjn__content" />
-      <div className="kkjn__panel">
-        {authRsp.data?.isLogin && (authRsp.data.id === comment.userId || authRsp.data.role === 0b11) && (
-          <Popconfirm
-            title={t("READY_TO_REMOVE")}
-            placement='top'
-            onConfirm={handleRemoveComment}
-            okText={t("YES")}
-            cancelText={t("NO")}
-          >
-            <Button loading={removing} danger={true} type='text' shape='circle' size='small' icon={<DeleteOutlined />}></Button>
-          </Popconfirm>
-        )}
-        <Button
-          disabled={removing}
-          type='text'
-          className={clsx(
-            'kkjn__button',
-            showReply ? 'kkjn__button-activated' : ''
+    <div className="kkjn__comment-item">
+      <div {...hoverProps}>
+        <CommentHeader commentRsp={commentRsp} showReference={comment.parentId !== comment.referenceId} />
+        <ReadonlyEditor comment={comment} className="kkjn__content" />
+        <div className="kkjn__panel">
+          {hovered && authRsp.data?.isLogin && (authRsp.data.id === comment.userId || authRsp.data.role === 0b11) && (
+            <Popconfirm
+              title={t("READY_TO_REMOVE")}
+              placement='top'
+              onConfirm={handleRemoveComment}
+              okText={t("YES")}
+              cancelText={t("NO")}
+            >
+              <Button loading={removing} danger={true} type='text' shape='circle' size='small' icon={<DeleteOutlined />}></Button>
+            </Popconfirm>
           )}
-          size='small'
-          icon={<CommentOutlined />}
-          onClick={handleClickReplyButton}  
-        >{!!showChildCounts && ' ' + comment.childCounts}</Button>
+          <Button
+            disabled={removing}
+            type='text'
+            className={clsx('kkjn__button')}
+            size='small'
+            icon={<CommentOutlined />}
+            onClick={handleClickReplyButton}  
+          >{!!showChildCounts && ' ' + comment.childCounts}</Button>
+        </div>
       </div>
-      {showReply && authRsp.data?.isLogin && (
-        <CommentPost
-          onPost={handleReply}
-          onCancel={_.partial(setShowReply, false)}
-          placeholder={replyPlaceHolder}
-        />
-      )}
-      {!comment.parentId && comment.childCounts > 0 && (
-        <CommentList
-          id={comment.id}
-          style={styleCommentList}
-          showCommentListHeader={false}
-          showCommentReplyCounts={false}
+      {comment.childCounts > 0 && userRsp.stage === 'done' && (
+        <ChildCommentList
+          style={styleChildCommentList}
+          comment={comment}
+          user={userRsp.data}
+          replyClick$={replyClick$}
         />
       )}
     </div>
@@ -328,14 +338,15 @@ function EmptyCommentList() {
   )
 }
 
-function CommentList(props: CommentListProps) {
+function CommentListCore(props: CommentListCoreProps) {
   const {
     id,
     className,
     style,
     showCommentReplyCounts = true,
     showCommentListHeader = true,
-    showPost = false,
+    onItemClickReply,
+    postChild,
   } = props;
   
   const { commentsRsp, page, pageSize, total, haveData, changePage, create } = useCommentList(id);
@@ -381,15 +392,108 @@ function CommentList(props: CommentListProps) {
                   <CommentItem
                     comment={item}
                     showChildCounts={showCommentReplyCounts}
+                    onClickReply={onItemClickReply}
                   />
                 </List.Item>
               )}
             />
           </ConfigProvider>
-          {showPost && <CommentPost onPost={create} />}
+          {postChild?.(create) ?? null}
         </>
       )}
     </div>
+  )
+}
+
+function RootCommentList(props: RootCommentListProps) {
+  const { className, style } = props;
+  const [collapsedPost, setCollapsedPost] = useState(true);
+  const handlePostFocus = useCallback(_.partial(setCollapsedPost, false), [setCollapsedPost]);
+
+  return (
+    <CommentListCore
+      id={undefined}
+      className={className}
+      style={style}
+      postChild={(create) => {
+        const handlePost = _.partial(create, _, undefined);
+        return (
+          <CommentPost
+            onPost={handlePost}
+            collapsed={collapsedPost}
+            onClick={handlePostFocus}
+          />
+        )
+      }}
+    />
+  )
+}
+
+function ChildCommentList(props: ChildCommentListProps) {
+  const { comment, user, className, style, replyClick$ } = props;
+  const { t } = useTranslation();
+
+  const [currentReply, setCurrentReply] = useState<{
+    reference: TypeComment.Get | null;
+    user: User.User | null;
+    placeholder: string | undefined;
+  }>({
+    reference: null,
+    user: null,
+    placeholder: undefined,
+  });
+
+  const handleChangeReply = useCallback((comment: TypeComment.Get, user: User.User) => {
+    if (comment.id === currentReply.reference?.id) {
+      return;
+    }
+    const raw = JSON.parse(comment.content);
+    const contentState = convertFromRaw(raw);
+    const editorState = EditorState.createWithContent(contentState);
+    const plainContent = editorState.getCurrentContent().getPlainText();
+    const placeholder = sprintf(t("REPLY_COMMENT_TO_USER"), user.name, plainContent);
+    setCurrentReply({
+      reference: comment,
+      user,
+      placeholder,
+    });
+  }, [currentReply]);
+  const handleHideReply = useCallback(() => {
+    setCurrentReply({
+      reference: null,
+      user: null,
+      placeholder: undefined,
+    });
+  }, []);
+  
+  useSubscription(replyClick$, _.partial(handleChangeReply, comment, user));
+
+  return (
+    <CommentListCore
+      id={comment.id}
+      className={className}
+      showCommentListHeader={false}
+      showCommentReplyCounts={false}
+      style={style}
+      onItemClickReply={handleChangeReply}
+      postChild={(create) => {
+        const handlePost = (comment: Pick<TypeComment.Create, 'content' | 'plainText'>) => {
+          const { reference } = currentReply;
+          if (!reference) {
+            console.error('reference is null but call handlePost. It\'s a bug.');
+            return throwError(() => new Error(t("UNKNOWN_ERROR")))
+          }
+          return create(comment, reference.id);
+        };
+        return !currentReply.reference ? null : (
+          <CommentPost
+            onPost={handlePost}
+            onCancel={handleHideReply}
+            placeholder={currentReply.placeholder}
+          />
+        )
+      }}
+    />
   )
 }
 
@@ -399,7 +503,7 @@ export function Comment(props: CommentProps) {
     <TranslationContext>
       <CommentProvider scope={scope} >
         <div className="kkjn__comment">
-          <CommentList id={undefined} showPost={true} />
+          <RootCommentList />
         </div>
       </CommentProvider>
     </TranslationContext>
