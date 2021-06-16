@@ -14,6 +14,8 @@ const { transformLess, minify } = require('./tools/handle-style');
 const { getDependencyModuleFiles } = require('./tools/get-dependency-module-files');
 const _ = require('lodash');
 
+let _modulesInAppendCompCss = null;
+
 function identityTransform() {
   return through2.obj(function (file, ec, cb) {
     this.push(file);
@@ -114,27 +116,32 @@ const emitTypes = (ctx) => async function emitTypes() {
 
 const processStyle = (ctx) => function processStyle() {
   const { format, outDir, gulpMemFs } = ctx;
-  let _modules = null;
 
   return gulp
     .src(['./src/**/*.@(css|less)'])
     // modify less file to dynamic add component less file
-    .pipe(cacheFiles('append-use-component-in-less', async function (file, encoding) {
-      if (file.path.endsWith('style.less')) {
-        if (!_modules) {
-          _modules = getDependencyModuleFiles(['antd'], ctx.state.buildFiles, true);
-        }
-        const antdCompModules = _modules.filter(m => m.id.relative.startsWith('node_modules/antd/lib'));
-  
-        let antdCompModuleLessPath = antdCompModules
-          .map(m => './' + m.id.dirname.relative + '/style/index.less')
-          .filter(p => existsSync(p))
-        antdCompModuleLessPath = _.uniq(antdCompModuleLessPath);
+    .pipe(cacheFiles(
+      {
+        key: 'append-use-component-in-less',
+        cache: false,
+      },
+      async function (file, encoding) {
+        if (file.path.endsWith('style.less')) {
+          if (!_modulesInAppendCompCss) {
+            _modulesInAppendCompCss = getDependencyModuleFiles(['antd'], ctx.state.buildFiles, true);
+          }
+          const antdCompModules = _modulesInAppendCompCss.filter(m => m.id.relative.startsWith('node_modules/antd/lib'));
+    
+          let antdCompModuleLessPath = antdCompModules
+            .map(m => './' + m.id.dirname.relative + '/style/index.less')
+            .filter(p => existsSync(p))
+          antdCompModuleLessPath = _.uniq(antdCompModuleLessPath);
 
-        const nextContent = file.contents.toString() + '\n' + antdCompModuleLessPath.map(p => `@import '~${p.slice('./node_modules/'.length)}';\n`).join('');
-        file.contents = Buffer.from(nextContent);
+          const nextContent = file.contents.toString() + '\n' + antdCompModuleLessPath.map(p => `@import '~${p.slice('./node_modules/'.length)}';\n`).join('');
+          file.contents = Buffer.from(nextContent);
+        }
       }
-    }))
+    ))
     // transform less files
     .pipe(cacheFiles('transform-less', async function (file, encoding) {
       if (/\.less$/.test(file.path)) {
@@ -178,9 +185,15 @@ const buildFactory = (ctxParams) => {
 }
 
 const develop = async () => {
-  gulp.watch('./src/**/*.@(tsx|ts|jsx|js|json|css|less)', { ignoreInitial: false }, gulp.parallel(
+  gulp.watch(
+    './src/**/*.@(tsx|ts|jsx|js|json|css|less)',
+    { ignoreInitial: false },
+    gulp.parallel(
     // buildFactory({ format: 'cjs', isDev: true, }),
-    buildFactory({ format: 'esm', isDev: true, }),
+    gulp.series(
+      async () => { _modulesInAppendCompCss = null },
+      buildFactory({ format: 'esm', isDev: true, })
+    ),
   ))
 };
 

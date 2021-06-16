@@ -28,7 +28,9 @@ function getDependencyModuleFiles(moduleName, buildFiles, recursive) {
       const [_, res] = REG_ANTD_IMPORT.exec(file) || [];
       if (res) {
         const modules = res.split(',').map(s => s.trim());
-        modules.forEach(m => set.add(m))
+        modules
+          .map(moduleExpr => moduleExpr.replace(/(\w+)\s+as\s+\w+/, (_, moduleName) => moduleName))
+          .forEach(m => set.add(m))
       }
     }
     var mapExportsToModule = new Map();

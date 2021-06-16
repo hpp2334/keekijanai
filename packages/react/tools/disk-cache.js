@@ -31,14 +31,17 @@ const saveCacheItem = (key, data) => {
 
 const cacheFiles = (opts, handler) => {
   const _opts = typeof opts === 'string'
-    ? { key: opts }
+    ? { key: opts, cache: true }
     : opts;
   return through2.obj(async function (file, encoding, next) {
     const cacheKey = _opts.key + '$$' + file.path;
     const cacheItem = getCacheItem(cacheKey);
     const parent = this;
 
-    if (cacheItem && cacheItem.input === file.contents.toString()) {
+    const useCache = _opts.cache
+      && (cacheItem && cacheItem.input === file.contents.toString());
+
+    if (useCache) {
       file.path = cacheItem.path;
       file.contents = Buffer.from(cacheItem.output);
       parent.push(file);

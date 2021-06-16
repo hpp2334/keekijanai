@@ -30,7 +30,7 @@ export function UserComponent(props: UserComponentProps) {
   return (
     <TranslationContext>
       <span className={clsx('kkjn__user-component', containerClassName)} style={containerStyle}>
-        {showAvatar && <Avatar userRsp={userRsp} size={avatarSize} className={clsx(avatarClassName)} style={avatarStyle} />}
+        {showAvatar && <Avatar userRsp={userRsp} size={avatarSize ?? 20} className={clsx(avatarClassName)} style={avatarStyle} />}
         {(userRsp.stage === 'pending' || userRsp.stage === 'requesting') && <Skeleton.Input className={clsx("kkjn__username", userNameClassName)} style={{ width: '50px' }} size='small' active />}
         {userRsp.stage === 'done' && !!userRsp.data && (
           <Typography.Text className={clsx("kkjn__username", userNameClassName)} style={userNameStyle}>{userRsp.data.name}</Typography.Text>
