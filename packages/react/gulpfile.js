@@ -1,3 +1,4 @@
+require('./tools/patch-string-about-path');
 const gulp = require('gulp');
 const path = require('path');
 const jetpack = require('fs-jetpack');
@@ -7,11 +8,18 @@ const glob = require('glob-promise');
 const through2 = require('through2');
 const GulpMem = require('gulp-mem');
 const fsDisk = require('fs/promises');
-const diskCache = require('./tools/disk-cache');
+const { cacheFiles } = require('./tools/disk-cache');
 const { existsSync } = require('fs');
-const { transformLess } = require('./tools/transform-less');
+const { transformLess, minify } = require('./tools/handle-style');
+const { getDependencyModuleFiles } = require('./tools/get-dependency-module-files');
+const _ = require('lodash');
 
-diskCache.ensureCacheJsonLoaded();
+function identityTransform() {
+  return through2.obj(function (file, ec, cb) {
+    this.push(file);
+    cb();
+  })
+}
 
 const getContext = (params) => {
   const ctx = {
@@ -19,6 +27,8 @@ const getContext = (params) => {
     moduleType: 'es2020',
     outDir: './dist/esm',
     gulpMemFs: new GulpMem(),
+    isDev: false,
+    state: {},
   };
   params = params || {};
   ctx.format = params.format || ctx.format;
@@ -27,6 +37,7 @@ const getContext = (params) => {
     || ctx.moduleType;
   ctx.outDir = params.outDir || './dist/' + ctx.format;
   ctx.gulpMemFs.enableLog = false;
+  ctx.isDev = params.isDev;
   return ctx;
 }
 
@@ -47,6 +58,8 @@ const processScript = (ctx) => async function processScript() {
     inject: ['./react-shim.js'],
     write: false,
   });
+
+  ctx.state.buildFiles = {};
   outputFiles.forEach(file => {
     const fs = gulpMemFs.fs;
     const p = '/' + path.relative(process.cwd(), file.path).replace(/\\/g, '/');
@@ -59,6 +72,7 @@ const processScript = (ctx) => async function processScript() {
         .replace(/\.less(['"])/g, (_, p) => '.css' + p)
         .replace(/\.json(['"])/g, (_, p) => '.js' + p);
     }
+    ctx.state.buildFiles[p] = contents;
     gulpMemFs.fs.writeFileSync(p, contents)
   });
 }
@@ -100,20 +114,45 @@ const emitTypes = (ctx) => async function emitTypes() {
 
 const processStyle = (ctx) => function processStyle() {
   const { format, outDir, gulpMemFs } = ctx;
+  let _modules = null;
+
   return gulp
     .src(['./src/**/*.@(css|less)'])
-    .pipe(through2.obj(async function (file, encoding, next) {
-      if (/\.less$/.test(file.path)) {
-        const cacheItem = diskCache.getCacheItem(file.path, file.contents);
-        if (!cacheItem.match) {
-          const css = await transformLess(file.path);
-          file.contents = Buffer.from(css);
-          diskCache.saveCacheItem(file.path, css);
-        } else {
-          file.contents = Buffer.from(cacheItem.data);
+    // modify less file to dynamic add component less file
+    .pipe(cacheFiles('append-use-component-in-less', async function (file, encoding) {
+      if (file.path.endsWith('style.less')) {
+        if (!_modules) {
+          _modules = getDependencyModuleFiles(['antd'], ctx.state.buildFiles, true);
         }
-        file.path = file.path.replace(/\.less$/, '.css');
+        const antdCompModules = _modules.filter(m => m.id.relative.startsWith('node_modules/antd/lib'));
+  
+        let antdCompModuleLessPath = antdCompModules
+          .map(m => './' + m.id.dirname.relative + '/style/index.less')
+          .filter(p => existsSync(p))
+        antdCompModuleLessPath = _.uniq(antdCompModuleLessPath);
+
+        const nextContent = file.contents.toString() + '\n' + antdCompModuleLessPath.map(p => `@import '~${p.slice('./node_modules/'.length)}';\n`).join('');
+        file.contents = Buffer.from(nextContent);
       }
+    }))
+    // transform less files
+    .pipe(cacheFiles('transform-less', async function (file, encoding) {
+      if (/\.less$/.test(file.path)) {
+        const css = await transformLess(file.path, file.contents.toString());
+        file.contents = Buffer.from(css);
+      }
+    }))
+    // minify
+    .pipe(
+      ctx.isDev
+        ? identityTransform()
+        : cacheFiles('minify-css', async function (file) {
+          const css = await minify(file.contents.toString());
+          file.contents = Buffer.from(css);
+        })
+    )
+    .pipe(through2.obj(async function (file, encoding, next) {
+      file.path = file.path.replace(/\.less$/, '.css');
       this.push(file);
       next();
     }))
@@ -140,8 +179,8 @@ const buildFactory = (ctxParams) => {
 
 const develop = async () => {
   gulp.watch('./src/**/*.@(tsx|ts|jsx|js|json|css|less)', { ignoreInitial: false }, gulp.parallel(
-    buildFactory({ format: 'cjs' }),
-    buildFactory({ format: 'esm' }),
+    // buildFactory({ format: 'cjs', isDev: true, }),
+    buildFactory({ format: 'esm', isDev: true, }),
   ))
 };
 

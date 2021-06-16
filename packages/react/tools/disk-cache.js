@@ -1,11 +1,8 @@
 const jetpack = require('fs-jetpack');
+const through2 = require('through2');
 
 const cachePath = './.cache/data.json';
 let cacheJSON = null;
-
-const transformData = (data) => {
-  return typeof data === 'string' ? data : data.toString();
-}
 
 const ensureCacheJsonLoaded = () => {
   if (!cacheJSON) {
@@ -17,31 +14,48 @@ const ensureCacheJsonLoaded = () => {
   }
 }
 
-const getCacheItem = (key, inputData) => {
+const getCacheItem = (key) => {
+  ensureCacheJsonLoaded();
+
   let cacheItem = cacheJSON[key];
-  inputData = transformData(inputData);
-  if (cacheItem && cacheItem.input === inputData) {
-    return cacheItem;
-  } else {
-    cacheItem = cacheJSON[key] = {
-      match: false,
-      input: inputData,
-    };
-  }
-  return cacheItem;
+  return cacheItem || null;
 }
 
 const saveCacheItem = (key, data) => {
-  let cacheItem = cacheJSON[key];
-  cacheItem.data = transformData(data);
-  cacheItem.match = true;
-  cacheJSON[key] = cacheItem;
+  ensureCacheJsonLoaded();
+
+  cacheJSON[key] = data;
   jetpack.write(cachePath, cacheJSON);
-  return cacheItem;
+  return data;
 }
 
-module.exports = {
-  ensureCacheJsonLoaded,
-  getCacheItem,
-  saveCacheItem,
+const cacheFiles = (opts, handler) => {
+  const _opts = typeof opts === 'string'
+    ? { key: opts }
+    : opts;
+  return through2.obj(async function (file, encoding, next) {
+    const cacheKey = _opts.key + '$$' + file.path;
+    const cacheItem = getCacheItem(cacheKey);
+    const parent = this;
+
+    if (cacheItem && cacheItem.input === file.contents.toString()) {
+      file.path = cacheItem.path;
+      file.contents = Buffer.from(cacheItem.output);
+      parent.push(file);
+      next();
+    } else {
+      const input = file.contents.toString();
+      await handler(file, encoding);
+      saveCacheItem(cacheKey, {
+        path: file.path,
+        input,
+        output: file.contents.toString()
+      });
+      file.contents = Buffer.from(file.contents);
+      this.push(file);
+      next();
+    }
+  });
 }
+
+module.exports = { cacheFiles }
