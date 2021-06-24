@@ -1,0 +1,16 @@
+.kkjn__button {
+  outline: none;
+  border: none;
+  color: rgb(53, 53, 53);
+  background-color: transparent;
+  opacity: 0.4;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.6;
+  }
+
+  &.kkjn__disabled {
+    opacity: 0.2;
+  }
+}

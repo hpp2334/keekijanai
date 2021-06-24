@@ -46,7 +46,7 @@
   },
   "scripts": {
     "test": "gulp test",
-    "jest": "jest",
+    "jest": "npm run build -- --skip-types && cross-env DEBUG=keekijanai:* jest",
     "dev": "gulp develop",
     "build": "gulp build",
     "clean": "rimraf ./dist"

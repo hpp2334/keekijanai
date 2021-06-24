@@ -17,6 +17,10 @@ export function toSearch(obj: any) {
   return new URLSearchParams(obj);
 }
 
+export function callFunc <T, V>(x: T, func: (x: T) => V) {
+  return func(x);
+}
+
 export const incrReducer = (state: number) => state + 1; 
 
 export function useIsMount() {

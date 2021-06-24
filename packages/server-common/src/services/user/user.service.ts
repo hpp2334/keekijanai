@@ -1,4 +1,4 @@
-import { User, UserRole } from 'keekijanai-type';
+import { User } from 'keekijanai-type';
 
 import { Init, Service, ServiceType } from 'keekijanai-server-core';
 import _ from 'lodash';
@@ -63,7 +63,7 @@ export class UserService {
   async matchScopeRole(scope: string, roleMap: Record<string, number>, user: User.User, roles: string | string[], useInternal?: INTERNAL_ROLE | INTERNAL_ROLE[]) {
     let targetRole = this._calcRole(roleMap, roles);
 
-    const result = await this.providers.userRole.select<UserRole>({
+    const result = await this.providers.userRole.select<User.UserRole>({
       columns: ['*'],
       where: {
         id: [['=', user.id]],
@@ -75,7 +75,7 @@ export class UserService {
     }
     if (Array.isArray(result.body) && result.body.length === 1) {
       const [scopeRole] = result.body;
-      const matched = !!(targetRole & scopeRole);
+      const matched = !!(targetRole & scopeRole.role);
       if (matched) {
         return true;
       }
@@ -184,9 +184,6 @@ export class UserService {
   private _calcRole(roleMap: Record<string, number>, roles: string | string[]): number {
     return (typeof roles === 'string' ? [roles] : roles).reduce(
       (prev, roleStr) => {
-        if (!(roleStr in roleMap)) {
-          throw Error(`role "${roleStr}" not in roleMap`);
-        }
         return prev | roleMap[roleStr];
       },
       0

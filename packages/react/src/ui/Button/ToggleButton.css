@@ -1,0 +1,24 @@
+.kkjn__toggle-button {
+  outline: none;
+  border: none;
+  color: rgb(53, 53, 53);
+  background-color: transparent;
+  opacity: 0.4;
+  cursor: pointer;
+}
+
+.kkjn__toggle-button:hover {
+  opacity: 0.6;
+}
+
+.kkjn__toggle-button.kkjn__disabled {
+  opacity: 0.2;
+}
+
+.kkjn__toggle-button.kkjn__active {
+  opacity: 0.5;
+}
+
+.kkjn__toggle-button:hover.kkjn__active {
+  opacity: 0.8;
+}

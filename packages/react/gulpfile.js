@@ -10,7 +10,7 @@ const GulpMem = require('gulp-mem');
 const fsDisk = require('fs/promises');
 const { cacheFiles } = require('./tools/disk-cache');
 const { existsSync } = require('fs');
-const { transformLess, minify } = require('./tools/handle-style');
+const { transformLess, transformScss, minify } = require('./tools/handle-style');
 const { getDependencyModuleFiles } = require('./tools/get-dependency-module-files');
 const _ = require('lodash');
 
@@ -72,6 +72,7 @@ const processScript = (ctx) => async function processScript() {
     if (/\.js$/.test(file.path)) {
       contents = Buffer.from(contents).toString()
         .replace(/\.less(['"])/g, (_, p) => '.css' + p)
+        .replace(/\.scss(['"])/g, (_, p) => '.css' + p)
         .replace(/\.json(['"])/g, (_, p) => '.js' + p);
     }
     ctx.state.buildFiles[p] = contents;
@@ -118,7 +119,7 @@ const processStyle = (ctx) => function processStyle() {
   const { format, outDir, gulpMemFs } = ctx;
 
   return gulp
-    .src(['./src/**/*.@(css|less)'])
+    .src(['./src/**/*.@(css|scss|less)'])
     // modify less file to dynamic add component less file
     .pipe(cacheFiles(
       {
@@ -149,6 +150,12 @@ const processStyle = (ctx) => function processStyle() {
         file.contents = Buffer.from(css);
       }
     }))
+    .pipe(cacheFiles('transform-scss', async function (file) {
+      if (/\.scss$/.test(file.path)) {
+        const css = await transformScss(file.path, file.contents.toString());
+        file.contents = css;
+      }
+    }))
     // minify
     .pipe(
       ctx.isDev
@@ -159,7 +166,7 @@ const processStyle = (ctx) => function processStyle() {
         })
     )
     .pipe(through2.obj(async function (file, encoding, next) {
-      file.path = file.path.replace(/\.less$/, '.css');
+      file.path = file.path.replace(/\.(less|scss)$/, '.css');
       this.push(file);
       next();
     }))
@@ -186,7 +193,7 @@ const buildFactory = (ctxParams) => {
 
 const develop = async () => {
   gulp.watch(
-    './src/**/*.@(tsx|ts|jsx|js|json|css|less)',
+    './src/**/*.@(tsx|ts|jsx|js|json|css|scss|less)',
     { ignoreInitial: false },
     gulp.parallel(
     // buildFactory({ format: 'cjs', isDev: true, }),

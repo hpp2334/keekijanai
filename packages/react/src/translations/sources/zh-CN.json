@@ -32,5 +32,10 @@
   "SHOW_CODE": "显示代码",
   "HIDE_CODE": "隐藏代码",
 
+  "CREATE_ARTICLE": "创建文章",
+  "ARTICLE_EDIT": "编辑",
+
+  "FIELD_REQUIRE": "此项为必填项",
+
   "UNKNOWN_ERROR": "未知错误"
 }

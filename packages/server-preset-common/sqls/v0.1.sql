@@ -23,6 +23,25 @@ CREATE TABLE keekijanai_comment (
   child_counts int DEFAULT 0
 );
 
+CREATE TABLE keekijanai_article_core (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  type int NOT NULL,
+  title varchar(200),
+  abstract text,
+  content text
+);
+
+CREATE TABLE keekijanai_article (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  scope varchar(150) NOT NULL,
+  article_id INTEGER UNIQUE NOT NULL,
+  creator_id varchar(50) NOT NULL,
+  last_update_user_id varchar(50) NOT NULL,
+  predecessor_id INTEGER,
+  c_time bigint NOT NULL,
+  m_time bigint NOT NULL
+);
+
 CREATE TABLE keekijanai_user (
   id varchar(50) PRIMARY KEY,
   name varchar(50),
@@ -39,4 +58,4 @@ CREATE TABLE keekijanai_user_role (
   scope VARCHAR(50),
   role int,
   PRIMARY KEY(id, scope)
-)
+);

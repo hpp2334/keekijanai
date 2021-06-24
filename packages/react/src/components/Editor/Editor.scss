@@ -1,0 +1,19 @@
+.kkjn__editor-container {
+  $cardRadius: 4px;
+  $borderColor: rgb(209, 209, 209);
+  $cardBorder: 1px solid #{$borderColor};
+
+  border: $cardBorder;
+  border-radius: #{$cardRadius};
+
+  .kkjn__editor {
+    padding: 10px;
+    .DraftEditor-root {
+      min-height: 60px;
+    }
+  }
+  .kkjn__toolbar {
+    padding: 2px 0;
+    border-bottom: $cardBorder;
+  }
+}

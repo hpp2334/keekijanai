@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { Login, Comment, View, Star } from 'keekijanai-react';
+import { Login, Comment, View, Star, ArticleView } from 'keekijanai-react';
 import { CodeShow } from '../components/code-show-sources';
 
 export default function IndexPage () {
@@ -19,6 +19,8 @@ export default function IndexPage () {
       <Login />
       <h2>Comment</h2>
       <Comment scope={scope} />
+      <h2>Article</h2>
+      <ArticleView scope={scope} where={{ scope }} header='Articles' />
       <h2>View</h2>
       <View scope={scope} />
       <h2>Star</h2>

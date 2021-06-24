@@ -9,3 +9,7 @@
   margin: 0 5px;
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.kkjn__user-component.kkjn__skeleton .kkjn__username {
+  width: 50px;
+}

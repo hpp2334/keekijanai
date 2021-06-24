@@ -1,0 +1,18 @@
+.kkjn__article-view {
+  .kkjn__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: px 0;
+
+    // .kkjn__title {
+    //   margin: 0;
+    // }
+  }
+}
+
+.kkjn__article-view-modal {
+  &.kkjn__modal-container {
+    padding: 20px 20px;
+  }
+}

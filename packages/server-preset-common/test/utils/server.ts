@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 
 import { app, setup, ConfigType } from 'keekijanai-server-core';
 import {
+  ArticleController, ArticleService, ArticleCoreService,
   AuthController, AuthService, AuthServiceConfig,
   CommentController, CommentService, CommentServiceConfig,
   NotifyService, NotifyServiceConfig,
@@ -60,6 +61,7 @@ const config = (() => {
 
   const config: ConfigType.Config = {
     controllers: [
+      ArticleController,
       AuthController,
       CommentController,
       StarController,
@@ -68,6 +70,8 @@ const config = (() => {
     ],
     services: [
       DeviceService,
+      ArticleCoreService,
+      ArticleService,
       [AuthService, options.services.auth],
       [CommentService, options.services.comment],
       [NotifyService, options.services.notify],

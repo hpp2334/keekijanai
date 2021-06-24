@@ -17,7 +17,8 @@ Object.defineProperty(String.prototype, 'slash', {
 const cwd = () => process.cwd().slash;
 
 const clean = async () => {
-  execSync('npm run clean', { stdio: 'inherit' });
+  // execSync('npm run clean', { stdio: 'inherit' });
+  jetpack.remove('./dist');
 }
 
 const build = async () => {
@@ -39,6 +40,8 @@ const build = async () => {
         file.contents.toString(),
         {
           filename: path.resolve(cwd(), file.path),
+          sourceMaps: 'inline',
+          sourceRoot: path.dirname(path.resolve(cwd(), file.path)),
         }
       );
       file.contents = Buffer.from(code);

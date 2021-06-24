@@ -1,7 +1,7 @@
 
 module.exports = {
   flags: {
-    DEV_SSR: true,
+    // DEV_SSR: true,
     PRESERVE_WEBPACK_CACHE: true,
   },
   plugins: [

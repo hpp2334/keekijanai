@@ -17,7 +17,7 @@ Object.defineProperty(String.prototype, 'slash', {
 const cwd = () => process.cwd().slash;
 
 const clean = async () => {
-  execSync('npm run clean', { stdio: 'inherit' });
+  await jetpack.removeAsync('./dist');
 }
 
 const build = async () => {

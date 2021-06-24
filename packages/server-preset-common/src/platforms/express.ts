@@ -19,8 +19,6 @@ export class Express implements PlatformType.Platform {
   }
 
   handleResponse: MiddlewareType.Middleware = async (ctx, next) => {
-    debug('in middleware [handleResponse]');
-
     const req = ctx.req._req as Request;
     const res = ctx.res._res as Response;
     try {
@@ -33,6 +31,7 @@ export class Express implements PlatformType.Platform {
       res.status(typeof ctx.res.status === 'number' ? ctx.res.status : (ctx.res.body ? 200 : 404));
       res.send(ctx.res.body);
     } catch (err) {
+      debug("err: %O", err);
       if (err instanceof ResponseError) {
         res.status(err.code);
         res.send({

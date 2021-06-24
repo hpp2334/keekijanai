@@ -1,0 +1,49 @@
+.kkjn__loading-dots {
+  @mixin dots-animation($pos) {
+    animation: kkjn__loading-dots 0.8s ease #{($pos - 1) * 0.5s} infinite alternate backwards;
+  }
+  $dot-size: 15px;
+  $dot-translate: 8px;
+
+  display: flex;
+  align-items: center;
+  height: $dot-size + 2 * $dot-translate;
+  margin: 0;
+  padding-left: 0;
+
+  li {
+    list-style-type: none;
+    border-radius: 50%;
+    width: $dot-size;
+    height: $dot-size;
+    margin-right: $dot-size;
+    background-color: rgb(165, 165, 165);
+  }
+
+  li:last-child {
+    margin-right: 0;
+  }
+
+  li:nth-child(1) {
+    @include dots-animation(1)
+  }
+
+  li:nth-child(2) {
+    @include dots-animation(2)
+  }
+
+  li:nth-child(3) {
+    @include dots-animation(3)
+  }
+
+
+  @keyframes kkjn__loading-dots {
+    from {
+      transform: translateY(#{$dot-translate});
+    }
+
+    to {
+      transform: translateY(#{-$dot-translate});
+    }
+  }
+}

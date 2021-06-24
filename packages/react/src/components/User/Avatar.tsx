@@ -7,6 +7,7 @@ import { TranslationContext } from '../../translations';
 import './Avatar.css';
 import { UserHookObject } from './controller';
 import { UserOutlined } from '@ant-design/icons';
+import { StylesProps } from '../../util/style';
 
 
 export interface AvatarProps {
@@ -17,6 +18,16 @@ export interface AvatarProps {
   style?: React.CSSProperties;
 }
 
+export interface AvatarV2Props extends StylesProps {
+  user: User.User | undefined | null;
+  size: number;
+}
+
+export interface AvatarLoadingProps {
+  size: number;
+}
+
+/** @deprecated */
 export function Avatar(props: AvatarProps) {
   const { userRsp, size, className, style } = props;
 
@@ -32,5 +43,32 @@ export function Avatar(props: AvatarProps) {
         )}
       </span>
     </TranslationContext>
+  )
+}
+
+export function AvatarV2(props: AvatarV2Props) {
+  const { user, size, className, style } = props;
+  
+  return (
+    <TranslationContext>
+      <span className="kkjn__avatar">
+        {user && (
+          <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} src={user.avatarUrl} />
+        )}
+        {!user && (
+          <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} icon={<UserOutlined />} />
+        )}
+      </span>
+    </TranslationContext>
+  )
+}
+
+export function AvatarLoading(props: AvatarLoadingProps) {
+  const { size } = props;
+
+  return (
+    <span className="kkjn__avatar">
+      <Skeleton.Avatar shape='circle' size={size} active />
+    </span>
   )
 }

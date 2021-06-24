@@ -1,0 +1,53 @@
+
+
+.kkjn__article-read-core {
+  $gray: rgb(139, 139, 139);
+
+  padding: 20px;
+  
+  h1.ant-typography.kkjn__title {
+    margin: 0;
+    margin-bottom: 10px;
+    color: rgb(63, 63, 63);
+    font-size: 32px;
+    font-weight: 600;
+  }
+  .kkjn__info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 10px 0;
+
+    .kkjn__date-text {
+      color: $gray;
+    }
+  }
+
+  .kkjn__abstract {
+    margin: 16px 0;
+    margin-left: 8px;
+    position: relative;
+    display: block;
+    color: $gray;
+
+    &::before {
+      content: '';
+      display: block;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: -8px;
+      width: 4px;
+      background-color: rgb(185, 185, 185);
+    }
+  }
+
+  .kkjn__editor-container {
+    border: none;
+    border-radius: 0;
+  
+    .kkjn__editor {
+      padding: 0;
+    }
+  }
+}
