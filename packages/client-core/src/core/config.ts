@@ -18,17 +18,25 @@ const configSchema = Joi.object({
       .default('/api/keekijanai')
       .description('api route prefix')
   }),
-})
+});
+
+const INIT_CONFIG: ConfigType = {
+  route: {
+    root: '/api/keekijanai',
+  }
+};
 
 export class ConfigReader {
   private _config!: InternalConfigType;
 
   constructor() {
-    this.read(configSchema.validate(undefined).value);
+    this.read(INIT_CONFIG);
   }
 
   read(config: ConfigType) {
-    this._config = this.validate(config);
+    const result = this.validate(config);
+    console.log(result);
+    this._config = result;
   }
 
   get config() {

@@ -3,14 +3,15 @@
   border: none;
   color: rgb(53, 53, 53);
   background-color: transparent;
-  opacity: 0.4;
+  opacity: 0.7;
   cursor: pointer;
 
   &:hover {
-    opacity: 0.6;
+    opacity: 0.9;
   }
 
   &.kkjn__disabled {
-    opacity: 0.2;
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }

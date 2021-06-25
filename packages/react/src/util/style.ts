@@ -12,11 +12,11 @@ function mergeStyle(a: React.CSSProperties | undefined, b: React.CSSProperties |
   return _.assign(a, b);
 }
 
-function mergeClassName(a: string | undefined, b: Array<any> | string | undefined) {
-  let finalCls = a ?? '';
-  let first = !finalCls;
-  if (b) {
-    (typeof b === 'string' ? [b] : b).forEach(s => {
+function handleClass(cls: Array<any> | string | undefined) {
+  let first = true;
+  let finalCls = '';
+  if (cls) {
+    (typeof cls === 'string' ? [cls] : cls).forEach(s => {
       if (s) {
         if (first) {
           finalCls += s;
@@ -30,9 +30,24 @@ function mergeClassName(a: string | undefined, b: Array<any> | string | undefine
   return finalCls || undefined;
 }
 
+function mergeClassName(a: Array<any> | string | undefined, b: Array<any> | string | undefined) {
+  let fa = handleClass(a);
+  let fb = handleClass(b);
+  return handleClass([fa, fb]);
+}
+
 export function mergeStyles(base: StylesProps | undefined, classNames?: Array<any>, style?: React.CSSProperties) {
   const finalStyle = mergeStyle(base?.style, style);
   const finalClassName = mergeClassName(base?.className, classNames);
+  return {
+    style: finalStyle,
+    className: finalClassName,
+  };
+}
+
+export function mergeStylesLeft(classNames: Array<any> | string | undefined, style: React.CSSProperties | undefined, extra: StylesProps | undefined) {
+  const finalStyle = mergeStyle(style, extra?.style);
+  const finalClassName = mergeClassName(classNames, extra?.className);
   return {
     style: finalStyle,
     className: finalClassName,

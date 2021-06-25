@@ -1,10 +1,11 @@
 import React from 'react';
 import { Article } from 'keekijanai-type';
-import { Button, List, PaginationProps, Popconfirm, Typography } from 'antd';
+import { List, PaginationProps, Popconfirm, Typography } from 'antd';
+import Button from '../../../ui/Button/Button';
 import { format } from 'date-fns-tz';
 import { useCallback } from 'react';
 import _ from 'lodash';
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { DeleteOutlined, EditOutlined, LoadingOutlined } from '@ant-design/icons';
 import { ArticleListWhereParams } from 'keekijanai-client-core';
 import { useRequest } from '../../../core/request';
 import { useTranslation } from 'react-i18next';
@@ -103,7 +104,7 @@ export function ArticleListCore(props: ArticleListCoreProps) {
               onClick={onClickItem && _.partial(onClickItem, item)}
             >
               {panel && (<div className="kkjn__panel" onClick={handleStopPropagation}>
-                <Button type='text' disabled={panel.removing} icon={<EditOutlined />}
+                <Button disabled={panel.removing} prefix={<EditOutlined />}
                   onClick={panel.onClickItemEdit && _.partial(panel.onClickItemEdit, item)} />
                 <Popconfirm
                   title={t("READY_TO_REMOVE")}
@@ -112,7 +113,7 @@ export function ArticleListCore(props: ArticleListCoreProps) {
                   okText={t("YES")}
                   cancelText={t("NO")}
                 >
-                  <Button loading={panel.removing} danger={true} type='text' shape='circle' size='small' icon={<DeleteOutlined />}></Button>
+                  <Button disabled={panel.removing} prefix={panel.removing ? <LoadingOutlined /> : <DeleteOutlined />}></Button>
                 </Popconfirm>
               </div>)}
             </ArticleListItem>

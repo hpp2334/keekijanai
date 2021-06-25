@@ -36,6 +36,7 @@ export class AuthService extends Service {
       }
     });
 
+    /** @todo use hook to execute after client ready */
     processNextTick(() => {
       this.updateCurrent().subscribe({});
     });

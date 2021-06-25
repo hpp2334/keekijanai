@@ -1,7 +1,7 @@
 import { Article, Article as ArticleType } from 'keekijanai-type';
 import { convertFromRaw, EditorState } from "draft-js";
 import React, {  } from "react";
-import { Typography, Divider } from 'antd';
+import { Typography } from 'antd';
 import { useRequest, createRequestGetReturned, UseRequestGetReturn } from '../../../core/request';
 import { useArticleContext } from '../controllers/context';
 import { EditorContainer, Editor } from '../../Editor';
@@ -12,6 +12,7 @@ import './ArticleRead.scss';
 import { DateText } from '../../../components/Base/Date';
 import { UserComponentV2 } from '../../../components/User/UserComponent';
 import LoadingDots from '../../../ui/Loading/Dots';
+import { Divider } from '../../../ui';
 
 interface ArticleReadCoreProps {
   article: ArticleType.Get;
@@ -38,6 +39,7 @@ export function ArticleReadCore(props: ArticleReadCoreProps) {
         <UserComponentV2 user={article.creator} />
         <DateText className="kkjn__date-text" timestamp={article.cTime} />
       </div>
+      <Divider />
       {articleCore.abstract && (
         <Typography.Text className="kkjn__abstract">
           {articleCore.abstract}
