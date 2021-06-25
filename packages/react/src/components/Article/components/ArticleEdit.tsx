@@ -4,8 +4,7 @@ import React, { useMemo } from "react";
 import { useCallback } from "react";
 import { Form, Field } from 'react-final-form';
 import { useTranslation } from 'react-i18next';
-import { useRequest, createRequestGetReturned, UseRequestGetReturn } from '../../../core/request';
-import { useArticleService } from '../controllers/context';
+import { useRequest, createRequestGetReturned, UseRequestGetReturn, UseRequestMutateOpts } from '../../../core/request';
 import { map } from 'rxjs/operators';
 import _ from 'lodash';
 import { Button, Checkbox, Input, Space, Typography } from 'antd';
@@ -13,6 +12,8 @@ import { Editor, EditorContainer, EditorToolbar } from '../../Editor';
 
 import './ArticleEdit.scss';
 import LoadingDots from '../../../ui/Loading/Dots';
+import { useArticleContext } from '../controllers';
+import { sprintf } from 'sprintf-js';
 
 interface ArticleEditCoreProps {
   scope?: string;
@@ -45,7 +46,7 @@ function FieldError(props: { children?: React.ReactNode }) {
 
 export function ArticleEditCore(props: ArticleEditCoreProps) {
   const { scope, articleCoreCreate, editScopeHide, upserting, onSubmit, onCancel } = props;
-  const { t } = useTranslation();
+  const { t } = useArticleContext();
 
   const initValues = useMemo(() => ({
     scope: scope ?? '',
@@ -80,12 +81,12 @@ export function ArticleEditCore(props: ArticleEditCoreProps) {
           <div>
             <Field name="switchTitle" component='input' type='checkbox'>
               {props => (
-                <Checkbox {...props.input}>include title</Checkbox>
+                <Checkbox {...props.input}>{t("INCLUDE_TITLE")}</Checkbox>
               )}
             </Field>
             <Field name="switchAbstract" component='input' type='checkbox'>
               {props => (
-                <Checkbox {...props.input}>include abstract</Checkbox>
+                <Checkbox {...props.input}>{t("INCLUDE_ABSTRACT")}</Checkbox>
               )}
             </Field>
           </div>
@@ -100,11 +101,11 @@ export function ArticleEditCore(props: ArticleEditCoreProps) {
               </Field>
             </div>
           )}
-          {values.switchTitle && <Field name='title' component='input' type='text'>
+          {values.switchTitle && <Field name='title' component='input' type='text' validate={validationRequire}>
             {({ input, meta }) => (
               <div className='kkjn__space-y'>
                 <Input {...input} placeholder={t('ARTICLE_TITLE')} />
-                {meta.touched && meta.error && <FieldError>{t(meta.error)}</FieldError>}
+                {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
               </div>
             )}
           </Field>}
@@ -112,7 +113,7 @@ export function ArticleEditCore(props: ArticleEditCoreProps) {
             {({ input, meta }) => (
               <div className='kkjn__space-y'>
                 <Input.TextArea className='kkjn__textarea' {...input} placeholder={t('ARTICLE_ABSTRACT')} />
-                {meta.touched && meta.error && <FieldError>{t(meta.error)}</FieldError>}
+                {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
               </div>
             )}
           </Field>}
@@ -123,14 +124,14 @@ export function ArticleEditCore(props: ArticleEditCoreProps) {
                   <EditorToolbar />
                   <Editor />
                 </EditorContainer>
-                {meta.touched && meta.error && <FieldError>{t(meta.error)}</FieldError>}
+                {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
               </>
             )}
           </Field>
           <div className="kkjn__panel">
             <Space>
-              <Button disabled={upserting} onClick={onCancel}>{t('CANCEL')}</Button>
-              <Button loading={upserting} type='primary' htmlType='submit'>{t('ARTICLE_EDIT')}</Button>
+              <Button disabled={upserting} onClick={onCancel}>{t('translation:CANCEL')}</Button>
+              <Button loading={upserting} type='primary' htmlType='submit'>{t('EDIT_ARTICLE')}</Button>
             </Space>
           </div>
         </form>
@@ -142,13 +143,19 @@ export function ArticleEditCore(props: ArticleEditCoreProps) {
 // === use Service ===
 
 export function ArticleEdit (props: ArticleEditProps) {
-  const articleService = useArticleService();
+  const { articleService, t }= useArticleContext();
   const _article = props.article;
   const _id = _article && (typeof _article === 'number' ? _article : _article.id);
 
   const reqUpsert = (() => {
-    const opts = {
+    const opts: UseRequestMutateOpts<any> = {
       onSuccess: () => props.onSubmit?.(),
+      notification: {
+        template: {
+          success: (rsp) => sprintf(t("EDIT_ARTICLE_SUCCESS")),
+          error: err => sprintf(t("EDIT_ARTICLE_ERROR"), err),
+        }
+      }
     }
 
     return typeof _id !== 'undefined'

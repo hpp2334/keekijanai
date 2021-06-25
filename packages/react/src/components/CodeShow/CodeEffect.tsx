@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useCodeEffect } from './controller';
 import { getCodeEffectContainer } from './code-effect-components';
 import { Card } from 'antd';
-import { TranslationContext } from '../../translations';
 
 export type CodeEffectProps = {
   /**
@@ -32,18 +31,16 @@ export function CodeEffect(props: CodeEffectProps) {
   const isContainerValid = !!Container && (typeof demoExports === 'object' && demoExports !== null);
 
   return (
-    <TranslationContext>
-      <Card>
-        {!isContainerValid && (
-          <div>
+    <Card>
+      {!isContainerValid && (
+        <div>
 
-          </div>
-        )}
-        {isContainerValid && Container && (
-          <Container {...demoExports} />
-        )}
-      </Card>
-    </TranslationContext>
+        </div>
+      )}
+      {isContainerValid && Container && (
+        <Container {...demoExports} />
+      )}
+    </Card>
   )
 }
 

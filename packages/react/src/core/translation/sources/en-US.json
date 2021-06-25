@@ -32,13 +32,6 @@
   "SHOW_CODE": "Show the code",
   "HIDE_CODE": "Hide the code",
 
-  "ARTICLE_TITLE": "Title",
-  "ARTICLE_ABSTRACT": "Abstract",
-  "ARTICLE_CONTENT": "Content",
-
-  "CREATE_ARTICLE": "Create Article",
-  "ARTICLE_EDIT": "Edit",
-
   "FIELD_REQUIRE": "This field is required",
 
   "UNKNOWN_ERROR": "Unknown error"

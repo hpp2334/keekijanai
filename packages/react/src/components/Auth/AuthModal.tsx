@@ -9,7 +9,6 @@ import './AuthModal.css'
 import { singletonModalManager } from '../Base/SingletonModal';
 import { useAuth, useLegacyAuth, useOAuth2 } from './controller';
 import { AuthService } from 'keekijanai-client-core';
-import { TranslationContext } from '../../translations';
 import { handleStopPropagation, useRequestState, withContexts } from '../../util';
 import { useForm } from 'antd/lib/form/Form';
 
@@ -190,9 +189,7 @@ function LegacyRegister(props: LegacyRegisterProps) {
   )
 }
 
-const AuthComponent = withContexts<AuthComponentProps>(
-  TranslationContext,
-)(function (props) {
+const AuthComponent = function (props: AuthComponentProps) {
   const { onClose, enableLegacyAuth, enableOAuth2: providers } = props;
   const [mode, setMode] = useState<'auth' | 'register'>('auth');
   const { t } = useTranslation();
@@ -221,7 +218,7 @@ const AuthComponent = withContexts<AuthComponentProps>(
       </div>
     </div>
   )
-})
+}
 
 function SingletonAuthComponent() {
   return (

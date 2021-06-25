@@ -4,10 +4,17 @@ import { Observable } from "rxjs";
 import _ from 'lodash';
 import { mergeMap, tap } from "rxjs/operators";
 import { PaginationCore, PaginationHook, PaginationParams, usePagination } from "./pagination";
+import { NotificationType } from "../notification";
+import { useKeekijanaiContext } from "../context";
 
 type UseRequestCommonOpts<T> = {
-  /** replace with real notification */
-  notification?: any;
+  notification?: {
+    instance?: NotificationType;
+    template: {
+      success: (rsp: T) => string;
+      error: (err: string) => string;
+    }
+  };
   onSuccess?: (rsp: T) => void;
   onFail?: (err: string) => void;
 }
@@ -17,9 +24,9 @@ type UseRequestListOpts<OT, PAGINATION> = UseRequestCommonOpts<OT> & {
   pagination?: PAGINATION;
 }
 
-type UseRequestGetOpts<T> = UseRequestCommonOpts<T>;
+export type UseRequestGetOpts<T> = UseRequestCommonOpts<T>;
 
-type UseRequestMutateOpts<T> = UseRequestCommonOpts<T>;
+export type UseRequestMutateOpts<T> = UseRequestCommonOpts<T>;
 
 type UseRequestListReturn<T> = {
   data: T[];
@@ -29,6 +36,11 @@ type UseRequestListReturn<T> = {
   pagination: PaginationHook;
   run: () => void;
 };
+
+/** @todo normalize and integrate into context */
+function handleResponse(err: any) {
+  return err?.response?.error ?? err.message ?? err ?? 'Unknown error';
+}
 
 export type UseRequestGetReturn<T> = {
   data: T;
@@ -133,6 +145,11 @@ function useRequestMutate<T, ARGS extends any[]> (
   getObservable: (...args: ARGS) => Observable<T>,
   opts?: UseRequestMutateOpts<T>,
 ): UseRequestMutateReturn<ARGS> {
+  const ctx = useKeekijanaiContext();
+  if (opts?.notification) {
+    opts.notification.instance = opts.notification.instance || ctx.notification;
+  }
+
   const [loading, setLoading] = useState(false);
 
   const run = useCallback((...args: ARGS) => {
@@ -147,9 +164,20 @@ function useRequestMutate<T, ARGS extends any[]> (
       .subscribe({
         next: (rsp) => {
           opts?.onSuccess?.(rsp);
+
+          if (opts?.notification) {
+            const { instance, template } = opts.notification;
+            instance?.message('success', template.success(rsp));
+          }
         },
         error: (err) => {
           opts?.onFail?.(err);
+
+          if (opts?.notification) {
+            const { instance, template } = opts.notification;
+            console.log('in useRequest', template.error(handleResponse(err)), instance);
+            instance?.message('error', template.error(handleResponse(err)));
+          }
         },
       })
   }, [getObservable, opts?.onSuccess, opts?.onFail]);

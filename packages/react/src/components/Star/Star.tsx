@@ -8,7 +8,6 @@ import _ from 'lodash';
 import './Star.css';
 import { useAuth } from '../Auth';
 import { authModal } from '../Auth/AuthModal';
-import { TranslationContext } from '../../translations';
 import { getRspError } from '../../util/request';
 
 export interface StarProps {
@@ -73,10 +72,8 @@ export const StarCore = function () {
 export function Star(props: StarProps) {
   const { scope } = props;
   return (
-    <TranslationContext>
-      <StarProvider scope={scope}>
-        <StarCore />
-      </StarProvider>
-    </TranslationContext>
+    <StarProvider scope={scope}>
+      <StarCore />
+    </StarProvider>
   )
 }

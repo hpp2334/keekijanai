@@ -9,13 +9,13 @@ import { ArticleEdit } from "./ArticleEdit";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { withComponentsFactory } from "../../../util/hoc";
-import { TranslationContext } from "../../../translations";
-import { ArticleContext, useArticleService } from "../controllers/context";
+import { ArticleContext, useArticleContext } from "../controllers/context";
 import _ from "lodash";
 import Modal from "../../../ui/Modal";
 import { useRequest } from "../../../core/request";
 
 import './ArticleView.scss';
+import { sprintf } from "sprintf-js";
 
 interface ArticleViewProps {
   scope?: string;
@@ -26,9 +26,7 @@ interface ArticleViewProps {
 
 export let ArticleView = (props: ArticleViewProps) => {
   const { scope, header, where, take = 10 } = props;
-  const { t } = useTranslation();
-
-  const articleService = useArticleService();
+  const { articleService, t } = useArticleContext();
 
   const {
     data: articleList,
@@ -58,6 +56,12 @@ export let ArticleView = (props: ArticleViewProps) => {
         pagination.change(1);
         run();
       },
+      notification: {
+        template: {
+          success: rsp => sprintf(t("DELETE_ARTICLE_SUCCESS")),
+          error: err => sprintf(t("DELETE_ARTICLE_ERROR"), err),
+        }
+      }
     }
   );
 
@@ -153,6 +157,5 @@ export let ArticleView = (props: ArticleViewProps) => {
 };
 
 ArticleView = withComponentsFactory(
-  TranslationContext,
   ArticleContext
 )(ArticleView);

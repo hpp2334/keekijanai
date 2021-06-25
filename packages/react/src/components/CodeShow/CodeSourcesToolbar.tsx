@@ -2,7 +2,6 @@ import { CompressOutlined, CopyOutlined, ExpandOutlined } from '@ant-design/icon
 import { Button, Tooltip } from 'antd'
 import React, { useCallback } from 'react'
 import { useTranslation } from 'react-i18next';
-import { TranslationContext } from '../../translations';
 
 interface CodeSourcesToolbarProps {
   isCollapsed: boolean;
@@ -24,17 +23,15 @@ export function CodeSourcesToolbar(props: CodeSourcesToolbarProps) {
   }, [onClickCopy]);
 
   return (
-    <TranslationContext>
-      <div className="kkjn__panel">
-        {!isCollapsed && (
-          <Tooltip title={t("COPY_CODE")}>
-            <Button onClick={handleClickCopy} icon={<CopyOutlined />} type='text' shape='circle' />
-          </Tooltip>
-        )}
-        <Tooltip title={isCollapsed ? t("SHOW_CODE") : t("HIDE_CODE")}>
-          <Button onClick={handleClickCollapse} icon={isCollapsed ? <ExpandOutlined /> : <CompressOutlined />} type='text' shape='circle' />
+    <div className="kkjn__panel">
+      {!isCollapsed && (
+        <Tooltip title={t("COPY_CODE")}>
+          <Button onClick={handleClickCopy} icon={<CopyOutlined />} type='text' shape='circle' />
         </Tooltip>
-      </div>
-    </TranslationContext>
+      )}
+      <Tooltip title={isCollapsed ? t("SHOW_CODE") : t("HIDE_CODE")}>
+        <Button onClick={handleClickCollapse} icon={isCollapsed ? <ExpandOutlined /> : <CompressOutlined />} type='text' shape='circle' />
+      </Tooltip>
+    </div>
   )
 }

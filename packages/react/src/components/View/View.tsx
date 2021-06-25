@@ -5,7 +5,6 @@ import { EyeOutlined } from '@ant-design/icons';
 import { Skeleton, Space, Typography } from 'antd';
 
 import './View.css'
-import { TranslationContext } from '../../translations';
 
 interface ViewProps {
   /** id，如可取 location.pathname */
@@ -39,10 +38,8 @@ export function View(props: ViewProps) {
   const { scope } = props;
 
   return (
-    <TranslationContext>
-      <ViewProvider scope={scope}>
-        <ViewCore />
-      </ViewProvider>
-    </TranslationContext>
+    <ViewProvider scope={scope}>
+      <ViewCore />
+    </ViewProvider>
   )
 }

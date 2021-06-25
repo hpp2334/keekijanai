@@ -5,7 +5,6 @@ import { format } from 'date-fns-tz';
 import { useCallback } from 'react';
 import _ from 'lodash';
 import { DeleteOutlined, EditOutlined } from '@ant-design/icons';
-import { useArticleService } from '../controllers/context';
 import { ArticleListWhereParams } from 'keekijanai-client-core';
 import { useRequest } from '../../../core/request';
 import { useTranslation } from 'react-i18next';
@@ -13,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import './ArticleList.scss';
 import LoadingDots from '../../../ui/Loading/Dots';
 import { handleStopPropagation } from '../../../util';
+import { DateText } from '../../Base/Date';
+import { useArticleContext } from '../controllers';
 
 interface ArticleListItemProps {
   article: Article.Get;
@@ -55,7 +56,7 @@ export function ArticleListItem(props: ArticleListItemProps) {
     <div className="kkjn__article-list-item" onClick={onClick}>
       <div className="kkjn__row">
         <Typography.Text>{article.article.title ?? ''}</Typography.Text>
-        <Typography.Text>{format(article.cTime, 'yyyy-MM-dd HH:mm:ss')}</Typography.Text>
+        <DateText timestamp={article.cTime} />
       </div>
       {children}
     </div>
@@ -127,7 +128,7 @@ export function ArticleList(props: ArticleListProps) {
     onClickItem,
     onClickItemEdit,
   } = props;
-  const articleService = useArticleService();
+  const { articleService } = useArticleContext();
 
   const { t } = useTranslation();
   const {

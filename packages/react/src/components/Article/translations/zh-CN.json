@@ -1,0 +1,21 @@
+{
+  "CREATE_ARTICLE": "创建文章",
+  "EDIT_ARTICLE": "编辑",
+
+  "ARTICLE_TITLE": "标题",
+  "ARTICLE_ABSTRACT": "摘要",
+  "ARTICLE_CONTENT": "内容",
+
+  "INCLUDE_TITLE": "包含标题",
+  "INCLUDE_ABSTRACT": "包含摘要",
+
+  "PLACEHOLDER_TITLE": "标题",
+  "PLACEHOLDER_ABSTRACT": "摘要",
+  "PLACEHOLDER_CONTENT": "内容",
+
+  "EDIT_ARTICLE_SUCCESS": "创建文章成功",
+  "EDIT_ARTICLE_ERROR": "创建文章失败：%s",
+
+  "DELETE_ARTICLE_SUCCESS": "删除文章成功",
+  "DELETE_ARTICLE_ERROR": "删除文章失败: %s"
+}

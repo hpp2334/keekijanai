@@ -9,7 +9,6 @@ import './Auth.css';
 import { authModal } from './AuthModal';
 import { UserComponent } from '../User/UserComponent';
 import clsx from 'clsx';
-import { TranslationContext } from '../../translations';
 import { useFetchResponse } from '../../util/request';
 
 
@@ -55,9 +54,7 @@ function HaveLogouted(props: HaveLogoutedProps) {
   );
 }
 
-export const Login = withContexts<LoginProps>(
-  TranslationContext,
-)(function (props) {
+export const Login = function (props: LoginProps) {
   const { className } = props;
   const { authRsp, logout } = useAuth();
 
@@ -73,4 +70,4 @@ export const Login = withContexts<LoginProps>(
       )()}
     </div>
   )
-})
+}

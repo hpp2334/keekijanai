@@ -1,7 +1,5 @@
 import './style.less';
 import './base.less';
-import { getClient as getClientCore } from 'keekijanai-client-core';
-import { initAuthModal } from './components/Auth';
 
 export * from './components/Auth';
 export * from './components/Article';
@@ -11,11 +9,6 @@ export * from './components/Star';
 export * from './components/View';
 export * from './components/CodeShow';
 
-export function getClient() {
-  return {
-    core: getClientCore(),
-    authModal: {
-      init: initAuthModal,
-    }
-  }
-}
+export { KeekijanaiContext } from './core/context';
+export type { KeekijanaiContextProps } from './core/context';
+

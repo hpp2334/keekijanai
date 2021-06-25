@@ -2,7 +2,6 @@ import { Skeleton, Avatar as AntdAvatar } from 'antd';
 import clsx from 'clsx';
 import { User } from 'keekijanai-type';
 import { FetchResponse } from '../../util/request';
-import { TranslationContext } from '../../translations';
 
 import './Avatar.css';
 import { UserHookObject } from './controller';
@@ -32,17 +31,15 @@ export function Avatar(props: AvatarProps) {
   const { userRsp, size, className, style } = props;
 
   return (
-    <TranslationContext>
-      <span className="kkjn__avatar">
-        {(userRsp.stage === 'pending' || userRsp.stage === 'requesting') && <Skeleton.Avatar shape='circle' size={size} active />}
-        {userRsp.stage === 'done' && !!userRsp.data && (
-          <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} src={userRsp.data.avatarUrl} />
-        )}
-        {userRsp.stage === 'done' && !userRsp.data && (
-          <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} icon={<UserOutlined />} />
-        )}
-      </span>
-    </TranslationContext>
+    <span className="kkjn__avatar">
+      {(userRsp.stage === 'pending' || userRsp.stage === 'requesting') && <Skeleton.Avatar shape='circle' size={size} active />}
+      {userRsp.stage === 'done' && !!userRsp.data && (
+        <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} src={userRsp.data.avatarUrl} />
+      )}
+      {userRsp.stage === 'done' && !userRsp.data && (
+        <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} icon={<UserOutlined />} />
+      )}
+    </span>
   )
 }
 
@@ -50,16 +47,14 @@ export function AvatarV2(props: AvatarV2Props) {
   const { user, size, className, style } = props;
   
   return (
-    <TranslationContext>
-      <span className="kkjn__avatar">
-        {user && (
-          <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} src={user.avatarUrl} />
-        )}
-        {!user && (
-          <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} icon={<UserOutlined />} />
-        )}
-      </span>
-    </TranslationContext>
+    <span className="kkjn__avatar">
+      {user && (
+        <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} src={user.avatarUrl} />
+      )}
+      {!user && (
+        <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} icon={<UserOutlined />} />
+      )}
+    </span>
   )
 }
 

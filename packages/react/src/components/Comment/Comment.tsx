@@ -20,7 +20,6 @@ import { authModal } from '../Auth/AuthModal';
 import { tap } from 'rxjs/operators';
 import _ from 'lodash';
 import { Observable, of, throwError } from 'rxjs';
-import { TranslationContext } from '../../translations';
 import { FetchResponse, getRspError, useFetchResponse } from '../../util/request';
 import { CommentEditor, CommentEditorContent } from './CommentEditor';
 import { Avatar } from '../User';
@@ -500,12 +499,10 @@ function ChildCommentList(props: ChildCommentListProps) {
 export function Comment(props: CommentProps) {
   const { scope } = props;
   return (
-    <TranslationContext>
-      <CommentProvider scope={scope} >
-        <div className="kkjn__comment">
-          <RootCommentList />
-        </div>
-      </CommentProvider>
-    </TranslationContext>
+    <CommentProvider scope={scope} >
+      <div className="kkjn__comment">
+        <RootCommentList />
+      </div>
+    </CommentProvider>
   )
 }

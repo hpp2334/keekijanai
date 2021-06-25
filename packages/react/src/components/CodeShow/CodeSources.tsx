@@ -8,7 +8,6 @@ import clsx from 'clsx';
 
 import { PrismAsyncLight as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { a11yDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { TranslationContext } from '../../translations';
 
 export interface HightlightProps {
   src: string;
@@ -56,19 +55,17 @@ export function CodeSources(props: CodeSourcesProps) {
   }), [activeKey, copy]);
 
   return isEmpty ? null : (
-    <TranslationContext>
-      <div className={clsx('kkjn__code-sources')}>
-        <Tabs className={clsx('kkjn__tabs')} activeKey={activeKey} onChange={setActiveKey} tabPosition='top'>
-          {
-            sources.map(item => (
-              <Tabs.TabPane tab={item.name} key={item.key}>
-                <Highlight src={item.key} source={item.source} />
-              </Tabs.TabPane>
-            ))
-          }
-        </Tabs>
-      </div>
-    </TranslationContext>
+    <div className={clsx('kkjn__code-sources')}>
+      <Tabs className={clsx('kkjn__tabs')} activeKey={activeKey} onChange={setActiveKey} tabPosition='top'>
+        {
+          sources.map(item => (
+            <Tabs.TabPane tab={item.name} key={item.key}>
+              <Highlight src={item.key} source={item.source} />
+            </Tabs.TabPane>
+          ))
+        }
+      </Tabs>
+    </div>
   )
 }
 

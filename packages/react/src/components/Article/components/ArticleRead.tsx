@@ -3,7 +3,7 @@ import { convertFromRaw, EditorState } from "draft-js";
 import React, {  } from "react";
 import { Typography, Divider } from 'antd';
 import { useRequest, createRequestGetReturned, UseRequestGetReturn } from '../../../core/request';
-import { useArticleService } from '../controllers/context';
+import { useArticleContext } from '../controllers/context';
 import { EditorContainer, Editor } from '../../Editor';
 import { useMemo } from 'react';
 import _ from 'lodash';
@@ -55,7 +55,7 @@ export function ArticleReadCore(props: ArticleReadCoreProps) {
 // === use Service ===
 
 export function ArticleRead (props: ArticleReadProps) {
-  const articleService = useArticleService();
+  const { articleService } = useArticleContext();
   const { id } = props;
 
   const { data, error, loading } = useRequest('get', ([id]) => articleService.get(id), [id])

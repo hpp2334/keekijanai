@@ -1,0 +1,21 @@
+{
+  "CREATE_ARTICLE": "Create Article",
+  "EDIT_ARTICLE": "Edit",
+
+  "ARTICLE_TITLE": "Title",
+  "ARTICLE_ABSTRACT": "Abstract",
+  "ARTICLE_CONTENT": "Content",
+
+  "INCLUDE_TITLE": "Include title",
+  "INCLUDE_ABSTRACT": "Include abstract",
+
+  "PLACEHOLDER_TITLE": "Title",
+  "PLACEHOLDER_ABSTRACT": "Abstract",
+  "PLACEHOLDER_CONTENT": "Content",
+  
+  "EDIT_ARTICLE_SUCCESS": "Create article successfully",
+  "EDIT_ARTICLE_ERROR": "Error on creating article：%s",
+
+  "DELETE_ARTICLE_SUCCESS": "Delete article successfully",
+  "DELETE_ARTICLE_ERROR": "Error on deleting article：%s"
+}
