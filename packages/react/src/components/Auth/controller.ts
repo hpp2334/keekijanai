@@ -7,12 +7,14 @@ import _ from 'lodash';
 import { useObservableState } from 'observable-hooks';
 import { of } from 'rxjs';
 import { FetchResponse, mapToRsp, INIT_PENDING_FETCH_RESPONSE } from '../../util/request';
+import { useRequest } from '../../core/request';
 
 
 const authContext = createContext({
   authService: new AuthService(),
 });
 
+/** @deprecated */
 export function useAuth() {
   const { authService } = useContext(authContext);
   const { user$, logout } = authService;
@@ -33,6 +35,32 @@ export function useAuth() {
   });
 
   return exports;
+}
+
+export function useAuthV2() {
+  const { authService } = useContext(authContext);
+  const { user$, logout } = authService;
+
+  const {
+    data: user,
+    loading,
+    error
+  } = useRequest(
+    'get',
+    () => user$
+      .asObservable()
+      .pipe(
+        filter(x => x !== null),
+      ),
+    []
+  )
+
+  return {
+    user,
+    loading,
+    error,
+    logout,
+  };
 }
 
 export function useOAuth2() {
