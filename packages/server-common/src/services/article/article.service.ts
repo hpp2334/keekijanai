@@ -72,7 +72,7 @@ export class ArticleService {
     if (result.count === null) {
       throw Error(`count is null` + result.error?.message);
     }
-    debug('after list: %O', result.body);
+    debug('after list: %d', result.body.length);
 
     const list = await Aigle.mapLimit<DBType, Article.Get>(result.body, 15, async (raw) => {
       return {
@@ -114,7 +114,7 @@ export class ArticleService {
     const user = this.authService.current(true);
     const time = await this.timeService.getTime();
 
-    debug(`before create %o (user: %s)`, payload.article, user.id);
+    debug(`before create %d (user: %s)`, payload.article.id, user.id);
     const canCreate = await this.userService.matchScopeRole('article/' + payload.scope, this.USER_ROLES[payload.scope] ?? {}, user, ['admin'], 'admin');
     if (!canCreate) {
       throw articleError.insufficientPriviledge;
@@ -133,11 +133,11 @@ export class ArticleService {
         mTime: time,
       },
     });
-    debug('after create %o', result.body);
 
     if (result.error || result.body?.length !== 1 || typeof result.body?.[0]?.id !== 'number') {
       throw Error(`Create article core fail. ` + result.error?.message);
     }
+    debug('after create %d', result.body?.[0].id);
     
     const [inserted] = result.body;
     return await this.get(inserted.id);

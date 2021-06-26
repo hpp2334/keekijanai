@@ -7,13 +7,14 @@ import { useTranslation } from 'react-i18next';
 import { useRequest, createRequestGetReturned, UseRequestGetReturn, UseRequestMutateOpts } from '../../../core/request';
 import { map } from 'rxjs/operators';
 import _ from 'lodash';
-import { Button, Checkbox, Input, Space, Typography } from 'antd';
-import { Editor, EditorContainer, EditorToolbar } from '../../Editor';
+import { Button, Checkbox, Input, Typography } from 'antd';
+import { Editor } from '../../Editor';
 
 import './ArticleEdit.scss';
 import LoadingDots from '../../../ui/Loading/Dots';
 import { useArticleContext } from '../controllers';
 import { sprintf } from 'sprintf-js';
+import { Space } from '../../../ui';
 
 interface ArticleEditCoreProps {
   scope?: string;
@@ -78,20 +79,20 @@ export function ArticleEditCore(props: ArticleEditCoreProps) {
       initialValues={initValues}
       render={({ handleSubmit, values }) => (
         <form className="kkjn__article-edit-core" onSubmit={handleSubmit}>
-          <div>
-            <Field name="switchTitle" component='input' type='checkbox'>
-              {props => (
-                <Checkbox {...props.input}>{t("INCLUDE_TITLE")}</Checkbox>
-              )}
-            </Field>
-            <Field name="switchAbstract" component='input' type='checkbox'>
-              {props => (
-                <Checkbox {...props.input}>{t("INCLUDE_ABSTRACT")}</Checkbox>
-              )}
-            </Field>
-          </div>
-          {!editScopeHide && (
-            <div className='kkjn__space-y'>
+          <Space>
+            <div>
+              <Field name="switchTitle" component='input' type='checkbox'>
+                {props => (
+                  <Checkbox {...props.input}>{t("INCLUDE_TITLE")}</Checkbox>
+                )}
+              </Field>
+              <Field name="switchAbstract" component='input' type='checkbox'>
+                {props => (
+                  <Checkbox {...props.input}>{t("INCLUDE_ABSTRACT")}</Checkbox>
+                )}
+              </Field>
+            </div>
+            {!editScopeHide && (
               <Field name="scope" component='input' type='text'>
                 {({ input, meta }) => (
                   <>
@@ -99,41 +100,38 @@ export function ArticleEditCore(props: ArticleEditCoreProps) {
                   </>
                 )}
               </Field>
+            )}
+            {values.switchTitle && <Field name='title' component='input' type='text' validate={validationRequire}>
+              {({ input, meta }) => (
+                <div>
+                  <Input {...input} placeholder={t('ARTICLE_TITLE')} />
+                  {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
+                </div>
+              )}
+            </Field>}
+            {values.switchAbstract && <Field name='abstract' component='textarea' validate={validationRequire}>
+              {({ input, meta }) => (
+                <div>
+                  <Input.TextArea className='kkjn__textarea' {...input} placeholder={t('ARTICLE_ABSTRACT')} />
+                  {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
+                </div>
+              )}
+            </Field>}
+            <Field name="content" validate={validationEditorStateRequire}>
+              {({ input, meta }) => (
+                <div>
+                  <Editor editorState={input.value} onEditorStateChange={input.onChange} />
+                  {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
+                </div>
+              )}
+            </Field>
+            <div className="kkjn__panel">
+              <Space direction='horizontal'>
+                <Button disabled={upserting} onClick={onCancel}>{t('translation:CANCEL')}</Button>
+                <Button loading={upserting} type='primary' htmlType='submit'>{t('EDIT_ARTICLE')}</Button>
+              </Space>
             </div>
-          )}
-          {values.switchTitle && <Field name='title' component='input' type='text' validate={validationRequire}>
-            {({ input, meta }) => (
-              <div className='kkjn__space-y'>
-                <Input {...input} placeholder={t('ARTICLE_TITLE')} />
-                {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
-              </div>
-            )}
-          </Field>}
-          {values.switchAbstract && <Field name='abstract' component='textarea' validate={validationRequire}>
-            {({ input, meta }) => (
-              <div className='kkjn__space-y'>
-                <Input.TextArea className='kkjn__textarea' {...input} placeholder={t('ARTICLE_ABSTRACT')} />
-                {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
-              </div>
-            )}
-          </Field>}
-          <Field name="content" validate={validationEditorStateRequire}>
-            {({ input, meta }) => (
-              <>
-                <EditorContainer className='kkjn__space-y' value={input.value} onChange={input.onChange}>
-                  <EditorToolbar />
-                  <Editor />
-                </EditorContainer>
-                {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
-              </>
-            )}
-          </Field>
-          <div className="kkjn__panel">
-            <Space>
-              <Button disabled={upserting} onClick={onCancel}>{t('translation:CANCEL')}</Button>
-              <Button loading={upserting} type='primary' htmlType='submit'>{t('EDIT_ARTICLE')}</Button>
-            </Space>
-          </div>
+          </Space>
         </form>
       )}
     />

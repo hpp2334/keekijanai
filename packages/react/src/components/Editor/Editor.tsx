@@ -1,39 +1,20 @@
-import { BoldOutlined, ItalicOutlined, StrikethroughOutlined, UnderlineOutlined } from "@ant-design/icons";
-import { Editor as NativeEditor, EditorState, RichUtils } from "draft-js";
+import { EditorState } from "draft-js";
+import NativeEditor from '@draft-js-plugins/editor';
 import _ from "lodash";
-import React, { useMemo } from "react";
-import { useCallback } from "react";
-import ToggleButton from "../../ui/Button/ToggleButton";
-import { useNotNilContextValueFactory } from "../../util";
-import { mergeStyles, StylesProps } from "../../util/style";
+import React, { useCallback } from "react";
+import { mergeStylesLeft, StylesProps } from "../../util/style";
+
+import createImagePlugin, {  } from '@draft-js-plugins/image';
+import createToolbarPlugin from './plugins/toolbar';
+import { ImageAddButton } from './components/image';
 
 import './Editor.scss';
 
-interface EditorProps {}
-interface ToolbarProps {
-  children?: React.ReactNode;
-}
-interface ContentContextValue {
+interface EditorProps extends StylesProps {
   editorState: EditorState;
   onEditorStateChange: (next: EditorState) => void;
-  readOnly: boolean;
-}
-interface ContainerProps extends StylesProps {
-  value: EditorState;
-  onChange: (next: EditorState) => void;
-  children?: React.ReactNode;
   readOnly?: boolean;
 }
-
-const contentContext = React.createContext<ContentContextValue | null>(null);
-const useContentContext = useNotNilContextValueFactory(contentContext);
-
-const switchButtons = [
-  { key: 'bold', prefix: <BoldOutlined />, style: 'BOLD' },
-  { key: 'italic', prefix: <ItalicOutlined />, style: 'ITALIC' },
-  { key: 'underline', prefix: <UnderlineOutlined />, style: 'UNDERLINE' },
-  { key: 'strike-through-out', prefix: <StrikethroughOutlined />, style: 'STRIKE_THROUGH' },
-];
 
 const styleMap: Record<string, React.CSSProperties> = {
   'BOLD': {
@@ -42,74 +23,51 @@ const styleMap: Record<string, React.CSSProperties> = {
   'STRIKE_THROUGH': {
     textDecoration: 'line-through',
   }
-}
+};
 
-function EditorToolbarBasic() {
-  const { editorState, onEditorStateChange } = useContentContext();
-  const currentStyle = editorState.getCurrentInlineStyle();
 
-  const toggleInlineStyle = useCallback(
-    (inlineStyle: string) => {
-      const nextEditorState = RichUtils.toggleInlineStyle(editorState, inlineStyle);
-      onEditorStateChange(nextEditorState);
-    },
-    [editorState, onEditorStateChange]
-  );
+const toolbarPlugin = createToolbarPlugin();
+const { Toolbar } = toolbarPlugin;
 
-  return (
-    <div>
-      {switchButtons.map(item => (
-        <ToggleButton
-          key={item.key}
-          prefix={item.prefix}
-          active={currentStyle.has(item.style)}
-          onToggle={_.partial(toggleInlineStyle, item.style)}
-        />
-      ))}
-    </div>
-  )
-}
+const imagePlugin = createImagePlugin({
+  theme: {
+    image: 'kkjn__image',
+  }
+});
+const { addImage } = imagePlugin;
 
-export function EditorToolbar(props: ToolbarProps) {
-  const {
-    children,
-  } = props;
-  return (
-    <div className="kkjn__toolbar">
-      <EditorToolbarBasic />
-      {children}
-    </div>
-  )
-}
+const plugins = [
+  toolbarPlugin,
+  imagePlugin,
+];
 
 export function Editor(props: EditorProps) {
-  const { editorState, onEditorStateChange, readOnly } = useContentContext();
+  const { editorState, onEditorStateChange, readOnly } = props;
+
+  const onImageLoad = useCallback(
+    (url: string) => {
+      const nextEditorState = addImage(editorState, url, {});
+      onEditorStateChange(nextEditorState);
+    },
+    [editorState, onEditorStateChange],
+  )
+
   return (
-    <div className="kkjn__editor">
+    <div {...mergeStylesLeft("kkjn__editor", undefined, props)}>
       <NativeEditor
         readOnly={readOnly}
         editorState={editorState}
         onChange={onEditorStateChange}
+        plugins={plugins}
         customStyleMap={styleMap}
       />
+      <Toolbar className="kkjn__toolbar">
+      {() => (
+        <div>
+          <ImageAddButton onload={onImageLoad} />
+        </div>
+      )}
+      </Toolbar>
     </div>
-  )
-}
-
-export function EditorContainer(props: ContainerProps) {
-  const { value, onChange, children, readOnly } = props;
-
-  const ctxValue = useMemo(() => ({
-    editorState: value,
-    onEditorStateChange: onChange,
-    readOnly: !!readOnly,
-  }), [value]);
-
-  return (
-    <contentContext.Provider value={ctxValue}>
-      <div {...mergeStyles(props, ['kkjn__editor-container'])}>
-        {children}
-      </div>
-    </contentContext.Provider>
   )
 }

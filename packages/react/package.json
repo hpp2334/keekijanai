@@ -16,6 +16,8 @@
   },
   "dependencies": {
     "@ant-design/icons": "^4.6.2",
+    "@draft-js-plugins/editor": "^4.1.0",
+    "@draft-js-plugins/image": "^4.1.2",
     "@loadable/component": "^5.15.0",
     "antd": "^4.15.4",
     "clsx": "^1.1.1",

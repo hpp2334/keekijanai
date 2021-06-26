@@ -1,0 +1,28 @@
+.kkjn__space {
+  $size: 10px;
+
+  &.kkjn__vertical {
+    &>.kkjn__space-margin-item {
+      margin-bottom: $size;
+  
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  &.kkjn__horizontal {
+    display: flex;
+    align-items: center;
+
+    &>.kkjn__space-margin-item {
+      margin-right: $size;
+  
+      &:last-child {
+        margin-right: 0;
+      }
+    }
+  }
+
+
+}

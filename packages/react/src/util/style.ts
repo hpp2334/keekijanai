@@ -45,7 +45,7 @@ export function mergeStyles(base: StylesProps | undefined, classNames?: Array<an
   };
 }
 
-export function mergeStylesLeft(classNames: Array<any> | string | undefined, style: React.CSSProperties | undefined, extra: StylesProps | undefined) {
+export function mergeStylesLeft(classNames: Array<any> | string | undefined, style?: React.CSSProperties, extra?: StylesProps) {
   const finalStyle = mergeStyle(style, extra?.style);
   const finalClassName = mergeClassName(classNames, extra?.className);
   return {

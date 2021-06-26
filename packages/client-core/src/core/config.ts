@@ -35,7 +35,6 @@ export class ConfigReader {
 
   read(config: ConfigType) {
     const result = this.validate(config);
-    console.log(result);
     this._config = result;
   }
 

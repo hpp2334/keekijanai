@@ -1,0 +1,1 @@
+export { default as FileInput, useFileInput } from './FileInput';
