@@ -1,7 +1,10 @@
 import { CloseOutlined } from '@ant-design/icons';
+import { useObservableState } from 'observable-hooks';
 import React from 'react';
+import { useCallback } from 'react';
 import { useState, useEffect, useRef } from 'react';
 import ReactDOM from 'react-dom';
+import { Subject } from 'rxjs';
 import { mergeStyles, StylesProps } from '../../util/style';
 import Button from '../Button/Button';
 
@@ -11,6 +14,22 @@ interface ModalProps extends StylesProps {
   visible: boolean;
   onCancel: () => void;
   children?: React.ReactNode;
+}
+
+export function externalModalVisibleFactory() {
+  const open$ = new Subject<boolean>();
+  const open = () => open$.next(true);
+  const close = () => open$.next(false);
+  function useModalOpen() {
+    const visible = useObservableState(open$, false);
+
+    return {
+      open,
+      close,
+      visible,
+    }
+  }
+  return { useModalOpen, handlers: { open, close } };
 }
 
 export default function Modal(props: ModalProps) {

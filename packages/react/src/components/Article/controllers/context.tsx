@@ -10,6 +10,7 @@ import { useMount } from 'react-use';
 import { TFunction, useTranslation } from 'react-i18next';
 import { addResources } from '../../../core/translation';
 import resourcesMap from '../translations';
+import { useKeekijanaiContext } from '../../../core/context';
 
 interface ArticleContextValue {
   articleService: ArticleService;
@@ -27,7 +28,8 @@ export function ArticleContext(props: ArticleContextProps) {
     children,
   } = props;
 
-  const [articleService] = useState(new ArticleService());
+  const { client } = useKeekijanaiContext();
+  const [articleService] = useState(new ArticleService(client));
   const { t } = useTranslation(['article', 'translation']);
 
   const ctxValue = useMemo(() => ({

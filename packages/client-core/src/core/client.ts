@@ -1,13 +1,13 @@
 import { ConfigReader, ConfigType } from "./config";
 import { Requester } from "./request";
 
-class Client {
+export class Client {
   requester: Requester;
 
   private configReader: ConfigReader;
 
-  constructor() {
-    this.configReader = new ConfigReader();
+  constructor(config: ConfigType) {
+    this.configReader = new ConfigReader(config);
     this.requester = new Requester(this);
   }
 
@@ -19,13 +19,3 @@ class Client {
     return this.configReader.config;
   }
 }
-
-let client: Client | undefined;
-
-export const getClient = () => {
-  return client ?? (client = new Client());
-}
-
-export type {
-  Client,
-};

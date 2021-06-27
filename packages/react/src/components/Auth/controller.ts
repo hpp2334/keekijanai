@@ -1,22 +1,19 @@
 import { AuthService } from 'keekijanai-client-core';
-import { Auth, User } from 'keekijanai-type';
-import { catchError, filter, mergeMap, startWith, tap } from 'rxjs/operators';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { createNotNilContextState, useMemoExports, useRequestState } from '../../util';
+import { Auth } from 'keekijanai-type';
+import { filter } from 'rxjs/operators';
+import React, { createContext, useContext } from 'react';
+import { useMemoExports, useNotNilContextValueFactory } from '../../util';
 import _ from 'lodash';
 import { useObservableState } from 'observable-hooks';
-import { of } from 'rxjs';
 import { FetchResponse, mapToRsp, INIT_PENDING_FETCH_RESPONSE } from '../../util/request';
 import { useRequest } from '../../core/request';
 
-
-const authContext = createContext({
-  authService: new AuthService(),
-});
+import { AuthContext, useAuthContext } from './context';
+export * from './context';
 
 /** @deprecated */
 export function useAuth() {
-  const { authService } = useContext(authContext);
+  const { authService } = useAuthContext();
   const { user$, logout } = authService;
 
   const [authRsp] = useObservableState<FetchResponse<Auth.CurrentUser>, void>(
@@ -38,7 +35,7 @@ export function useAuth() {
 }
 
 export function useAuthV2() {
-  const { authService } = useContext(authContext);
+  const { authService } = useAuthContext();
   const { user$, logout } = authService;
 
   const {
@@ -64,7 +61,7 @@ export function useAuthV2() {
 }
 
 export function useOAuth2() {
-  const { authService } = useContext(authContext);
+  const { authService } = useAuthContext();
   const { oauth2, onCallback } = authService;
 
   const exports = useMemoExports({
@@ -75,7 +72,7 @@ export function useOAuth2() {
 }
 
 export function useLegacyAuth() {
-  const { authService } = useContext(authContext);
+  const { authService } = useAuthContext();
   const { legacyRegister, legacyAuth } = authService;
 
   const register = legacyRegister;

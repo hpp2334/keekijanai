@@ -5,6 +5,7 @@ import { tap } from 'rxjs/operators';
 import { TreeMap, TreeNode } from 'jelly-util-tree-map';
 import { Service } from '../../core/service';
 import { CommentService } from './basic';
+import { Client } from '../../core/client';
 
 export class CommentCachableService extends Service {
   private options = {
@@ -21,10 +22,10 @@ export class CommentCachableService extends Service {
   private _scope: string;
   private commentService: CommentService;
 
-  constructor(scope: string) {
-    super();
+  constructor(client: Client, scope: string) {
+    super(client);
     this._scope = scope;
-    this.commentService = new CommentService(this._scope);
+    this.commentService = new CommentService(client, this._scope);
 
     this._itemNodeMap.set(undefined, this.cacher.root as any);
   }

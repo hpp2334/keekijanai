@@ -1,6 +1,5 @@
 import React, { useContext } from 'react'
-import { toSearch, withContexts } from '../../util';
-import { useView, ViewProvider } from './controller';
+import { useView, ViewContext } from './controller';
 import { EyeOutlined } from '@ant-design/icons';
 import { Skeleton, Space, Typography } from 'antd';
 
@@ -38,8 +37,8 @@ export function View(props: ViewProps) {
   const { scope } = props;
 
   return (
-    <ViewProvider scope={scope}>
+    <ViewContext scope={scope}>
       <ViewCore />
-    </ViewProvider>
+    </ViewContext>
   )
 }

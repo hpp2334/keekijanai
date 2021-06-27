@@ -1,5 +1,6 @@
 import { Star } from 'keekijanai-type';
 import { Observable } from 'rxjs';
+import { Client } from '../core/client';
 import { Service } from "../core/service";
 
 export class StarService extends Service {
@@ -9,8 +10,8 @@ export class StarService extends Service {
   };
   private scope: string;
 
-  constructor(scope: string) {
-    super();
+  constructor(client: Client, scope: string) {
+    super(client);
 
     this.scope = scope;
   }

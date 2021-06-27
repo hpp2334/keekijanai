@@ -1,5 +1,6 @@
 import { StarService } from "keekijanai-client-core";
 import { createContext, useState } from "react";
+import { useKeekijanaiContext } from "../../core/context";
 import { useNotNilContextValueFactory } from "../../util";
 
 interface ProviderProps {
@@ -15,9 +16,10 @@ interface ContextValue {
 const commentContext = createContext<ContextValue | null>(null);
 export const useStarContextValue = useNotNilContextValueFactory(commentContext);
 
-export function StarProvider(props: ProviderProps) { 
+export function StarContext(props: ProviderProps) { 
   const { children, scope } = props;
-  const [starService] = useState(new StarService(scope));
+  const { client } = useKeekijanaiContext();
+  const [starService] = useState(new StarService(client, scope));
 
   return (
     <commentContext.Provider value={{ scope, starService }}>

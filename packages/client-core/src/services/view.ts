@@ -1,6 +1,7 @@
 import { Observable } from "rxjs";
 import { Service } from "../core/service";
 import { View } from 'keekijanai-type';
+import { Client } from "../core/client";
 
 export class ViewService extends Service {
   private routes = {
@@ -8,8 +9,8 @@ export class ViewService extends Service {
   };
   private scope: string;
 
-  constructor(scope: string) {
-    super();
+  constructor(client: Client, scope: string) {
+    super(client);
 
     this.scope = scope;
   }

@@ -1,18 +1,23 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { GithubOutlined, LockOutlined, UserOutlined } from '@ant-design/icons';
-import { Typography, Button, Form, Input, Row, Col, notification } from 'antd';
+import { Typography, Button, Form, Input, notification } from 'antd';
 import joi from 'joi';
 import _ from 'lodash';
 
-import './AuthModal.css'
+import './AuthModal.scss'
 import { singletonModalManager } from '../Base/SingletonModal';
-import { useAuth, useLegacyAuth, useOAuth2 } from './controller';
-import { AuthService } from 'keekijanai-client-core';
-import { handleStopPropagation, useRequestState, withContexts } from '../../util';
+import { useLegacyAuth, useOAuth2 } from './controller';
+import { handleStopPropagation } from '../../util';
 import { useForm } from 'antd/lib/form/Form';
+import Modal, { externalModalVisibleFactory } from '../../ui/Modal';
 
-export interface Options {
+export interface AuthModalProps {
+  enableLegacyAuth?: boolean;
+  enableOAuth2?: string[];
+}
+
+interface Options {
   enableLegacyAuth: boolean;
   enableOAuth2: string[];
 }
@@ -34,24 +39,13 @@ type AuthComponentProps = Options & {
   onClose: () => void;
 }
 
-const optionsSchema = joi.object({
-  enableLegacyAuth: joi.boolean().default(false),
-  enableOAuth2: joi.array().items(joi.string()).default(['github'])
-});
-
-let _options: Options = null as any;
-
-/** should be called before render */
-export const init = (options?: Partial<Options>) => {
-  const { error, value } = optionsSchema.validate(options);
-  if (error) {
-    throw error;
-  }
-  _options = value;
-}
+const {
+  useModalOpen,
+  handlers,
+} = externalModalVisibleFactory();
 
 /** @description open auth modal (rely on browser) */
-export const authModal = singletonModalManager.register(SingletonAuthComponent);
+export const authModal = handlers;
 
 function OAuth2(props: OAuth2Props) {
   const { providers: providerList } = props;
@@ -196,35 +190,42 @@ const AuthComponent = function (props: AuthComponentProps) {
   const enableOAuth2 = providers.length > 0;
 
   return (
-    <div className='kkjn__auth-modal' onClick={onClose}>
-      <div className='kkjn__container-inner' onClick={handleStopPropagation}>
-        {mode === 'auth' && (
-          <>
-            <div className="kkjn__header">
-              <Typography.Text className="kkjn__text">{t("LOGIN_TO_CONTINUE")}</Typography.Text>
-            </div>
-            {enableLegacyAuth && <LegacyAuth onChangeMode={setMode} onClose={onClose} />}
-            {enableOAuth2 && <OAuth2 providers={providers} />}
-          </>
-        )}
-        {mode === 'register' && (
-          <>
-            <div className="kkjn__header">
-              <Typography.Text className="kkjn__text">{t("REGISTER")}</Typography.Text>
-            </div>
-            {enableLegacyAuth && <LegacyRegister onChangeMode={setMode} />}
-          </>
-        )}
-      </div>
+    <div className="kkjn__auth-component">
+      {mode === 'auth' && (
+        <>
+          <div className="kkjn__header">
+            <Typography.Text className="kkjn__text">{t("LOGIN_TO_CONTINUE")}</Typography.Text>
+          </div>
+          {enableLegacyAuth && <LegacyAuth onChangeMode={setMode} onClose={onClose} />}
+          {enableOAuth2 && <OAuth2 providers={providers} />}
+        </>
+      )}
+      {mode === 'register' && (
+        <>
+          <div className="kkjn__header">
+            <Typography.Text className="kkjn__text">{t("REGISTER")}</Typography.Text>
+          </div>
+          {enableLegacyAuth && <LegacyRegister onChangeMode={setMode} />}
+        </>
+      )}
     </div>
   )
 }
 
-function SingletonAuthComponent() {
+export function AuthModal(props: AuthModalProps) {
+  const {
+    enableLegacyAuth = false,
+    enableOAuth2 = ['github'],
+  } = props;
+  const { visible, open, close, } = useModalOpen();
+
   return (
-    <AuthComponent
-      onClose={authModal.close}
-      {..._options}
-    />
+    <Modal visible={visible} onCancel={close}>
+      <AuthComponent
+        enableLegacyAuth={enableLegacyAuth}
+        enableOAuth2={enableOAuth2}
+        onClose={close}
+      />
+    </Modal>
   )
 }

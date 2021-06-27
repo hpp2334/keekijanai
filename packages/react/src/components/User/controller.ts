@@ -1,18 +1,17 @@
 import { UserService } from 'keekijanai-client-core';
 import { User } from 'keekijanai-type';
 import { useObservable, useSubscription } from 'observable-hooks';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { forkJoin, of } from 'rxjs';
-import { filter, map, mergeMap, switchMapTo, tap } from 'rxjs/operators';
+import { createContext, useContext, useState } from 'react';
+import { filter, mergeMap } from 'rxjs/operators';
 import { FetchResponse, INIT_PENDING_FETCH_RESPONSE, mapToRsp } from '../../util/request';
-import { createNotNilContextState, useMemoExports, useRequestState } from '../../util';
+import { useMemoExports } from '../../util';
+import { contextManager } from '../../core/context';
 
-export const userContext = createContext({
-  userService: new UserService(),
-})
+import { UserContext, useUserContext } from './context';
+export * from './context';
 
 export function useUser(id: string | undefined) {
-  const { userService } = useContext(userContext);
+  const { userService } = useUserContext();
   const [userRsp, setUserRsp] = useState<FetchResponse<User.User>>(INIT_PENDING_FETCH_RESPONSE);
 
   const userRsp$ = useObservable<FetchResponse<User.User>, [string | undefined]>(

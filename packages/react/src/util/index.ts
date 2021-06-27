@@ -4,7 +4,7 @@ import { useMountedState, useUnmount } from 'react-use';
 import { takeUntil, take } from 'rxjs/operators';
 import _ from 'lodash';
 
-export { withContexts, createNotNilContextState, useNotNilContextValueFactory } from './context';
+export { useNotNilContextValueFactory } from './context';
 
 export const noop: (...args: any[]) => any = () => {};
 

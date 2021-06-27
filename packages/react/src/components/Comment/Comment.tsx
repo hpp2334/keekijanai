@@ -4,7 +4,7 @@ import { Popover, Button, Typography, List, ConfigProvider, Popconfirm, notifica
 import { Translation, useTranslation } from 'react-i18next';
 import {
   useComment,
-  useCommentList, CommentProvider
+  useCommentList, CommentContext
 } from './controller';
 import { useAuth } from '../Auth/controller';
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
@@ -499,10 +499,10 @@ function ChildCommentList(props: ChildCommentListProps) {
 export function Comment(props: CommentProps) {
   const { scope } = props;
   return (
-    <CommentProvider scope={scope} >
+    <CommentContext scope={scope} >
       <div className="kkjn__comment">
         <RootCommentList />
       </div>
-    </CommentProvider>
+    </CommentContext>
   )
 }

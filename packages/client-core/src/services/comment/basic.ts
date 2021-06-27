@@ -3,6 +3,7 @@ import { Observable } from "rxjs";
 import { Service } from "../../core/service";
 import _ from 'lodash';
 import { tap } from 'rxjs/operators';
+import { Client } from '../../core/client';
 
 export class CommentService extends Service {
   private routes = {
@@ -13,8 +14,8 @@ export class CommentService extends Service {
   };
   private _scope: string;
 
-  constructor(scope: string) {
-    super();
+  constructor(client: Client, scope: string) {
+    super(client);
     this._scope = scope;
   }
 

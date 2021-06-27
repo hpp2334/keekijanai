@@ -4,7 +4,7 @@ import React, {  } from "react";
 import { Typography } from 'antd';
 import { useRequest, createRequestGetReturned, UseRequestGetReturn } from '../../../core/request';
 import { useArticleContext } from '../controllers/context';
-import { EditorContainer, Editor } from '../../Editor';
+import { Editor } from '../../Editor';
 import { useMemo } from 'react';
 import _ from 'lodash';
 
@@ -46,9 +46,7 @@ export function ArticleReadCore(props: ArticleReadCoreProps) {
         </Typography.Text>
       )}
       {articleCore.content && (
-        <EditorContainer readOnly={true} value={editorState} onChange={_.noop}>
-          <Editor />
-        </EditorContainer>
+        <Editor readMode={true} editorState={editorState} onEditorStateChange={_.noop} />
       )}
     </div>
   )

@@ -4,6 +4,7 @@ import _ from 'lodash';
 import { of, Subject, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
 import { TreeMap, TreeNode } from 'jelly-util-tree-map';
+import { SyncSeriesHook } from '../utils/browser-hook';
 
 interface RequestParam {
   route: string;
@@ -24,7 +25,9 @@ export class Requester {
   private internalRequestMap = new Map<string, Subscription>();
   private _treeCache: TreeMap | undefined;
 
-  private lifeCycleSet = new Map<string, Set<(...args: any[]) => any>>();
+  public hooks = {
+    beforeRequest: new SyncSeriesHook<[any]>(),
+  }
 
   get treeCache() {
     return this._treeCache ?? (this._treeCache = new TreeMap())
@@ -53,9 +56,7 @@ export class Requester {
     method = method.toUpperCase();
 
     const headers = {};
-    this.lifeCycleSet.get('beforeRequest')?.forEach(handler => {
-      handler(headers);
-    });
+    this.hooks.beforeRequest.call(headers);
 
     const url = this.getURI(params);
     
@@ -125,18 +126,5 @@ export class Requester {
     this.internalRequestMap.set(obKey, subscription);
     this.returnedSubjectMap.set(obKey, subject);
     return subject;
-  }
-
-  hook(type: 'beforeRequest', handler: (...args: any[]) => any) {
-    let st = this.lifeCycleSet.get(type);
-    if (st) {
-      st.add(handler);
-    } else {
-      st = new Set([handler]);
-      this.lifeCycleSet.set(type, st);
-    }
-    return () => {
-      st!.delete(handler);
-    }
   }
 }

@@ -1,6 +1,12 @@
+import { contextManager } from '../../core/context';
+import { AuthContext } from './context';
+contextManager.pushContext(AuthContext);
+
 export { Login } from './Auth';
 export { useAuth, useLegacyAuth, useOAuth2 } from './controller';
-export { init as initAuthModal  } from './AuthModal';
-export type { Options as AuthModalOptions } from './AuthModal';
+
+
+export { AuthModal } from './AuthModal';
+export type { AuthModalProps } from './AuthModal';
 
 export type { LoginProps } from './Auth';

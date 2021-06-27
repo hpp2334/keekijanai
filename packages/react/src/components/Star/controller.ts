@@ -3,12 +3,12 @@ import { useState } from "react";
 import { Star } from 'keekijanai-type';
 import { mergeMap, mergeMapTo, tap } from 'rxjs/operators';
 import { incrReducer, useMemoExports } from "../../util";
-import { useStarContextValue, StarProvider } from './context';
+import { useStarContextValue, StarContext } from './context';
 import { useObservable, useSubscription } from "observable-hooks";
 import { FetchResponse, INIT_PENDING_FETCH_RESPONSE, mapToRsp } from "../../util/request";
 import { StarType } from "keekijanai-type/dist/services/star";
 
-export { useStarContextValue, StarProvider } from './context';
+export { useStarContextValue, StarContext } from './context';
 
 export function useStar() {
   const { starService } = useStarContextValue();

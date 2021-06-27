@@ -36,4 +36,15 @@
     padding: 2px 0;
     border-bottom: $cardBorder;
   }
+
+  &.kkjn__read-mode {
+    border: none;
+
+    .DraftEditor-root {
+      margin-top: 0;
+    }
+    .kkjn__toolbar {
+      display: none;
+    }
+  }
 }

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, notification, Statistic } from 'antd';
 import { MehOutlined, LikeOutlined, DislikeOutlined } from '@ant-design/icons';
-import { StarProvider, useStar } from './controller';
+import { StarContext, useStar } from './controller';
 import { useCallback } from 'react';
 import _ from 'lodash';
 
@@ -72,8 +72,8 @@ export const StarCore = function () {
 export function Star(props: StarProps) {
   const { scope } = props;
   return (
-    <StarProvider scope={scope}>
+    <StarContext scope={scope}>
       <StarCore />
-    </StarProvider>
+    </StarContext>
   )
 }

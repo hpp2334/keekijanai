@@ -2,20 +2,20 @@ import { Comment as TypeComment } from 'keekijanai-type';
 import { useCallback, useContext, useState } from 'react';
 import { mergeMap, startWith, tap } from 'rxjs/operators';
 import { useMemoExports } from '../../util';
-import { userContext, useUser } from '../User/controller';
+import { useUserContext, useUser } from '../User/controller';
 import _ from 'lodash';
 import { useObservable, useSubscription } from 'observable-hooks';
 import { throwError } from 'rxjs';
 import { FetchResponse, INIT_PENDING_FETCH_RESPONSE, mapToRsp } from '../../util/request';
 import { useCommentContextValue } from './context';
 
-export { CommentProvider } from './context';
+export { CommentContext } from './context';
 
 export function useCommentList(
   id: number | undefined,
 ) {
   const { scope, commentCachableService, mutationCounts, updateMutationCounts } = useCommentContextValue();
-  const { userService } = useContext(userContext);
+  const { userService } = useUserContext();
 
   const [total, setTotal] = useState<number>();
   const [page, changePage] = useState(1);

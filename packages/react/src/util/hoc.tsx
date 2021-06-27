@@ -1,16 +1,26 @@
-export function withComponentsFactory(...Components: React.JSXElementConstructor<{ children?: React.ReactNode }>[]) {
-  function withComponents <Props>(BaseComponent: React.JSXElementConstructor<Props>) {
-    const Inner = (props: Props) => {
-      const base = (
-        <BaseComponent {...props} />
+import _ from 'lodash';
+
+type ComponentWithChildren = React.JSXElementConstructor<{ children?: React.ReactNode }>; 
+
+export function withComponents <Props>(Components: ComponentWithChildren[], BaseComponent: React.JSXElementConstructor<Props>): React.JSXElementConstructor<Props>;
+export function withComponents <Props>(Components: ComponentWithChildren[], element: JSX.Element): React.JSXElementConstructor<Props>;
+
+export function withComponents <Props>(Components: ComponentWithChildren[], Element: React.JSXElementConstructor<Props> | JSX.Element) {
+  const Inner = (props: Props) => {
+    const base = typeof Element === 'function'
+      ? (
+        <Element {...props} />
       )
-      return Components.reduceRight((element, Component) => (
-        <Component>
-          {element}
-        </Component>
-      ), base);
-    }
-    return Inner;
+      : Element;
+    return Components.reduceRight((element, Component) => (
+      <Component>
+        {element}
+      </Component>
+    ), base);
   }
-  return withComponents;
+  return Inner;
+}
+
+export function withComponentsFactory(...Components: React.JSXElementConstructor<{ children?: React.ReactNode }>[]) {
+  return _.partial(withComponents, Components);
 }

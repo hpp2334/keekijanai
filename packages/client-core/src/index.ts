@@ -5,5 +5,5 @@ export { ViewService } from './services/view';
 export { UserService } from './services/user';
 export { ArticleService, ArticleListWhereParams } from './services/article';
 
-export { getClient } from './core/client';
+export { Client } from './core/client';
 export { ConfigType } from './core/config';

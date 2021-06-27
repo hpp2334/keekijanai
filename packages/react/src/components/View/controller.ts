@@ -3,9 +3,10 @@ import { useObservable, useSubscription } from 'observable-hooks';
 import { useState } from 'react';
 import { FetchResponse, INIT_PENDING_FETCH_RESPONSE, mapToRsp } from '../../util/request';
 import { useMemoExports } from '../../util';
-import { useViewContextValue } from './context';
 
-export { ViewProvider, useViewContextValue } from './context';
+import { ViewContext, useViewContextValue } from './context';
+export * from './context';
+
 
 export function useView() {
   const [viewRsp, setViewRsp] = useState<FetchResponse<View.Get>>(INIT_PENDING_FETCH_RESPONSE);

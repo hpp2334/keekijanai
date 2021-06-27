@@ -5,6 +5,7 @@ import { Service } from "../core/service";
 import { createLocalStorageEntry } from "../utils/local-storage-entry";
 import { Auth } from "keekijanai-type";
 import processNextTick from 'next-tick';
+import { Client } from '../core/client';
 
 interface JwtInfo {
   jwt: string;
@@ -24,12 +25,12 @@ export class AuthService extends Service {
   private jwtInfo: JwtInfo | undefined;
   user$ = new BehaviorSubject<Auth.CurrentUser | null>(null);
 
-  constructor() {
-    super();
+  constructor(client: Client) {
+    super(client);
 
     this.jwtInfo = this.readLocalJwtInfo();
 
-    this.client.requester.hook('beforeRequest', (headers) => {
+    this.client.requester.hooks.beforeRequest.tap(headers => {
       const jwt = this.jwt;
       if (jwt !== undefined) {
         headers.Authorization = this.jwt;

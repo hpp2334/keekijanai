@@ -1,11 +1,7 @@
-import { Client, getClient } from "./client";
+import { Client } from "./client";
 
 class ServiceBase {
-  protected client: Client;
-
-  constructor() {
-    this.client = getClient();
-  }
+  constructor(protected client: Client) {}
 }
 
 export {

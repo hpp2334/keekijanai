@@ -15,22 +15,15 @@ type InternalConfigType = {
 const configSchema = Joi.object({
   route: Joi.object({
     root: Joi.string()
-      .default('/api/keekijanai')
       .description('api route prefix')
   }),
 });
 
-const INIT_CONFIG: ConfigType = {
-  route: {
-    root: '/api/keekijanai',
-  }
-};
-
 export class ConfigReader {
   private _config!: InternalConfigType;
 
-  constructor() {
-    this.read(INIT_CONFIG);
+  constructor(config: ConfigType) {
+    this.read(config);
   }
 
   read(config: ConfigType) {
