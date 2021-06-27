@@ -13,7 +13,8 @@ import './Editor.scss';
 interface EditorProps extends StylesProps {
   editorState: EditorState;
   onEditorStateChange: (next: EditorState) => void;
-  readMode?: boolean;
+  readOnly?: boolean;
+  showToolbar?: boolean;
 }
 
 const styleMap: Record<string, React.CSSProperties> = {
@@ -42,7 +43,7 @@ const plugins = [
 ];
 
 export function Editor(props: EditorProps) {
-  const { editorState, onEditorStateChange, readMode } = props;
+  const { editorState, onEditorStateChange, readOnly = false, showToolbar = true } = props;
 
   const onImageLoad = useCallback(
     (url: string) => {
@@ -53,9 +54,9 @@ export function Editor(props: EditorProps) {
   )
 
   return (
-    <div {...mergeStylesLeft(["kkjn__editor", readMode && "kkjn__read-mode"], undefined, props)}>
+    <div {...mergeStylesLeft(["kkjn__editor", readOnly && "kkjn__read-only", !showToolbar && "kkjn__hide-toolbar"], undefined, props)}>
       <NativeEditor
-        readOnly={readMode}
+        readOnly={readOnly}
         editorState={editorState}
         onChange={onEditorStateChange}
         plugins={plugins}

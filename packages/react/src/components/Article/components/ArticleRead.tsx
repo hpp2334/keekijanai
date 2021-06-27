@@ -46,7 +46,7 @@ export function ArticleReadCore(props: ArticleReadCoreProps) {
         </Typography.Text>
       )}
       {articleCore.content && (
-        <Editor readMode={true} editorState={editorState} onEditorStateChange={_.noop} />
+        <Editor readOnly={true} showToolbar={false} editorState={editorState} onEditorStateChange={_.noop} />
       )}
     </div>
   )
