@@ -15,6 +15,7 @@ import LoadingDots from '../../../ui/Loading/Dots';
 import { useArticleContext } from '../controllers';
 import { sprintf } from 'sprintf-js';
 import { Space } from '../../../ui';
+import { ArticleEditor } from './ArticleEditor';
 
 interface ArticleEditCoreProps {
   scope?: string;
@@ -120,7 +121,7 @@ export function ArticleEditCore(props: ArticleEditCoreProps) {
             <Field name="content" validate={validationEditorStateRequire}>
               {({ input, meta }) => (
                 <div>
-                  <Editor editorState={input.value} onEditorStateChange={input.onChange} />
+                  <ArticleEditor editorState={input.value} onEditorStateChange={input.onChange} />
                   {meta.touched && meta.error && <FieldError>{t('translation:' + meta.error)}</FieldError>}
                 </div>
               )}

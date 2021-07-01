@@ -13,6 +13,7 @@ import { DateText } from '../../../components/Base/Date';
 import { UserComponentV2 } from '../../../components/User/UserComponent';
 import LoadingDots from '../../../ui/Loading/Dots';
 import { Divider } from '../../../ui';
+import { ArticleEditor } from './ArticleEditor';
 
 interface ArticleReadCoreProps {
   article: ArticleType.Get;
@@ -46,7 +47,7 @@ export function ArticleReadCore(props: ArticleReadCoreProps) {
         </Typography.Text>
       )}
       {articleCore.content && (
-        <Editor readOnly={true} showToolbar={false} editorState={editorState} onEditorStateChange={_.noop} />
+        <ArticleEditor readMode={true} editorState={editorState} onEditorStateChange={_.noop} />
       )}
     </div>
   )

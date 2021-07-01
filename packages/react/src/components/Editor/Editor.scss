@@ -1,11 +1,11 @@
-.kkjn__editor {
+.kkjn__editor-container {
   position: relative;
   $cardRadius: 4px;
   $borderColor: rgb(209, 209, 209);
   $cardBorder: 1px solid #{$borderColor};
 
   border: $cardBorder;
-  border-radius: #{$cardRadius};
+  border-radius: $cardRadius;
 
   .DraftEditor-root {
     margin-top: 30px;
@@ -22,31 +22,6 @@
       .kkjn__image {
         max-width: 600px;
       }
-    }
-  }
-
-  .kkjn__toolbar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    display: flex;
-    align-items: center;
-    height: 25px;
-    padding: 2px 0;
-    border-bottom: $cardBorder;
-  }
-
-  &.kkjn__read-only {
-    border: none;
-  }
-
-  &.kkjn__hide-toolbar {
-    .DraftEditor-root {
-      margin-top: 0;
-    }
-    .kkjn__toolbar {
-      display: none;
     }
   }
 }

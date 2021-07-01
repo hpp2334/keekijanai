@@ -7,11 +7,9 @@ import React, { useCallback } from "react";
 import ToggleButton from "../../../../ui/Button/ToggleButton";
 import { mergeStyles, mergeStylesLeft, StylesProps } from "../../../../util/style";
 
-interface ToolbarStore extends GetSetEditorState {}
+import './index.scss';
 
-interface ToolbarBasicProps {
-  store: ToolbarStore;
-}
+export interface ToolbarStore extends GetSetEditorState {}
 
 export interface ToolbarProps extends StylesProps {
   children?: (store: ToolbarStore) => JSX.Element;
@@ -24,6 +22,7 @@ interface ToolbarUnwrapperProps extends ToolbarProps {
 
 export type ToolbarPlugin = EditorPlugin & {
   Toolbar: React.ComponentType<ToolbarProps>;
+  _store: ToolbarStore;
 };
 
 
@@ -69,14 +68,14 @@ function EditorToolbarUnwrapper(props: ToolbarUnwrapperProps) {
     store,
   } = props;
   return (
-    <div {...mergeStyles(props)}>
+    <div {...mergeStylesLeft("kkjn__toolbar", undefined, props)}>
       {showBasic && <EditorToolbarBasic store={store} />}
       {children?.(store) ?? null}
     </div>
   )
 }
 
-export default function (): ToolbarPlugin {
+export function createToolbarPlugin(): ToolbarPlugin {
   const store: ToolbarStore = {
     getEditorState: null as any,
     setEditorState: null as any,
@@ -94,5 +93,6 @@ export default function (): ToolbarPlugin {
       store.setEditorState = setEditorState;
     },
     Toolbar: EditorToolbar,
+    _store: store,
   }
 }

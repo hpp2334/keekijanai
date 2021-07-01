@@ -125,7 +125,7 @@ export let ArticleView = (props: ArticleViewProps) => {
       <>
         {error && <ArticleListError error={error} />}
         {!articleList && loading && <ArticleListLoading />}
-        {articleList && !error && <ArticleListCore
+        {articleList && !error && !loading && <ArticleListCore
           articleList={articleList}
           loading={loading}
           pagination={pagination.toAntd('small')}
