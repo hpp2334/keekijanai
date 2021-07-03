@@ -32,7 +32,17 @@ module.exports = {
           test: /[\\/]node_modules[\\/]react-dom/,
           priority: -10,
           reuseExistingChunk: true,
-        }
+        },
+        kkjnClientCore: {
+          test: /[\\/]client-core[\\/]dist/,
+          priority: -15,
+          reuseExistingChunk: true,
+        },
+        kkjnReactComponent: {
+          test: /[\\/]react[\\/]dist/,
+          priority: -15,
+          reuseExistingChunk: true,
+        },
       },
     },
   },
