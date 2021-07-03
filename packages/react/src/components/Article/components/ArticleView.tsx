@@ -21,6 +21,7 @@ import { useRequest } from "../../../core/request";
 
 import "./ArticleView.scss";
 import { sprintf } from "sprintf-js";
+import { useAuthV2 } from "../../Auth/controller";
 
 interface ArticleViewProps {
   scope?: string;
@@ -32,6 +33,8 @@ interface ArticleViewProps {
 export let ArticleView = (props: ArticleViewProps) => {
   const { scope, header, where, take = 10 } = props;
   const { articleService, t } = useArticleContext();
+  const auth = useAuthV2();
+  const isAdmin = !auth.loading && !auth.error && auth.user?.isLogin && !!(auth.user.role & 0b11);
 
   const {
     data: articleList,
@@ -135,12 +138,14 @@ export let ArticleView = (props: ArticleViewProps) => {
           )}
         </>
         <div>
-          <Button
-            type="primary"
-            onClick={_.partial(handleEditShow, undefined, "create")}
-          >
-            {t("CREATE_ARTICLE")}
-          </Button>
+          {isAdmin && (
+            <Button
+              type="primary"
+              onClick={_.partial(handleEditShow, undefined, "create")}
+            >
+              {t("CREATE_ARTICLE")}
+            </Button>
+          )}
         </div>
       </div>
       <>
@@ -153,8 +158,9 @@ export let ArticleView = (props: ArticleViewProps) => {
             pagination={pagination.toAntd("small")}
             onClickItem={handleReadShow}
             panel={{
-              onClickItemEdit: _.partial(handleEditShow, _, 'edit'),
+              onClickItemEdit: _.partial(handleEditShow, _, "edit"),
               onClickItemRemove: handleClickRemoveItem,
+              itemVisible: () => isAdmin ? ~0 : 0,
               removing: reqRemove.loading,
             }}
           />
@@ -170,8 +176,10 @@ export let ArticleView = (props: ArticleViewProps) => {
         )}
       </Modal>
       <Modal
-        visible={editModalState.open && (editModalState.type === undefined ||
-          editModalState.type === "edit")}
+        visible={
+          editModalState.open &&
+          (editModalState.type === undefined || editModalState.type === "edit")
+        }
         onCancel={handleEditHide}
         className="kkjn__article-view-modal"
         destroy={true}
@@ -186,7 +194,7 @@ export let ArticleView = (props: ArticleViewProps) => {
         )}
       </Modal>
       <Modal
-        visible={editModalState.open && (editModalState.type === 'create')}
+        visible={editModalState.open && editModalState.type === "create"}
         onCancel={handleEditHide}
         className="kkjn__article-view-modal"
         destroy={true}
