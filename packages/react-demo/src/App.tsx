@@ -10,8 +10,6 @@ import {
 import { Login, Comment, View, Star, ArticleView, KeekijanaiContext } from 'keekijanai-react';
 
 function App() {
-  const [count, setCount] = useState(0);
-  
   return (
     <KeekijanaiContext
       clientCoreOptions={{

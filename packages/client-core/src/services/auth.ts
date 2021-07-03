@@ -15,6 +15,7 @@ interface JwtInfo {
 const keekijanaiJwtEntry = createLocalStorageEntry('keekijanai-jwt');
 const lastPageEntry = createLocalStorageEntry('keekijanai-last-page');
 
+
 export class AuthService extends Service {
   private routes = {
     current: '/auth/current',
@@ -22,20 +23,24 @@ export class AuthService extends Service {
     legacyRegister: '/auth/legacyRegister',
     getCode: '/auth/getCode',
   };
-  private jwtInfo: JwtInfo | undefined;
+  private _jwtInfo: JwtInfo | null = null;
   user$ = new BehaviorSubject<Auth.CurrentUser | null>(null);
+
+  get jwtInfo() {
+    return this._jwtInfo;
+  }
+  set jwtInfo(next: JwtInfo | null) {
+    // console.log('next jwtInfo', next, new Error());
+    this._jwtInfo = next;
+  }
 
   constructor(client: Client) {
     super(client);
-
     this.jwtInfo = this.readLocalJwtInfo();
+  }
 
-    this.client.requester.hooks.beforeRequest.tap(headers => {
-      const jwt = this.jwt;
-      if (jwt !== undefined) {
-        headers.Authorization = this.jwt;
-      }
-    });
+  initialize() {
+    this.client.requester.hooks.beforeRequest.tap(this.handleBeforeRequest);
 
     /** @todo use hook to execute after client ready */
     processNextTick(() => {
@@ -43,10 +48,14 @@ export class AuthService extends Service {
     });
   }
 
+  uninitialize() {
+    this.client.requester.hooks.beforeRequest.untap(this.handleBeforeRequest);
+  }
+
   get jwt() {
     if (!this.jwtInfo || Date.now() > this.jwtInfo.expire) {
       keekijanaiJwtEntry.removeItem();
-      this.jwtInfo = undefined;
+      this.jwtInfo = null;
       return undefined;
     }
     return this.jwtInfo.jwt;
@@ -94,7 +103,7 @@ export class AuthService extends Service {
   }
 
   logout = () => {
-    this.jwtInfo = undefined;
+    this.jwtInfo = null;
     keekijanaiJwtEntry.removeItem();
     this.user$.next({ isLogin: false });
   }
@@ -130,12 +139,12 @@ export class AuthService extends Service {
     }
   }
 
-  private updateLocalJwtInfo(jwt: string, maxAge: number) {
+  private updateLocalJwtInfo = (jwt: string, maxAge: number) => {
     this.jwtInfo = { jwt, expire: maxAge + Date.now() };
     keekijanaiJwtEntry.setItem(JSON.stringify(this.jwtInfo));
   }
 
-  private readLocalJwtInfo() {
+  private readLocalJwtInfo = () => {
     const str = keekijanaiJwtEntry.getItem();
     if (str) {
       const info = JSON.parse(str);
@@ -146,6 +155,13 @@ export class AuthService extends Service {
       return info;
     }
     return undefined;
+  }
+
+  private handleBeforeRequest = (headers: any) => {
+    const jwt = this.jwt;
+    if (jwt !== undefined) {
+      headers.Authorization = this.jwt;
+    }
   }
 }
 

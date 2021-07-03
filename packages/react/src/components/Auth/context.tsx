@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { AuthService } from 'keekijanai-client-core';
 import { useNotNilContextValueFactory } from "../../util/context";
 import { useMemo } from "react";
 import { useKeekijanaiContext } from "../../core/context";
+import { useEffect } from "react";
 
 interface AuthContextValue {
   authService: AuthService;
@@ -23,9 +24,17 @@ export const AuthContext = (props: AuthContextProps) => {
 
   const { client } = useKeekijanaiContext();
 
-  const ctxValue = useMemo(() => ({
+  const [ctxValue] = useState(() => ({
     authService: new AuthService(client),
-  }), [client]);
+  }));
+  const { authService } = ctxValue;
+
+  useEffect(() => {
+    authService.initialize();
+    return () => {
+      authService.uninitialize();
+    }
+  }, [authService]);
 
   return (
     <authContext.Provider value={ctxValue}>
