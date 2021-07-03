@@ -14,6 +14,8 @@ interface ModalProps extends StylesProps {
   visible: boolean;
   onCancel: () => void;
   children?: React.ReactNode;
+  /** invisible then destroy */
+  destroy?: boolean;
 }
 
 export function externalModalVisibleFactory() {
@@ -41,6 +43,7 @@ export default function Modal(props: ModalProps) {
     visible,
     onCancel,
     children,
+    destroy,
   } = props;
   const refBody = useRef(document.querySelector('body'));
   const refEl = useRef(document.createElement('div'));
@@ -66,14 +69,14 @@ export default function Modal(props: ModalProps) {
   }, []);
 
   return ReactDOM.createPortal(
-    <div {...mergeStyles(undefined, ["kkjn__modal kkjn__modal-mask", visible && "kkjn__visible"])} onClick={handleClickMask}>
+    (!destroy || visible) ? (<div {...mergeStyles(undefined, ["kkjn__modal kkjn__modal-mask", visible && "kkjn__visible"])} onClick={handleClickMask}>
       <div onClick={handleClickContainer} {...mergeStyles(props, ["kkjn__modal-container"])}>
         <div className="kkjn__modal-container-header">
         <Button className="kkjn__modal-close-btn" prefix={<CloseOutlined />} onClick={handleClickMask} />
         </div>
         {children}
       </div>
-    </div>,
+    </div>) : null,
     refEl.current,
   );
 }

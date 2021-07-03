@@ -1,6 +1,11 @@
 import React from "react";
 import { ArticleListWhereParams } from "keekijanai-client-core";
-import { ArticleList, ArticleListCore, ArticleListError, ArticleListLoading } from "./ArticleList";
+import {
+  ArticleList,
+  ArticleListCore,
+  ArticleListError,
+  ArticleListLoading,
+} from "./ArticleList";
 import { Button, Typography } from "antd";
 import { ArticleRead } from "./ArticleRead";
 import { useState } from "react";
@@ -14,7 +19,7 @@ import _ from "lodash";
 import Modal from "../../../ui/Modal";
 import { useRequest } from "../../../core/request";
 
-import './ArticleView.scss';
+import "./ArticleView.scss";
 import { sprintf } from "sprintf-js";
 
 interface ArticleViewProps {
@@ -34,22 +39,25 @@ export let ArticleView = (props: ArticleViewProps) => {
     error,
     pagination,
     run,
-  } = useRequest('list', (args) => articleService.list({
+  } = useRequest(
+    "list",
+    (args) =>
+      articleService.list({
         where: props.where,
         pagination: args.pagination,
-        fields: ['title'],
+        fields: ["title"],
       }),
-      [props.where],
-      {
-        pagination: {
-          page: 1,
-          pageSize: props.take ?? 10,
-        },
-      }
-    );
+    [props.where],
+    {
+      pagination: {
+        page: 1,
+        pageSize: props.take ?? 10,
+      },
+    }
+  );
 
   const reqRemove = useRequest(
-    'mutate',
+    "mutate",
     (id: number) => articleService.delete(id),
     {
       onSuccess: () => {
@@ -58,16 +66,19 @@ export let ArticleView = (props: ArticleViewProps) => {
       },
       notification: {
         template: {
-          success: rsp => sprintf(t("DELETE_ARTICLE_SUCCESS")),
-          error: err => sprintf(t("DELETE_ARTICLE_ERROR"), err),
-        }
-      }
+          success: (rsp) => sprintf(t("DELETE_ARTICLE_SUCCESS")),
+          error: (err) => sprintf(t("DELETE_ARTICLE_ERROR"), err),
+        },
+      },
     }
   );
 
-  const handleClickRemoveItem = useCallback((item: Article.Get) => {
-    reqRemove.run(item.id);
-  }, [reqRemove.run]);
+  const handleClickRemoveItem = useCallback(
+    (item: Article.Get) => {
+      reqRemove.run(item.id);
+    },
+    [reqRemove.run]
+  );
 
   const [readModalState, setReadModalState] = useState<{
     open: boolean;
@@ -79,9 +90,11 @@ export let ArticleView = (props: ArticleViewProps) => {
   const [editModalState, setEditModalState] = useState<{
     open: boolean;
     article: Article.Get | undefined | null;
+    type?: "edit" | "create";
   }>({
     open: false,
     article: null,
+    type: "edit",
   });
 
   const handleReadShow = useCallback((article: Article.Get) => {
@@ -92,9 +105,12 @@ export let ArticleView = (props: ArticleViewProps) => {
     setReadModalState((prev) => ({ ...prev, open: false }));
   }, []);
 
-  const handleEditShow = useCallback((article: Article.Get | undefined) => {
-    setEditModalState({ article, open: true });
-  }, []);
+  const handleEditShow = useCallback(
+    (article: Article.Get | undefined, type?: "edit" | "create") => {
+      setEditModalState({ article, type, open: true });
+    },
+    []
+  );
 
   const handleEditHide = useCallback(() => {
     setEditModalState((prev) => ({ ...prev, open: false }));
@@ -113,11 +129,16 @@ export let ArticleView = (props: ArticleViewProps) => {
           {typeof header !== "string" ? (
             header
           ) : (
-            <Typography.Title className="kkjn__title" level={2}>{header}</Typography.Title>
+            <Typography.Title className="kkjn__title" level={2}>
+              {header}
+            </Typography.Title>
           )}
         </>
         <div>
-          <Button type="primary" onClick={_.partial(handleEditShow, undefined)}>
+          <Button
+            type="primary"
+            onClick={_.partial(handleEditShow, undefined, "create")}
+          >
             {t("CREATE_ARTICLE")}
           </Button>
         </div>
@@ -125,24 +146,51 @@ export let ArticleView = (props: ArticleViewProps) => {
       <>
         {error && <ArticleListError error={error} />}
         {!articleList && loading && <ArticleListLoading />}
-        {articleList && !error && !loading && <ArticleListCore
-          articleList={articleList}
-          loading={loading}
-          pagination={pagination.toAntd('small')}
-          onClickItem={handleReadShow}
-          panel={{
-            onClickItemEdit: handleEditShow,
-            onClickItemRemove: handleClickRemoveItem,
-            removing: reqRemove.loading,
-          }}
-        />}
+        {articleList && !error && !loading && (
+          <ArticleListCore
+            articleList={articleList}
+            loading={loading}
+            pagination={pagination.toAntd("small")}
+            onClickItem={handleReadShow}
+            panel={{
+              onClickItemEdit: _.partial(handleEditShow, _, 'edit'),
+              onClickItemRemove: handleClickRemoveItem,
+              removing: reqRemove.loading,
+            }}
+          />
+        )}
       </>
-      <Modal visible={readModalState.open} onCancel={handleReadHide} className='kkjn__article-view-modal'>
+      <Modal
+        visible={readModalState.open}
+        onCancel={handleReadHide}
+        className="kkjn__article-view-modal"
+      >
         {readModalState.article !== null && (
           <ArticleRead id={readModalState.article.id} />
         )}
       </Modal>
-      <Modal visible={editModalState.open} onCancel={handleEditHide} className='kkjn__article-view-modal'>
+      <Modal
+        visible={editModalState.open && (editModalState.type === undefined ||
+          editModalState.type === "edit")}
+        onCancel={handleEditHide}
+        className="kkjn__article-view-modal"
+        destroy={true}
+      >
+        {editModalState.article !== null && (
+          <ArticleEdit
+            scope={scope}
+            article={editModalState.article}
+            onSubmit={handleEditAfterSubmitSuccess}
+            onCancel={handleEditHide}
+          />
+        )}
+      </Modal>
+      <Modal
+        visible={editModalState.open && (editModalState.type === 'create')}
+        onCancel={handleEditHide}
+        className="kkjn__article-view-modal"
+        destroy={true}
+      >
         {editModalState.article !== null && (
           <ArticleEdit
             scope={scope}
@@ -156,6 +204,4 @@ export let ArticleView = (props: ArticleViewProps) => {
   );
 };
 
-ArticleView = withComponentsFactory(
-  ArticleContext
-)(ArticleView);
+ArticleView = withComponentsFactory(ArticleContext)(ArticleView);
