@@ -1,6 +1,6 @@
 {
   "name": "keekijanai-client-core",
-  "version": "0.0.3",
+  "version": "0.1.0",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "license": "MIT",
@@ -11,7 +11,7 @@
   "dependencies": {
     "jelly-util-tree-map": "^0.0.3",
     "joi": "^17.4.0",
-    "keekijanai-type": "^0.0.3",
+    "keekijanai-type": "^0.1.0",
     "localstorage-memory": "^1.0.3",
     "lodash": "^4.17.21",
     "next-tick": "^1.1.0",
