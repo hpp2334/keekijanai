@@ -1,0 +1,8 @@
+.kkjn__comment-post__container {
+  display: flex;
+  align-items: flex-start;
+
+  .kkjn__space-margin-item:nth-child(2) {
+    flex-grow: 1;
+  }
+}

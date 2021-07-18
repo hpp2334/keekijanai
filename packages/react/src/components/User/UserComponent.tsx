@@ -29,6 +29,7 @@ interface UserComponentV2Props {
   user: User.User | null | undefined;
 
   showAvatar?: boolean;
+  avatarSize?: number;
 
   classes?: {
     avatar?: string;
@@ -38,13 +39,15 @@ interface UserComponentV2Props {
 }
 
 interface UserComponentLoadingProps {
-  avatarSize: number;
+  avatarSize?: number;
   classes?: {
     avatar?: string;
     container?: string;
     userName?: string;
   }
 }
+
+const defaultAvatarSize = 20;
 
 /** @deprecated */
 export function UserComponent(props: UserComponentProps) {
@@ -65,20 +68,20 @@ export function UserComponentLoading(props: UserComponentLoadingProps) {
   const { avatarSize, classes } = props;
 
   return (
-    <span {...mergeStyles(undefined, ['kkjn__user-component kkjn__skeleton', classes?.container])}>
-      <AvatarLoading size={avatarSize} />
+    <div {...mergeStyles(undefined, ['kkjn__user-component kkjn__skeleton', classes?.container])}>
+      <AvatarLoading size={avatarSize ?? defaultAvatarSize} />
       <Skeleton.Input {...mergeStyles(undefined, ["kkjn__username", classes?.userName])} size='small' active />
-    </span>
+    </div>
   )
 }
 
 export function UserComponentV2(props: UserComponentV2Props) {
-  const { user, showAvatar = true, classes } = props;
+  const { user, showAvatar = true, classes, avatarSize } = props;
 
   return (
-    <span {...mergeStyles(undefined, ['kkjn__user-component', classes?.container])}>
-      {showAvatar && <AvatarV2 user={user} size={20} {...mergeStyles(undefined, [classes?.avatar])} />}
+    <div {...mergeStyles(undefined, ['kkjn__user-component', classes?.container])}>
+      {showAvatar && <AvatarV2 user={user} size={avatarSize ?? defaultAvatarSize} {...mergeStyles(undefined, [classes?.avatar])} />}
       <Typography.Text {...mergeStyles(undefined, ["kkjn__username", classes?.userName])}>{user?.name ?? "Unknown User"}</Typography.Text>
-    </span>
+    </div>
   )
 }

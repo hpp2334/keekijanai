@@ -2,7 +2,7 @@ import { Article, Article as ArticleType } from 'keekijanai-type';
 import { convertFromRaw, EditorState } from "draft-js";
 import React, {  } from "react";
 import { Typography } from 'antd';
-import { useRequest, createRequestGetReturned, UseRequestGetReturn } from '../../../core/request';
+import { useRequestGet, UseRequestGetReturn } from '../../../core/request';
 import { useArticleContext } from '../controllers/context';
 import { Editor } from '../../Editor';
 import { useMemo } from 'react';
@@ -59,7 +59,7 @@ export function ArticleRead (props: ArticleReadProps) {
   const { articleService } = useArticleContext();
   const { id } = props;
 
-  const { data, error, loading } = useRequest('get', ([id]) => articleService.get(id), [id])
+  const { data, error, loading } = useRequestGet(([id]) => articleService.get(id), [id])
 
   if (error) {
     return (

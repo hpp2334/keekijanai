@@ -17,11 +17,11 @@ import { withComponentsFactory } from "../../../util/hoc";
 import { ArticleContext, useArticleContext } from "../controllers/context";
 import _ from "lodash";
 import Modal from "../../../ui/Modal";
-import { useRequest } from "../../../core/request";
 
 import "./ArticleView.scss";
 import { sprintf } from "sprintf-js";
 import { useAuthV2 } from "../../Auth/controller";
+import { useRequestList, useRequestMutate } from "../../../core/request";
 
 interface ArticleViewProps {
   scope?: string;
@@ -42,15 +42,16 @@ export let ArticleView = (props: ArticleViewProps) => {
     error,
     pagination,
     run,
-  } = useRequest(
-    "list",
-    (args) =>
+  } = useRequestList(
+    ({ pagination }, { where }) =>
       articleService.list({
-        where: props.where,
-        pagination: args.pagination,
+        where,
+        pagination,
         fields: ["title"],
       }),
-    [props.where],
+    {
+      where: props.where
+    } as const,
     {
       pagination: {
         page: 1,
@@ -59,8 +60,7 @@ export let ArticleView = (props: ArticleViewProps) => {
     }
   );
 
-  const reqRemove = useRequest(
-    "mutate",
+  const reqRemove = useRequestMutate(
     (id: number) => articleService.delete(id),
     {
       onSuccess: () => {

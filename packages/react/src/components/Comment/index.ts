@@ -1,4 +1,3 @@
-export { Comment } from './Comment';
-export { useComment } from './controller';
+export * from './views';
+export * from './controllers';
 
-export type { CommentProps } from './Comment';

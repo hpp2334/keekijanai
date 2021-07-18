@@ -1,6 +1,7 @@
+import { Typography } from 'antd';
 import { format } from 'date-fns-tz';
 import React from 'react'
-import { mergeStyles, StylesProps } from '../../util/style';
+import { mergeStyles, mergeStylesLeft, StylesProps } from '../../util/style';
 
 interface DateTextProps extends StylesProps {
   timestamp: number;
@@ -9,8 +10,8 @@ interface DateTextProps extends StylesProps {
 export function DateText(props: DateTextProps) {
   const { timestamp } = props;
   return (
-    <div {...mergeStyles(props)}>
+    <Typography.Text {...mergeStylesLeft(undefined, undefined, props)}>
       {format(timestamp, 'yyyy-MM-dd HH:mm:ss')}
-    </div>
+    </Typography.Text>
   )
 }

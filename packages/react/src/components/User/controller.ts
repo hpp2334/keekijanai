@@ -8,8 +8,10 @@ import { useMemoExports } from '../../util';
 import { contextManager } from '../../core/context';
 
 import { UserContext, useUserContext } from './context';
+import { useRequestGet } from '../../core/request';
 export * from './context';
 
+/** @deprecated */
 export function useUser(id: string | undefined) {
   const { userService } = useUserContext();
   const [userRsp, setUserRsp] = useState<FetchResponse<User.User>>(INIT_PENDING_FETCH_RESPONSE);
@@ -30,6 +32,30 @@ export function useUser(id: string | undefined) {
 
   const exports = useMemoExports({ userRsp });
   return exports;
+}
+
+
+export function useUserV2(id: string) {
+  const { userService } = useUserContext();
+
+  const {
+    data: user,
+    loading,
+    error
+  } = useRequestGet(
+    ([id]) => userService
+      .get(id)
+      .pipe(
+        filter(x => x !== null),
+      ),
+    [id]
+  );
+
+  return {
+    user,
+    loading,
+    error,
+  };
 }
 
 export type UserHookObject = ReturnType<typeof useUser>;

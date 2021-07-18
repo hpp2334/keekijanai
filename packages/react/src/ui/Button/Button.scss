@@ -1,4 +1,4 @@
-.kkjn__button {
+.kkjn__text-button {
   outline: none;
   border: none;
   color: rgb(53, 53, 53);
@@ -8,6 +8,26 @@
 
   &:hover {
     opacity: 0.9;
+  }
+
+  &.kkjn__disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.kkjn__contained-button {
+  outline: none;
+  border: none;
+  color: white;
+  background-color: #1277c9;
+  border-radius: 5px;
+  padding: 5px 10px;
+  opacity: 0.9;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 1.0;
   }
 
   &.kkjn__disabled {

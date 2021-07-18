@@ -6,7 +6,7 @@ import { useMemoExports, useNotNilContextValueFactory } from '../../util';
 import _ from 'lodash';
 import { useObservableState } from 'observable-hooks';
 import { FetchResponse, mapToRsp, INIT_PENDING_FETCH_RESPONSE } from '../../util/request';
-import { useRequest } from '../../core/request';
+import { useRequestGet } from '../../core/request';
 
 import { AuthContext, useAuthContext } from './context';
 export * from './context';
@@ -42,8 +42,7 @@ export function useAuthV2() {
     data: user,
     loading,
     error
-  } = useRequest(
-    'get',
+  } = useRequestGet(
     () => user$
       .asObservable()
       .pipe(

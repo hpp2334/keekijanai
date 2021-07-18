@@ -14,6 +14,11 @@
     max-height: 300px;
     overflow: auto;
 
+    .public-DraftEditorPlaceholder-root {
+      position: absolute;
+      color: rgb(184, 184, 184);
+    }
+
     .DraftEditor-editorContainer {
 
       figure {

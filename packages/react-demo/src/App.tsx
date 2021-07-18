@@ -17,6 +17,9 @@ function App() {
           root: '/api/blog-common',
         },
       }}
+      authModalOptions={{
+        enableLegacyAuth: true,
+      }}
     >
       <Router>
         <Switch>

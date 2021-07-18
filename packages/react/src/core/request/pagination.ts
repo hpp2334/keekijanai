@@ -2,8 +2,9 @@ import { useCallback, useState } from "react";
 import { PaginationProps } from 'antd';
 
 export type PaginationParams = {
-  page?: number,
-  pageSize?: number;
+  page: number,
+  pageSize: number;
+  mode?: 'pageTurn' | 'loadMore';
 }
 
 export type PaginationCore = {
@@ -16,6 +17,7 @@ export type PaginationHook = ReturnType<typeof usePagination>;
 export function usePagination(params: PaginationParams | undefined, total: number) {
   const [page, setPage] = useState(params?.page ?? 1);
   const [pageSize, setPageSize] = useState(params?.pageSize ?? 10);
+  const [mode, setMode] = useState(params?.mode ?? 'pageTurn');
 
   const change = setPage;
 
@@ -39,11 +41,17 @@ export function usePagination(params: PaginationParams | undefined, total: numbe
     onChange: antdOnChange,
   }), [page, total, antdOnChange]);
 
+  const loadMore = useCallback(() => {
+    setPage(page => page + 1);
+  }, []);
+
   return {
     page,
     pageSize,
+    mode,
     change,
     getCore,
     toAntd,
+    loadMore,
   }
 }

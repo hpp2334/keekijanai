@@ -4,7 +4,7 @@ import React, { useMemo } from "react";
 import { useCallback } from "react";
 import { Form, Field } from 'react-final-form';
 import { useTranslation } from 'react-i18next';
-import { useRequest, createRequestGetReturned, UseRequestGetReturn, UseRequestMutateOpts } from '../../../core/request';
+import { useRequestGet, UseRequestGetReturn, useRequestMutate, UseRequestMutateOpts } from '../../../core/request';
 import { map } from 'rxjs/operators';
 import _ from 'lodash';
 import { Button, Checkbox, Input, Typography } from 'antd';
@@ -158,14 +158,14 @@ export function ArticleEdit (props: ArticleEditProps) {
     }
 
     return typeof _id !== 'undefined'
-      ? useRequest('mutate', (scope: string, payload: Article.CoreCreate) => articleService.updateArticleCore(_id, payload), opts)
-      : useRequest('mutate', (scope: string, payload: Article.CoreCreate) => articleService.create({ scope, article: payload }), opts);
+      ? useRequestMutate((scope: string, payload: Article.CoreCreate) => articleService.updateArticleCore(_id, payload), opts)
+      : useRequestMutate((scope: string, payload: Article.CoreCreate) => articleService.create({ scope, article: payload }), opts);
   })();
 
   const { data, error, loading } = ((): UseRequestGetReturn<Article.CoreCreate> => {
     switch (typeof _id) {
       case 'number':
-        return useRequest('get', ([id]) => 
+        return useRequestGet(([id]) => 
           articleService
             .get(id)
             .pipe(
@@ -174,7 +174,11 @@ export function ArticleEdit (props: ArticleEditProps) {
           [_id]
         )
       default:
-        return createRequestGetReturned({ type: 0, title: '', abstract: '', content: '' })
+        return {
+          data: { type: 0, title: '', abstract: '', content: '' },
+          loading: false,
+          error: null,
+        };
     }
   })();
 

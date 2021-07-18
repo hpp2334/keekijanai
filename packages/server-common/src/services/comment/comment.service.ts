@@ -131,7 +131,7 @@ export class CommentService {
       throw Error(`count is null`);
     }
 
-    return { comments: result.body ?? [], total: result.count };
+    return { data: result.body ?? [], total: result.count };
   }
 
   async delete(commentId: number) {

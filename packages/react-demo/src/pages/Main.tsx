@@ -17,13 +17,13 @@ export default function Main() {
       <h2>Login</h2>
       <Login />
       <h2>Comment</h2>
-      <Comment scope={scope} />
-      <h2>Article</h2>
+      <Comment scope={scope} listMaxHeight={{ main: 200, sub: 200 }} />
+      {/* <h2>Article</h2>
       <ArticleView scope={scope} where={{ scope }} header='Articles' />
       <h2>View</h2>
       <View scope={scope} />
       <h2>Star</h2>
-      <Star scope={scope} />
+      <Star scope={scope} /> */}
     </div>
   )
 }

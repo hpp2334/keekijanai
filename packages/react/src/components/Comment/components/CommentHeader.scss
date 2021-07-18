@@ -1,0 +1,12 @@
+.kkjn__header {
+  display: flex;
+  align-items: center;
+
+
+  .kkjn__header-datetext {
+    $col: rgb(151, 151, 151);
+  
+    margin-left: 12px;
+    color: $col;
+  }
+}

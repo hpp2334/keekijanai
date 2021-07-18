@@ -1,0 +1,20 @@
+{
+  
+  "CONFIRM": "确认",
+  "CANCEL": "取消",
+  "REMOVE": "删除",
+  "READY_TO_REMOVE": "确认删除本条评论？",
+  "REPLY": "回复",
+  "POST_COMMENT": "评论",
+  "POST_COMMENT_USERNAME": "用户名（如果不写默认取邮箱）",
+  "POST_COMMENT_CONTENT": "评论内容",
+  "COMMENT_LIST": "评论列表",
+  "REPLY_COMMENT_TO_USER": "回复用户 \"%s\" 的评论: \"%s\"",
+  "COMMENT_PLACEHOLDER": "评论一些话...",
+  "NO_COMMENT": "空空如也",
+
+  "CREATE_COMMENT_SUCCESS": "创建评论成功",
+  "CREATE_COMMENT_ERROR": "创建评论失败",
+  "DELETE_COMMENT_SUCESS": "删除评论成功",
+  "DELETE_COMMENT_ERROR": "删除评论失败"
+}

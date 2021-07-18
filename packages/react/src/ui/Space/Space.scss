@@ -1,4 +1,12 @@
 .kkjn__space {
+  @mixin margin-item($gap) {
+    margin-right: $gap;
+  
+    &:last-child {
+      margin-right: 0;
+    }
+  }
+
   $size: 10px;
 
   &.kkjn__vertical {
@@ -13,13 +21,17 @@
 
   &.kkjn__horizontal {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 
     &>.kkjn__space-margin-item {
-      margin-right: $size;
-  
-      &:last-child {
-        margin-right: 0;
+      &.kkjn__xs {
+        @include margin-item(4px)
+      }
+      &.kkjn__sm {
+        @include margin-item(8px)
+      }
+      &.kkjn__md {
+        @include margin-item(12px)
       }
     }
   }

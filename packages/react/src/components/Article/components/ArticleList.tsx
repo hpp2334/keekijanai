@@ -11,7 +11,6 @@ import {
   LoadingOutlined,
 } from "@ant-design/icons";
 import { ArticleListWhereParams } from "keekijanai-client-core";
-import { useRequest } from "../../../core/request";
 import { useTranslation } from "react-i18next";
 
 import "./ArticleList.scss";
@@ -19,6 +18,7 @@ import LoadingDots from "../../../ui/Loading/Dots";
 import { handleStopPropagation } from "../../../util";
 import { DateText } from "../../Base/Date";
 import { useArticleContext } from "../controllers";
+import { useRequestList, useRequestMutate } from "../../../core/request";
 
 interface ArticleListItemProps {
   article: Article.Get;
@@ -153,12 +153,11 @@ export function ArticleList(props: ArticleListProps) {
     loading,
     error,
     pagination,
-  } = useRequest(
-    "list",
-    (args) =>
+  } = useRequestList(
+    ({ pagination }) =>
       articleService.list({
         where: props.where,
-        pagination: args.pagination,
+        pagination,
         fields: ["title"],
       }),
     [props.where],
@@ -170,7 +169,7 @@ export function ArticleList(props: ArticleListProps) {
     }
   );
 
-  const reqRemove = useRequest("mutate", (id: number) =>
+  const reqRemove = useRequestMutate((id: number) =>
     articleService.delete(id)
   );
 

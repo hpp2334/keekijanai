@@ -1,0 +1,1 @@
+export * as commentPostStore from './commentPost';

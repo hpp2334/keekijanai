@@ -47,14 +47,14 @@ export function AvatarV2(props: AvatarV2Props) {
   const { user, size, className, style } = props;
   
   return (
-    <span className="kkjn__avatar">
+    <>
       {user && (
         <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} src={user.avatarUrl} />
       )}
       {!user && (
         <AntdAvatar className={clsx(className)} style={style} shape='circle' size={size} icon={<UserOutlined />} />
       )}
-    </span>
+    </>
   )
 }
 
@@ -62,8 +62,8 @@ export function AvatarLoading(props: AvatarLoadingProps) {
   const { size } = props;
 
   return (
-    <span className="kkjn__avatar">
+    <>
       <Skeleton.Avatar shape='circle' size={size} active />
-    </span>
+    </>
   )
 }

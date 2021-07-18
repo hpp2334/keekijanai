@@ -124,3 +124,23 @@ export function useHover() {
 
   return [hovered, props] as const;
 }
+
+const isObject = (x: any) => !(x === null || typeof x !== 'object');
+
+export function objectShallowEqual(a: any, b: any) {
+  if (!isObject(a) || !isObject(b)) {
+    return false;
+  }
+  if (a === b) {
+    return true;
+  }
+  if (Object.keys(a).length !== Object.keys(b).length) {
+    return false;
+  }
+  for (const k in a) {
+    if (a[k] !== b[k]) {
+      return false;
+    }
+  }
+  return true;
+}

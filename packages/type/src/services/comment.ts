@@ -1,4 +1,5 @@
 import { User } from ".";
+import { Grouping } from "../util";
 
 export interface Get {
   id: number;
@@ -16,7 +17,8 @@ export type Create = Omit<Get, 'id' | 'cTime' | 'userId' | 'childCounts'>;
 
 export type List = {
   total: number;
-  comments: Array<Get>
+  pagination: Grouping | null;
+  data: Get[];
 };
 
 export type Delete = {

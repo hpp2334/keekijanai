@@ -1,36 +1,39 @@
 import React from 'react';
-import { mergeStyles, mergeStylesLeft } from '../../util/style';
+import { mergeStyles, mergeStylesLeft, StylesProps } from '../../util/style';
 
 import './Space.scss';
 
-interface SpaceCommonProps {
+interface SpaceCommonProps extends StylesProps {
   direction?: 'horizontal' | 'vertical';
+  gap?: 'xs' | 'sm' | 'md';
   children?: React.ReactNode;
 }
 
-type SpaceMarginProps = SpaceCommonProps;
+type SpaceMarginProps = { mode?: 'margin' } & SpaceCommonProps;
 
-type SpaceProps = 
-  ({ mode?: 'margin' } & SpaceMarginProps)
+type SpaceProps = SpaceMarginProps
 
 function SpaceMargin(props: SpaceMarginProps) {
   const {
+    gap = 'md',
     direction = 'vertical',
     children,
   } = props;
 
   return !children ? null : (
-    <div {...mergeStylesLeft(["kkjn__space", direction === 'vertical' ? "kkjn__vertical" : "kkjn__horizontal"])}>
+    <div {...mergeStylesLeft(["kkjn__space", direction === 'vertical' ? "kkjn__vertical" : "kkjn__horizontal"], undefined, props)}>
     {
       React.Children.map(children, element => (
-        <div
-          {...mergeStylesLeft(
-          ["kkjn__space-margin-item"]
-        )}>{element}</div>
+        element === null || element === false
+          ? null
+          : <div
+              {...mergeStylesLeft(
+              ["kkjn__space-margin-item", "kkjn__" + gap]
+            )}>{element}</div>
       ))
     }
     </div>
-  )
+  );
 }
 
 export default function Space(props: SpaceProps) {

@@ -1,0 +1,20 @@
+.kkjn__comment-item {
+  position: relative;
+
+  .kkjn__comment-editor {
+    border: none;
+
+    .DraftEditor-root {
+      min-height: auto;
+      margin-top: auto;
+
+      padding-left: 25px;
+    }
+  }
+
+  .kkjn__panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+  }
+}

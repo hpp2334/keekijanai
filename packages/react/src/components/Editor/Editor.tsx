@@ -11,6 +11,7 @@ interface EditorProps extends StylesProps {
   onEditorStateChange: (next: EditorState) => void;
   readOnly?: boolean;
   plugins?: EditorPlugin[];
+  placeholder?: string;
 }
 
 interface EditorContainerProps extends StylesProps {
@@ -33,7 +34,7 @@ export function EditorContainer(props: EditorContainerProps) {
 }
 
 export function Editor(props: EditorProps) {
-  const { editorState, onEditorStateChange, readOnly, plugins } = props;
+  const { editorState, onEditorStateChange, readOnly, placeholder, plugins } = props;
 
   return (
     <NativeEditor
@@ -42,6 +43,7 @@ export function Editor(props: EditorProps) {
       onChange={onEditorStateChange}
       plugins={plugins}
       customStyleMap={styleMap}
+      placeholder={placeholder}
     />
   )
 }
