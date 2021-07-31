@@ -1,5 +1,5 @@
 import { ContextStore, useContextStore } from "../../../util/hooks/useContextStore";
-import { CommentService } from "keekijanai-client-core";
+import { CommentService, CommentSmartService } from "keekijanai-client-core";
 import { createContext, useCallback, useReducer, useState } from "react";
 import { TFunction, useTranslation } from "react-i18next";
 import { useKeekijanaiContext } from "../../../core/context";
@@ -26,7 +26,7 @@ interface ProviderProps {
 
 interface ContextValue {
   refresh: RefreshHook;
-  commentService: CommentService;
+  commentService: CommentSmartService;
   scope: string;
   mainPageSize: number;
   subPageSize: number;
@@ -52,7 +52,7 @@ export function CommentContext(props: ProviderProps) {
   const { client } = useKeekijanaiContext();
   // const [mutationCounts, updateMutationCounts] = useReducer(incrReducer, 0);
   const [commentService] = useState(
-    new CommentService(client, scope)
+    new CommentSmartService(client, scope)
   );
   const refresh = useRefresh();
   const { t } = useTranslation(["comment", "translation"]);

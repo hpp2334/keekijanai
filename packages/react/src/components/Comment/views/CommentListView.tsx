@@ -130,7 +130,7 @@ function CommentListContainer(props: CommentListContainerProps) {
         )}
       >
         {!loading && hasMore && (
-          <div>
+          <div className="kkjn__comment-list-view__loadmore">
             <Button onClick={loadMore} label={'Load More...'} />
           </div>
         )}
