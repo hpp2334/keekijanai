@@ -3,49 +3,61 @@ import { useState } from "react";
 import { Star } from 'keekijanai-type';
 import { mergeMap, mergeMapTo, tap } from 'rxjs/operators';
 import { incrReducer, useMemoExports } from "../../util";
-import { useStarContextValue, StarContext } from './context';
 import { useObservable, useSubscription } from "observable-hooks";
 import { FetchResponse, INIT_PENDING_FETCH_RESPONSE, mapToRsp } from "../../util/request";
-import { StarType } from "keekijanai-type/dist/services/star";
+import { Star as StarType } from "keekijanai-type";
+import { useStarContext } from "./context";
+import { useRequestGet } from "../../core/request";
+import { useAuthV2 } from "../Auth/controller";
 
-export { useStarContextValue, StarContext } from './context';
+export { useStarContext, StarContext } from './context';
 
 export function useStar() {
-  const { starService } = useStarContextValue();
-  const [starRsp, setStarRsp] = useState<FetchResponse<Star.Get>>(INIT_PENDING_FETCH_RESPONSE);
+  const authHook = useAuthV2();
+  const { starService } = useStarContext();
+  const [posting, setPosting] = useState(false);
 
-  const starRsp$ = useObservable(
-    input$ => input$.pipe(
-      mergeMap(() => starService
-        .get()
-        .pipe(
-          mapToRsp(),
-        )
-      )
-    ),
-    []
+  const {
+    data,
+    loading,
+    error,
+    mutate,
+  } = useRequestGet(
+    () => {
+      return starService.get();
+    },
+    {
+      authUser: authHook.user,
+    }
   );
 
   const post = useCallback((val: Star.StarType) => {
-    if (starRsp.stage !== 'done') {
-      throw Error('should call after starRsp done');
+    if (loading) {
+      throw Error('should call after get star done');
     }
-    const { current } = starRsp.data;
+    const { current } = data;
     const next = typeof current === 'number' && val === current ? null : val;
+    setPosting(true);
     return starService
       .post(next)
       .pipe(
+        tap({
+          next: () => setPosting(false),
+          error: () => setPosting(false),
+        }),
         tap(result => {
-          setStarRsp({ stage: 'done', data: result, error: null, })
-        })
+          mutate(result);
+        }),
       )
-  }, [starRsp]);
+  }, [data, loading, error, mutate]);
 
-  useSubscription(starRsp$, setStarRsp)
 
   const exports = useMemoExports({
-    starRsp,
+    data,
+    loading,
+    error,
     post,
+    posting,
   });
   return exports;
 }

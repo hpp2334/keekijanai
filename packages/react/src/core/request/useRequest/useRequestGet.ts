@@ -13,6 +13,7 @@ export type UseRequestGetReturn<T> = {
   data: T;
   loading: boolean;
   error: string | null;
+  mutate: (next: T) => void;
 }
 
 export function useRequestGet<T, INPUTS extends {}> (
@@ -32,6 +33,10 @@ export function useRequestGet<T, INPUTS extends {}> (
     observableRequestInfo,
     memoziedInputs,
   ] as const;
+
+  const mutate = useCallback((next: T) => {
+    setData(next);
+  }, []);
 
   const data$ = useObservable<T, typeof observableInputs>(
     inputs$ => inputs$.pipe(
@@ -61,5 +66,6 @@ export function useRequestGet<T, INPUTS extends {}> (
     data,
     loading,
     error,
+    mutate,
   }
 }

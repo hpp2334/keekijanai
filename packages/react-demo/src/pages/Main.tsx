@@ -22,8 +22,8 @@ export default function Main() {
       <ArticleView scope={scope} where={{ scope }} header='Articles' />
       <h2>View</h2>
       <View scope={scope} />
-      {/* <h2>Star</h2>
-      <Star scope={scope} /> */}
+      <h2>Star</h2>
+      <Star scope={scope} />
     </div>
   )
 }

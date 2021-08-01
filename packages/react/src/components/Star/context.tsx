@@ -14,7 +14,7 @@ interface ContextValue {
 }
 
 const commentContext = createContext<ContextValue | null>(null);
-export const useStarContextValue = useNotNilContextValueFactory(commentContext);
+export const useStarContext = useNotNilContextValueFactory(commentContext);
 
 export function StarContext(props: ProviderProps) { 
   const { children, scope } = props;
