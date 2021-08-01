@@ -8,6 +8,7 @@ import type { AuthService } from '@/services/auth';
 import * as commentError from './error';
 import Mint from "mint-filter";
 import { O } from 'ts-toolbelt';
+import Aigle from 'aigle';
 
 const debug = require('debug')('keekijanai:service:comment');
 
@@ -71,6 +72,11 @@ export class CommentService {
     }
     
     const comment: Comment.Get = result.body[0];
+
+    comment.user = await this.userService.get(comment.userId, {
+      shouldExists: true,
+    });
+
     return comment;
   }
 
@@ -112,7 +118,7 @@ export class CommentService {
   }
 
   async list(scope: string, parentId: number | undefined, grouping: Grouping) {
-    const result = await this.provider.select({
+    const result = await this.provider.select<Comment.Get>({
       count: 'exact',
       where: {
         'scope': [['=', scope]],
@@ -131,7 +137,23 @@ export class CommentService {
       throw Error(`count is null`);
     }
 
-    return { data: result.body ?? [], total: result.count };
+    const {
+      body: _data,
+      count: total,
+    } = result;
+
+    /** @todo implement this by ORM relation */
+    const data = await Aigle.mapLimit(
+      _data ?? [],
+      async (item) => {
+        item.user = await this.userService.get(item.userId, {
+          shouldExists: true,
+        });
+        return item;
+      }
+    );
+
+    return { data, total };
   }
 
   async delete(commentId: number) {

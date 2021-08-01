@@ -1,4 +1,4 @@
-import { User } from ".";
+import { User } from "./user";
 import { Grouping } from "../util";
 
 export interface Get {
@@ -11,9 +11,10 @@ export interface Get {
   parentId?: number;
   userId: string;
   childCounts: number;
+  user: User;
 }
 
-export type Create = Omit<Get, 'id' | 'cTime' | 'userId' | 'childCounts'>;
+export type Create = Omit<Get, 'id' | 'cTime' | 'userId' | 'childCounts' | 'user'>;
 
 export type List = {
   total: number;
