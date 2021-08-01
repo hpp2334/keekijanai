@@ -1,10 +1,11 @@
-import { EditorState } from "draft-js";
+import { convertToRaw, EditorState } from "draft-js";
 import NativeEditor, { EditorPlugin } from '@draft-js-plugins/editor';
 import _ from "lodash";
 import React, { useCallback } from "react";
 import { mergeStylesLeft, StylesProps } from "../../util/style";
 
 import './Editor.scss';
+import { useRef } from "react";
 
 interface EditorProps extends StylesProps {
   editorState: EditorState;
@@ -36,14 +37,23 @@ export function EditorContainer(props: EditorContainerProps) {
 export function Editor(props: EditorProps) {
   const { editorState, onEditorStateChange, readOnly, placeholder, plugins } = props;
 
+  const refEditor = useRef<NativeEditor>(null);
+
+  const onClick = useCallback(() => {
+    refEditor.current?.focus();
+  }, []);
+
   return (
-    <NativeEditor
-      readOnly={readOnly}
-      editorState={editorState}
-      onChange={onEditorStateChange}
-      plugins={plugins}
-      customStyleMap={styleMap}
-      placeholder={placeholder}
-    />
+    <div onClick={onClick}>
+      <NativeEditor
+        ref={refEditor}
+        readOnly={readOnly}
+        editorState={editorState}
+        onChange={onEditorStateChange}
+        plugins={plugins}
+        customStyleMap={styleMap}
+        placeholder={placeholder}
+      />
+    </div>
   )
 }

@@ -1,7 +1,10 @@
 import { EditorState } from "draft-js";
-import { Editor, EditorContainer, toolbarRich } from "../../Editor";
+import { Editor, EditorContainer, toolbarRich, toolbar } from "../../Editor";
 import _ from 'lodash';
 import { mergeStylesLeft, StylesProps } from "../../../util/style";
+
+import './CommentEditor.scss';
+import { useMemo } from "react";
 
 interface ArticleEditorProps extends StylesProps {
   editorState: EditorState;
@@ -10,8 +13,7 @@ interface ArticleEditorProps extends StylesProps {
   placeholder?: string;
 }
 
-const toolbarRichPlugin = toolbarRich.createToolbarRichPlugin();
-const { ToolbarRich } = toolbarRichPlugin;
+
 
 export default function CommentEditor(props: ArticleEditorProps) {
   const {
@@ -20,6 +22,18 @@ export default function CommentEditor(props: ArticleEditorProps) {
     readMode = false,
     placeholder,
   } = props;
+
+  const {
+    ToolbarRich,
+    toolbarRichPlugin,
+  } = useMemo(() => {
+    const toolbarRichPlugin = toolbarRich.createToolbarRichPlugin();
+    const { ToolbarRich } = toolbarRichPlugin;
+    return {
+      toolbarRichPlugin,
+      ToolbarRich,
+    }
+  }, []);
   
   return (
     <EditorContainer {...mergeStylesLeft("kkjn__comment-editor-container", undefined, props)}>
@@ -28,9 +42,11 @@ export default function CommentEditor(props: ArticleEditorProps) {
         onEditorStateChange={onEditorStateChange ?? _.noop}
         readOnly={readMode}
         plugins={[...toolbarRichPlugin.dependPlugins, toolbarRichPlugin]}
+        // plugins={[toolbarPlugin]}
         placeholder={placeholder}
       />
       {!readMode && <ToolbarRich />}
+      {/* {!readMode && <Toolbar />} */}
     </EditorContainer>
   )
 }

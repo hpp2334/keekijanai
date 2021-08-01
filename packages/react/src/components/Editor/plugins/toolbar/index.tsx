@@ -1,7 +1,7 @@
 import { BoldOutlined, ItalicOutlined, UnderlineOutlined, StrikethroughOutlined } from "@ant-design/icons";
 import { EditorPlugin, GetSetEditorState } from "@draft-js-plugins/editor";
 
-import { EditorState, RichUtils } from "draft-js";
+import { convertToRaw, EditorState, RichUtils } from "draft-js";
 import _ from "lodash";
 import React, { useCallback } from "react";
 import ToggleButton from "../../../../ui/Button/ToggleButton";
@@ -41,6 +41,7 @@ function EditorToolbarBasic(props: ToolbarUnwrapperProps) {
   const toggleInlineStyle = useCallback(
     (inlineStyle: string) => {
       const nextEditorState = RichUtils.toggleInlineStyle(editorState, inlineStyle);
+      console.log('next', JSON.stringify(convertToRaw(nextEditorState.getCurrentContent())));
       store.setEditorState(nextEditorState);
     },
     [editorState, store.setEditorState]

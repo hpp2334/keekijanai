@@ -5,6 +5,7 @@ import { EditorPlugin } from '@draft-js-plugins/editor';
 
 import createImagePlugin from '@draft-js-plugins/image';
 import { ImageAddButton } from '../../components/image';
+import { convertToRaw } from 'draft-js';
 const imagePlugin = createImagePlugin();
 const { addImage } = imagePlugin;
 
