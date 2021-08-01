@@ -17,7 +17,7 @@ export default function Main() {
       <h2>Login</h2>
       <Login />
       <h2>Comment</h2>
-      <Comment scope={scope} listMaxHeight={{ main: 400, sub: 200 }} />
+      <Comment scope={scope} listMaxHeight={{ main: 400, sub: 200 }} subPageSize={4} />
       {/* <h2>Article</h2>
       <ArticleView scope={scope} where={{ scope }} header='Articles' />
       <h2>View</h2>

@@ -43,7 +43,7 @@ export default function Button(props: ButtonProps) {
     >
       <Space direction='horizontal' gap='xs'>
         {prefix ?? null}
-        {label?.toUpperCase() ?? null}
+        {label ?? null}
       </Space>
     </button>
   )

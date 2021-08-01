@@ -17,7 +17,7 @@ import { sprintf } from "sprintf-js";
 import "./CommentListView.scss";
 import { Button } from "../../../ui";
 import { RetweetOutlined } from "@ant-design/icons";
-import { Popover, Button as AntdButton } from "antd";
+import { Popover, Button as AntdButton, Typography } from "antd";
 
 interface CommentItemContainerProps {
   parentId: number | undefined;
@@ -51,7 +51,7 @@ function CommentReferenceContainer(props: CommentReferenceContainerProps) {
   const { comment, loading, error } = useCommentGet(id);
 
   if (loading) {
-    return <>'12312'</>;
+    return null;
   }
   if (error) {
     return <>{error}</>
@@ -129,10 +129,10 @@ function CommentItemContainer(props: CommentItemContainerProps) {
 }
 
 function CommentListContainer(props: CommentListContainerProps) {
-  const { listMaxHeight } = useCommentContext();
+  const { listMaxHeight, t } = useCommentContext();
   const { id } = props;
 
-  const { comments, loading, error, total, loadMore, hasMore } = useCommentList(id);
+  const { comments, loading, error, total, loadMore, hasMore, left } = useCommentList(id);
 
   const isMainList = id === undefined;
 
@@ -163,7 +163,8 @@ function CommentListContainer(props: CommentListContainerProps) {
       >
         {!loading && hasMore && (
           <div className="kkjn__comment-list-view__loadmore">
-            <Button onClick={loadMore} label={'Load More...'} />
+            <Typography.Text>{sprintf(t("COMMENT_LEFT"), left)}, </Typography.Text>
+            <Button className="kkjn__loadmore-button" onClick={loadMore} label={t("COMMENT_LOADMORE")} />
           </div>
         )}
         {loading && comments != null && (

@@ -39,7 +39,8 @@ export function useCommentList(id: number | undefined) {
   );
 
   const loadMore = pagination.loadMore;
-  const hasMore = total - (comments?.length ?? 0) > 0;
+  const left = total - (comments?.length ?? 0);
+  const hasMore = left > 0;
 
   return {
     comments,
@@ -47,6 +48,7 @@ export function useCommentList(id: number | undefined) {
     error,
     total,
     loadMore,
+    left,
     hasMore,
   };
 }

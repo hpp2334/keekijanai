@@ -16,5 +16,8 @@
   "CREATE_COMMENT_SUCCESS": "Create comment successfully",
   "CREATE_COMMENT_FAIL": "Failed to delete comment",
   "DELETE_COMMENT_SUCESS": "Delete comment successfully",
-  "DELETE_COMMENT_ERROR": "Error occur when deleting comment"
+  "DELETE_COMMENT_ERROR": "Error occur when deleting comment",
+
+  "COMMENT_LEFT": "%d comments left",
+  "COMMENT_LOADMORE": "Load More"
 }

@@ -16,5 +16,8 @@
   "CREATE_COMMENT_SUCCESS": "创建评论成功",
   "CREATE_COMMENT_ERROR": "创建评论失败",
   "DELETE_COMMENT_SUCESS": "删除评论成功",
-  "DELETE_COMMENT_ERROR": "删除评论失败"
+  "DELETE_COMMENT_ERROR": "删除评论失败",
+
+  "COMMENT_LEFT": "还有 %d 条评论",
+  "COMMENT_LOADMORE": "加载更多"
 }
