@@ -1,6 +1,7 @@
 {
   "CREATE_ARTICLE": "Create Article",
   "EDIT_ARTICLE": "Edit",
+  "CANCEL_ARTICLE": "Cancel",
 
   "ARTICLE_TITLE": "Title",
   "ARTICLE_ABSTRACT": "Abstract",

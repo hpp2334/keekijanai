@@ -1,5 +1,8 @@
+import { mergeStylesLeft } from "../../../util/style";
 import { EditorState } from "draft-js";
 import { Editor, EditorContainer, toolbarRich } from "../../Editor";
+
+import "./ArticleEditor.scss";
 
 interface ArticleEditorProps {
   editorState: EditorState;
@@ -18,7 +21,7 @@ export function ArticleEditor(props: ArticleEditorProps) {
   } = props;
   
   return (
-    <EditorContainer className="kkjn__article-editor-container">
+    <EditorContainer {...mergeStylesLeft(["kkjn__article-editor-container", !readMode && "kkjn__edit-mode"])}>
       <Editor
         editorState={editorState}
         onEditorStateChange={onEditorStateChange}

@@ -1,6 +1,7 @@
 {
   "CREATE_ARTICLE": "创建文章",
   "EDIT_ARTICLE": "编辑",
+  "CANCEL_ARTICLE": "取消",
 
   "ARTICLE_TITLE": "标题",
   "ARTICLE_ABSTRACT": "摘要",

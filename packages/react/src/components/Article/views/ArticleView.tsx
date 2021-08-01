@@ -5,12 +5,12 @@ import {
   ArticleListCore,
   ArticleListError,
   ArticleListLoading,
-} from "./ArticleList";
+} from "../components/ArticleList";
 import { Button, Typography } from "antd";
-import { ArticleRead } from "./ArticleRead";
+import { ArticleRead } from "../components/ArticleRead";
 import { useState } from "react";
 import { Article } from "../../../../../type/dist";
-import { ArticleEdit } from "./ArticleEdit";
+import { ArticleEdit } from "../components/ArticleEdit";
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { withComponentsFactory } from "../../../util/hoc";

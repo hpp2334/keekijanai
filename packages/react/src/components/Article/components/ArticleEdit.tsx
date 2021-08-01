@@ -128,7 +128,7 @@ export function ArticleEditCore(props: ArticleEditCoreProps) {
             </Field>
             <div className="kkjn__panel">
               <Space direction='horizontal'>
-                <Button disabled={upserting} onClick={onCancel}>{t('translation:CANCEL')}</Button>
+                <Button disabled={upserting} onClick={onCancel}>{t('CANCEL_ARTICLE')}</Button>
                 <Button loading={upserting} type='primary' htmlType='submit'>{t('EDIT_ARTICLE')}</Button>
               </Space>
             </div>
@@ -165,13 +165,13 @@ export function ArticleEdit (props: ArticleEditProps) {
   const { data, error, loading } = ((): UseRequestGetReturn<Article.CoreCreate> => {
     switch (typeof _id) {
       case 'number':
-        return useRequestGet(([id]) => 
+        return useRequestGet((info, { id }) => 
           articleService
             .get(id)
             .pipe(
               map(v => v.article),
             ),
-          [_id]
+          { id: _id }
         )
       default:
         return {

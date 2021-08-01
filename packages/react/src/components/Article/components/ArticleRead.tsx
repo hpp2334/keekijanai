@@ -59,7 +59,10 @@ export function ArticleRead (props: ArticleReadProps) {
   const { articleService } = useArticleContext();
   const { id } = props;
 
-  const { data, error, loading } = useRequestGet(([id]) => articleService.get(id), [id])
+  const { data, error, loading } = useRequestGet(
+    (info, { id }) => articleService.get(id),
+    { id }
+  )
 
   if (error) {
     return (
