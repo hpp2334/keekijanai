@@ -14,7 +14,7 @@ interface ContextValue {
 }
 
 const viewContext = createContext<ContextValue | null>(null);
-export const useViewContextValue = useNotNilContextValueFactory(viewContext);
+export const useViewContext = useNotNilContextValueFactory(viewContext);
 
 export function ViewContext(props: ProviderProps) { 
   const { children, scope } = props;

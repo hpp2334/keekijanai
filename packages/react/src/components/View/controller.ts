@@ -4,26 +4,29 @@ import { useState } from 'react';
 import { FetchResponse, INIT_PENDING_FETCH_RESPONSE, mapToRsp } from '../../util/request';
 import { useMemoExports } from '../../util';
 
-import { ViewContext, useViewContextValue } from './context';
+import { ViewContext, useViewContext } from './context';
+import { useRequestGet } from '../../core/request';
 export * from './context';
 
 
 export function useView() {
-  const [viewRsp, setViewRsp] = useState<FetchResponse<View.Get>>(INIT_PENDING_FETCH_RESPONSE);
-  const { viewService } = useViewContextValue();
-  const view$ = useObservable(
-    () => viewService
-      .get()
-      .pipe(
-        mapToRsp(),
-      ),
-    []
+  const { viewService } = useViewContext();
+
+  const {
+    data,
+    loading,
+    error,
+  } = useRequestGet(
+    () => {
+      return viewService.get();
+    },
+    {}
   );
 
-  useSubscription(view$, setViewRsp);
-
   const exports = useMemoExports({
-    viewRsp
+    data,
+    loading,
+    error,
   });
   return exports;
 }
