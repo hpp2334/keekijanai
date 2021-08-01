@@ -20,14 +20,6 @@ export default function CommentHeader(props: CommentHeaderProps) {
       <UserComponentV2 user={user} avatarSize={20} />
       <DateText className="kkjn__header-datetext" timestamp={comment.cTime} />
       {props.children}
-      {/* {showReference && comment.referenceId !== undefined && (
-        <Popover
-          trigger='hover'
-          content={<ReferenceComment id={data.referenceId} />}
-        >
-          <Button type='link' icon={<RetweetOutlined />}></Button>
-        </Popover>
-      )} */}
     </div>
   )
 }

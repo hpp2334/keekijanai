@@ -1,9 +1,10 @@
 import { getResponseError, UseRequestCommonOpts } from './shared';
 import { PaginationCore, PaginationHook, PaginationParams, usePagination } from "../pagination";
 import { useObservable, useSubscription } from 'observable-hooks';
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { Observable } from 'rxjs';
 import { mergeMap, tap } from 'rxjs/operators';
+import { useObjectMemo } from '../../../util/hooks/useObjectMemo';
 
 
 export type UseRequestGetOpts<T> = UseRequestCommonOpts<T>;
@@ -14,21 +15,30 @@ export type UseRequestGetReturn<T> = {
   error: string | null;
 }
 
-export function useRequestGet<T, DEPS extends any[]> (
-  getObservable: (deps: DEPS) => Observable<T>,
-  deps: DEPS,
+export function useRequestGet<T, INPUTS extends {}> (
+  getObservable: (info: {}, inputs: INPUTS) => Observable<T>,
+  inputs: INPUTS,
   opts?: UseRequestGetOpts<T>,
 ): UseRequestGetReturn<T> {
   const [data, setData] = useState<T>(null as any);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const memoziedInputs = useObjectMemo(inputs);
 
-  const data$ = useObservable<T, DEPS>(
+  const observableRequestInfo = useMemo(() => ({
+  }), []);
+
+  const observableInputs = [
+    observableRequestInfo,
+    memoziedInputs,
+  ] as const;
+
+  const data$ = useObservable<T, typeof observableInputs>(
     inputs$ => inputs$.pipe(
       tap(() => setLoading(true)),
-      mergeMap((deps) => getObservable(deps)),
+      mergeMap((deps) => getObservable(deps[0], deps[1])),
     ),
-    deps,
+    observableInputs as any,
   )
 
   useSubscription(data$, {

@@ -5,6 +5,7 @@ import { useUserV2 } from "../../User";
 import { CommentContext, useCommentContext } from "../controllers/context";
 import LoadingDots from "../../../ui/Loading/Dots";
 import {
+  useCommentGet,
   useCommentList,
   useCommentPost,
   useCommentRemove,
@@ -15,6 +16,8 @@ import { sprintf } from "sprintf-js";
 
 import "./CommentListView.scss";
 import { Button } from "../../../ui";
+import { RetweetOutlined } from "@ant-design/icons";
+import { Popover, Button as AntdButton } from "antd";
 
 interface CommentItemContainerProps {
   parentId: number | undefined;
@@ -29,6 +32,10 @@ interface CommentListContainerProps extends StylesProps {
 
 interface CommentListViewProps {}
 
+interface CommentReferenceContainerProps {
+  id: number;
+}
+
 interface CommentProps {
   scope: string;
   listMaxHeight: {
@@ -39,11 +46,28 @@ interface CommentProps {
   subPageSize?: number;
 }
 
+function CommentReferenceContainer(props: CommentReferenceContainerProps) {
+  const { id } = props;
+  const { comment, loading, error } = useCommentGet(id);
+
+  if (loading) {
+    return <>'12312'</>;
+  }
+  if (error) {
+    return <>{error}</>
+  }
+  return (
+    <CommentItem
+      comment={comment}
+      user={comment.user}
+    />
+  )
+}
+
 function CommentItemContainer(props: CommentItemContainerProps) {
   const { comment, showSubList, showChildCounts } = props;
 
   const { t } = useCommentContext();
-  const { user, loading, error } = useUserV2(comment.userId);
   const { user: currentUser } = useAuthV2();
 
   const commentPostHook = useCommentPost();
@@ -59,7 +83,7 @@ function CommentItemContainer(props: CommentItemContainerProps) {
         referenceId: comment.id,
         placeholder: sprintf(
           t("REPLY_COMMENT_TO_USER"),
-          user.name,
+          comment.user.name,
           comment.plainText
         ),
       },
@@ -74,7 +98,15 @@ function CommentItemContainer(props: CommentItemContainerProps) {
     <>
       <CommentItem
         comment={comment}
-        user={user}
+        user={comment.user}
+        headerExtra={comment.referenceId !== undefined && comment.referenceId !== comment.parentId && (
+          <Popover
+            trigger='hover'
+            content={comment.referenceId !== undefined && <CommentReferenceContainer id={comment.referenceId} />}
+          >
+            <AntdButton type="link" icon={<RetweetOutlined />}></AntdButton>
+          </Popover>
+        )}
         panel={{
           showChildCounts,
           onClickReply,

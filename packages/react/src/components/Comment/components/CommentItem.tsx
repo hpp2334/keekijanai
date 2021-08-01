@@ -24,6 +24,7 @@ interface CommentItemPanelProps {
 interface CommentItemProps {
   comment: TypeComment.Get;
   user: User.User;
+  headerExtra?: React.ReactNode;
   panel?: {
     showChildCounts?: boolean;
     onClickReply?: (comment: TypeComment.Get, user: User.User) => void;
@@ -89,7 +90,9 @@ export default function CommentItem(props: CommentItemProps) {
 
   return (
     <div className="kkjn__comment-item">
-      <CommentHeader comment={comment} user={user} />
+      <CommentHeader comment={comment} user={user}>
+        {props.headerExtra ?? null}
+      </CommentHeader>
       <CommentEditor className="kkjn__comment-editor" editorState={editorState} readMode={true} />
       {panel && (
         <CommentItemPanel
