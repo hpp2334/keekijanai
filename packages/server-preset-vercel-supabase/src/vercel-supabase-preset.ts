@@ -3,6 +3,7 @@ import { Vercel } from './platforms/vercel';
 import { Supabase } from "./providers/supabase";
 
 import {
+  ArticleController, ArticleService, ArticleCoreService,
   AuthController, AuthService, AuthServiceConfig,
   CommentController, CommentService, CommentServiceConfig,
   NotifyService, NotifyServiceConfig,
@@ -29,6 +30,7 @@ export interface VercelSupabasePresetOptions {
 export function getVercelSupabasePreset(options: VercelSupabasePresetOptions): ConfigType.Preset {
   return {
     controllers: [
+      ArticleController,
       AuthController,
       CommentController,
       StarController,
@@ -36,6 +38,8 @@ export function getVercelSupabasePreset(options: VercelSupabasePresetOptions): C
       ViewController,
     ],
     services: [
+      ArticleService,
+      ArticleCoreService,
       DeviceService,
       [AuthService, options.services.auth],
       [CommentService, options.services.comment],
@@ -46,7 +50,9 @@ export function getVercelSupabasePreset(options: VercelSupabasePresetOptions): C
       ViewService,
     ],
     platform: Vercel,
-    provider: [Supabase, options.supabase]
+    providers: {
+      default: [Supabase, options.supabase]
+    },
   }
 }
 

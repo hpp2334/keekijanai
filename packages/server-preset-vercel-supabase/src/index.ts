@@ -1,3 +1,5 @@
 export { Vercel } from './platforms/vercel';
 export { Supabase } from './providers/supabase';
-export { getVercelSupabasePreset, VercelSupabasePresetOptions } from './vercel-supabase-preset';
+export { getVercelSupabasePreset } from './vercel-supabase-preset';
+export type { VercelSupabasePresetOptions } from './vercel-supabase-preset';
+

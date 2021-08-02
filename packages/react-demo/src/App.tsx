@@ -7,7 +7,7 @@ import {
   Route,
   Link
 } from "react-router-dom";
-import { Login, Comment, View, Star, ArticleView, KeekijanaiContext } from 'keekijanai-react';
+import { KeekijanaiContext } from 'keekijanai-react';
 
 function App() {
   return (

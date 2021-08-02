@@ -20,7 +20,7 @@ class SupabaseProvider implements ProviderType.ProviderBase {
     try {
       let request = this.client
         .from(params.from)
-        .select(params.columns?.join(','), { count: this.transformCount(params.count) });
+        .select(params.columns?.filter(c => c !== '*').join(',') || undefined, { count: this.transformCount(params.count) });
       if (params.where) {
         request = this.handleWhere(request, params.where);
       }
