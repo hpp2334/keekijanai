@@ -1,6 +1,6 @@
 {
   "name": "keekijanai-gatsby-demo",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Keekijanai Demo",
   "author": "hpp2334",
@@ -18,12 +18,12 @@
   "dependencies": {
     "@vercel/node": "^1.11.0",
     "gatsby": "^3.4.1",
-    "gatsby-plugin-keekijanai": "^0.1.0",
-    "keekijanai-react": "^0.1.0",
-    "keekijanai-server-common": "^0.1.0",
-    "keekijanai-server-core": "^0.1.0",
-    "keekijanai-server-preset-common": "^0.1.0",
-    "keekijanai-server-preset-vercel-supabase": "^0.1.0",
+    "gatsby-plugin-keekijanai": "^0.1.1",
+    "keekijanai-react": "^0.1.1",
+    "keekijanai-server-common": "^0.1.1",
+    "keekijanai-server-core": "^0.1.1",
+    "keekijanai-server-preset-common": "^0.1.1",
+    "keekijanai-server-preset-vercel-supabase": "^0.1.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1"
   },
