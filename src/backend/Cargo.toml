@@ -1,0 +1,23 @@
+[package]
+name = "backend"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sqlx = { version = "0.5", features = [ "runtime-tokio-rustls", "macros", "postgres", "time" ] }
+sea-query = "^0"
+dotenv = "0.15.0"
+lazy_static = "1.4.0"
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+qstring = "0.7.2"
+url = "2.2.2"
+anyhow = { version = "1.0", features = [ "backtrace" ] }
+shaku = "0.6.1"
+async-trait = "0.1.51"
+chrono = "0.4"
+log = "0.4"
+derive_more = "0.99.16"
