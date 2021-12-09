@@ -21,3 +21,5 @@ async-trait = "0.1.51"
 chrono = "0.4"
 log = "0.4"
 derive_more = "0.99.16"
+hyper = { version = "0.14", features = ["full"] }
+thiserror = "1.0"

@@ -1,4 +1,6 @@
+#[macro_use]
 pub mod db;
 
-#[macro_use]
-pub mod db_active_column;
+pub mod error;
+
+pub mod controller;
