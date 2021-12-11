@@ -1,4 +1,4 @@
-use std::future::Future;
+use std::{future::Future, collections::HashMap};
 
 
 pub use hyper::{Body, Response};
@@ -15,4 +15,5 @@ pub struct Route<R, E> {
     pub pattern_re: Regex,
     pub method: Method,
     pub handler: Handler<R, E>,
+    pub(crate) params_name: Vec<String>,
 }

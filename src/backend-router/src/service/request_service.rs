@@ -34,7 +34,7 @@ impl<B: HttpBody + From<&'static str> + From<String> + Send + Sync + 'static, E:
         let router = self.router.clone();
 
         let fut = async move {
-            let res = router.process(req).await;
+            let res = router.process(req, None).await;
 
             if let Err(err) = res {
                 if let Ok(KeekijanaiError::Client { status, message }) = err.downcast::<KeekijanaiError>() {

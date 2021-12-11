@@ -62,6 +62,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "33954243bd79057c2de7338850b85983a44588021f8a5fee574a8888c6de4344"
 
 [[package]]
+name = "assert_matches"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
+
+[[package]]
 name = "async-trait"
 version = "0.1.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -126,10 +132,13 @@ name = "backend-router"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "assert_matches",
  "derive_more",
  "futures",
  "hyper",
+ "once_cell",
  "regex",
+ "reqwest",
  "serde",
  "serde_json",
  "serde_qs",
