@@ -1,6 +1,6 @@
-use std::{collections::HashMap, pin::Pin};
+use std::{pin::Pin};
 
-use hyper::{Error, Response, StatusCode};
+use hyper::{Response};
 use regex::Regex;
 use std::future::Future;
 use tracing::info;
@@ -129,7 +129,7 @@ where
         let mut resp: Option<Response<R>> = None;
 
         for Route {
-            pattern,
+            pattern: _,
             pattern_re,
             method,
             handler,

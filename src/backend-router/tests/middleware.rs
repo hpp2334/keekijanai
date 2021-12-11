@@ -4,15 +4,14 @@ extern crate assert_matches;
 mod util;
 
 use std::{
-    collections::{HashMap, HashSet},
-    net::SocketAddr,
+    collections::{HashMap},
     sync::Mutex,
 };
 
 use backend_router::{
-    Body, KeekijanaiError, Method, Request, Response, Router, RouterService, WithResponseHelper,
+    Body, KeekijanaiError, Method, Request, Response, Router, WithResponseHelper,
 };
-use hyper::{Server, StatusCode};
+use hyper::{StatusCode};
 use once_cell::sync::OnceCell;
 use reqwest;
 use serde::{Deserialize, Serialize};

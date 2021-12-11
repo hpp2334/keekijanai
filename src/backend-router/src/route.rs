@@ -1,4 +1,4 @@
-use std::{future::Future, collections::HashMap};
+use std::{future::Future};
 
 
 pub use hyper::{Body, Response};

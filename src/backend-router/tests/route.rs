@@ -3,10 +3,10 @@ extern crate assert_matches;
 
 mod util;
 
-use std::net::SocketAddr;
 
-use backend_router::{Body, Method, Request, Response, Router, RouterService, WithResponseHelper};
-use hyper::Server;
+
+use backend_router::{Body, Method, Request, Response, Router, WithResponseHelper};
+
 use reqwest;
 use serde::{Deserialize, Serialize};
 
