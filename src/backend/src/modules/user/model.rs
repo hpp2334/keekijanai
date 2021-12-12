@@ -3,7 +3,7 @@ use sea_query::{Iden, Value};
 
 
 
-use crate::core::db_active_column::ActiveColumn;
+use crate::core::db::ActiveColumn;
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum UserRole {

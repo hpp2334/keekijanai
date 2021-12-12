@@ -1,4 +1,4 @@
-use crate::modules::user::{model::UserActiveModel, service::UserService};
+use crate::modules::user::{model::UserActiveModel, service::{UserService, USER_SERVICE}};
 
 use super::oauth2::{core::OAuth2Service, OAuth2Manager};
 
@@ -41,4 +41,11 @@ impl<'a> AuthService<'a> {
         let resp = self.user_service.upsert(id, user_active_model).await?;
         return Ok(resp);
     }
+}
+
+
+lazy_static! {
+    pub static ref AUTH_SERVICE: AuthService<'static> = {
+        return AuthService::new(&USER_SERVICE);
+    };
 }

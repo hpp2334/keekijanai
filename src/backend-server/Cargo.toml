@@ -1,5 +1,5 @@
 [package]
-name = "backend_server"
+name = "backend-server"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,7 +8,6 @@ edition = "2021"
 [dependencies]
 hyper = { version = "0.14", features = ["full"] }
 tokio = { version = "1", features = ["full"] }
-routerify = "2"
 qstring = "0.7.2"
 anyhow = "1.0"
 backend = { path = "../backend" }

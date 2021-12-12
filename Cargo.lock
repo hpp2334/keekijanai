@@ -110,6 +110,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "async-trait",
+ "backend-router",
  "chrono",
  "derive_more",
  "dotenv",
@@ -117,6 +118,7 @@ dependencies = [
  "lazy_static",
  "log",
  "qstring",
+ "regex",
  "reqwest",
  "sea-query",
  "serde",
@@ -124,7 +126,10 @@ dependencies = [
  "shaku",
  "sqlx",
  "thiserror",
+ "tracing",
+ "tracing-subscriber",
  "url",
+ "uuid",
 ]
 
 [[package]]
@@ -150,7 +155,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "backend_server"
+name = "backend-server"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -161,7 +166,6 @@ dependencies = [
  "hyper",
  "log",
  "qstring",
- "routerify",
  "serde",
  "serde_json",
  "tokio",
@@ -1244,19 +1248,6 @@ dependencies = [
  "untrusted",
  "web-sys",
  "winapi",
-]
-
-[[package]]
-name = "routerify"
-version = "2.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c6bb49594c791cadb5ccfa5f36d41b498d40482595c199d10cd318800280bd9"
-dependencies = [
- "http",
- "hyper",
- "lazy_static",
- "percent-encoding",
- "regex",
 ]
 
 [[package]]

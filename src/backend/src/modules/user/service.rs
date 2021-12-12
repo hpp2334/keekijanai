@@ -95,3 +95,9 @@ WHERE provider = $1 AND in_provider_id = $2
         return Ok(());
     }
 }
+
+lazy_static! {
+    pub static ref USER_SERVICE: UserService = {
+        return UserService::new();
+    };
+}
