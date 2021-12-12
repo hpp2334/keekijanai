@@ -3,8 +3,6 @@ extern crate assert_matches;
 
 mod util;
 
-
-
 use backend_router::{Body, Method, Request, Response, Router, WithResponseHelper};
 
 use reqwest;
@@ -16,7 +14,7 @@ struct AddParams {
     b: i32,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Eq)]
 struct AddResponse {
     result: i32,
 }
@@ -49,9 +47,14 @@ async fn add_param(req: Request) -> anyhow::Result<Response<Body>> {
 
 pub fn build_server() -> String {
     let router = Router::builder()
-        .add("/add", Method::GET, add_query)
-        .add("/add", Method::POST, add_post)
-        .add("/add/:a/:b", Method::GET, add_param)
+        .scope(
+            "/add",
+            Router::builder()
+                .add("/", Method::GET, add_query)
+                .add("/", Method::POST, add_post)
+                .add("/:a/:b", Method::GET, add_param)
+                .build(),
+        )
         .build();
     util::spawn_server(router)
 }
@@ -63,8 +66,10 @@ async fn test_add_query() {
     let resp = reqwest::get(format!("{}/add?a=1&b=2", addr))
         .await
         .expect("");
+    assert_eq!(resp.status(), 200);
     let res = resp.json::<AddResponse>().await.expect("");
-    assert_matches!(res, AddResponse { result: 3 });
+    let to_match = AddResponse { result: 3 };
+    assert_eq!(res, to_match);
 }
 
 #[tokio::test]

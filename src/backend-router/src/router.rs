@@ -1,11 +1,11 @@
-use std::{pin::Pin};
+use std::pin::Pin;
 
-use hyper::{Response};
+use hyper::Response;
 use regex::Regex;
 use std::future::Future;
 use tracing::info;
 
-use crate::{error::KeekijanaiError, method::Method, request::Request, route::Route};
+use crate::{error::KeekijanaiError, method::Method, request::Request, route::Route, util};
 
 type PreMiddlewareHandler<E> =
     Box<dyn Fn(Request) -> PreMiddlewareHandlerMut<E> + Send + Sync + 'static>;
@@ -52,6 +52,24 @@ where
         self
     }
 
+    pub fn scope(mut self, scope: &str, mut child_router: Router<R, E>) -> RouterBuilder<R, E> {
+        while child_router.routes.len() > 0 {
+            let route = child_router.routes.pop().unwrap();
+
+            let pattern = util::join_path(scope, route.pattern.as_str());
+            let (pattern_re, params_name) = self.build_pattern_re_and_params_name(pattern.as_ref());
+            let route = Route {
+                pattern,
+                pattern_re,
+                method: route.method,
+                handler: route.handler,
+                params_name,
+            };
+            self.routes.push(route);
+        }
+        return self;
+    }
+
     pub fn add<P, H, HRet>(mut self, pattern: P, method: Method, handler: H) -> RouterBuilder<R, E>
     where
         P: Into<String>,
@@ -85,11 +103,13 @@ where
 
         let param_names: Vec<String> = param_pattern_re
             .captures_iter(pattern)
-            .map(|e| {
-                e.get(1).unwrap().as_str().to_owned()
-            })
+            .map(|e| e.get(1).unwrap().as_str().to_owned())
             .collect();
-        let pattern_re_str = "^".to_string() + param_pattern_re.replace_all(pattern, r#"(?P<$1>[^/]+)"#).as_ref() + "$";
+        let pattern_re_str = "^".to_string()
+            + param_pattern_re
+                .replace_all(pattern, r#"(?P<$1>[^/]+)"#)
+                .as_ref()
+            + "$";
         let pattern_re =
             Regex::new(pattern_re_str.as_ref()).expect("build route pattern regexp fail");
         (pattern_re, param_names)
@@ -138,8 +158,14 @@ where
         {
             let caps = pattern_re.captures(path);
             if &req.info.method == method && caps.is_some() {
+                let caps = caps.unwrap();
                 let mut req = req.clone();
                 req.params_name = params_name.clone();
+                for param_name in &req.params_name {
+                    let param = caps.name(param_name).unwrap();
+                    req.params
+                        .insert(param_name.to_owned(), param.as_str().to_owned());
+                }
 
                 let _resp = Pin::from(handler(req.clone()))
                     .await
