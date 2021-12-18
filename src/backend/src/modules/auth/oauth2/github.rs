@@ -1,7 +1,7 @@
 use std::env;
 use async_trait::async_trait;
 use reqwest::{Method, Client};
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize};
 
 
 use super::core::{OAuth2Config, OAuth2Service, UserProfile};

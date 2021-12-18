@@ -1,5 +1,5 @@
 
-use sqlx::{Pool, Postgres};
+
 use sqlx::postgres::{PgPoolOptions, PgPool};
 use std::env;
 

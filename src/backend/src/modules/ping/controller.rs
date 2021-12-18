@@ -1,6 +1,6 @@
 use backend_router::{Request, Response, Body, Router, Method};
 
-async fn ping(req: Request) -> anyhow::Result<Response<Body>> {
+async fn ping(_req: Request) -> anyhow::Result<Response<Body>> {
     return Ok(Response::new("pong".into()));
 }
 

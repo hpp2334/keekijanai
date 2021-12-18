@@ -1,12 +1,10 @@
-use std::sync::Arc;
 
-use hyper::rt::Executor;
 use num_traits::FromPrimitive;
-use once_cell::{sync::Lazy, sync::OnceCell};
-use sea_query::PostgresQueryBuilder;
-use tokio::sync::mpsc::{Sender, Receiver};
 
-use crate::{core::{db::get_pool, Service}, modules::{user::model::UserActiveModel, star::model::StarModelColumns}};
+use sea_query::PostgresQueryBuilder;
+
+
+use crate::{core::{db::get_pool, Service}, modules::{star::model::StarModelColumns}};
 
 use super::model::{StarType, StarActiveModel};
 
@@ -30,7 +28,7 @@ impl Service for StarService {
 }
 
 impl StarService {
-    pub async fn update_star(&mut self, user_id: i64, payload: StarActiveModel) -> anyhow::Result<()> {
+    pub async fn update_star(&mut self, _user_id: i64, payload: StarActiveModel) -> anyhow::Result<()> {
         let conn = get_pool().await?;
 
         if payload.id.is_unset() {
@@ -108,7 +106,6 @@ GROUP BY star_type
                 StarType::Bad => -1,
                 StarType::JustOK => 0,
                 StarType::Good => 1,
-                _ => 0,
             };
             prev + cnt * (curr as i64)
         });

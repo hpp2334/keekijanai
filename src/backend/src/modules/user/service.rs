@@ -3,8 +3,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use backend_router::{KeekijanaiError, Request};
-use hyper::StatusCode;
+use backend_router::{Request};
+
 use once_cell::sync::Lazy;
 use sea_query::{PostgresQueryBuilder, Query};
 use uuid::Uuid;
