@@ -4,8 +4,6 @@ use reqwest::{Method, Client};
 use serde::{Serialize, Deserialize};
 
 
-use crate::core::{error::KeekijanaiError};
-
 use super::core::{OAuth2Config, OAuth2Service, UserProfile};
 
 const AUTH_URL: &'static str = "https://github.com/login/oauth/authorize";

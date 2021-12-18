@@ -58,7 +58,7 @@ pub struct UserModel {
     pub email: Option<String>,
 }
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 pub struct UserActiveModel {
     pub id: ActiveColumn<i64>,
     pub name: ActiveColumn<String>,
@@ -71,6 +71,7 @@ pub struct UserActiveModel {
     pub email: ActiveColumn<String>,
 }
 
+#[derive(Clone)]
 pub struct User {
     pub id: i64,
     pub name: String,
@@ -139,39 +140,39 @@ impl UserActiveModel {
 
         if self.id.is_set() {
             columns.push(UserModelColumns::Id);
-            values.push(self.id.unwrap().into());
+            values.push(self.id.clone().unwrap().into());
         }
         if self.name.is_set() {
             columns.push(UserModelColumns::Name);
-            values.push(self.name.unwrap().into());
+            values.push(self.name.clone().unwrap().into());
         }
         if self.role.is_set() {
             columns.push(UserModelColumns::Role);
-            values.push(self.role.unwrap().into());
+            values.push(self.role.clone().unwrap().into());
         }
         if self.password.is_set() {
             columns.push(UserModelColumns::Password);
-            values.push(self.password.unwrap().into());
+            values.push(self.password.clone().unwrap().into());
         }
         if self.provider.is_set() {
             columns.push(UserModelColumns::Provider);
-            values.push(self.provider.unwrap().into());
+            values.push(self.provider.clone().unwrap().into());
         }
         if self.in_provider_id.is_set() {
             columns.push(UserModelColumns::InProviderId);
-            values.push(self.in_provider_id.unwrap().into());
+            values.push(self.in_provider_id.clone().unwrap().into());
         }
         if self.last_login.is_set() {
             columns.push(UserModelColumns::LastLogin);
-            values.push(self.last_login.unwrap().into());
+            values.push(self.last_login.clone().unwrap().into());
         }
         if self.avatar_url.is_set() {
             columns.push(UserModelColumns::AvatarUrl);
-            values.push(self.avatar_url.unwrap().into());
+            values.push(self.avatar_url.clone().unwrap().into());
         }
         if self.email.is_set() {
             columns.push(UserModelColumns::Email);
-            values.push(self.email.unwrap().into());
+            values.push(self.email.clone().unwrap().into());
         }
 
         return (columns, values);

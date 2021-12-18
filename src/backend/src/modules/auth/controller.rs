@@ -1,7 +1,10 @@
 use backend_router::{Request, Response, Body, Router, Method};
 use serde::Deserialize;
 
-use super::{service::AUTH_SERVICE, oauth2::core::OAuth2Service};
+use crate::core::Service;
+
+use super::{service::AuthService, oauth2::core::OAuth2Service};
+
 
 #[derive(Deserialize)]
 struct OAuth2LoginQuery {
@@ -10,7 +13,7 @@ struct OAuth2LoginQuery {
 
 async fn outh2_login_url(req: Request) -> anyhow::Result<Response<Body>> {
     let provider =  req.get_param("provider").unwrap();
-    let url = AUTH_SERVICE.oauth2_mgr.get(provider)?.get_auth_url();
+    let url = AuthService::serve().oauth2_mgr.get(provider.as_str())?.get_auth_url();
     return Ok(Response::new(Body::from(url)));
 }
 
@@ -19,7 +22,7 @@ async fn outh2_login(req: Request) -> anyhow::Result<Response<Body>> {
     let provider =  req.get_param("provider").unwrap();
     let query = req.parse_query::<OAuth2LoginQuery>().unwrap();
 
-    AUTH_SERVICE.login_oauth2(provider.as_str(), &query.code).await?;
+    AuthService::serve().login_oauth2(provider.as_str(), &query.code).await?;
     println!("oauth2_login end");
     return Ok(Response::new("".into()));
 }

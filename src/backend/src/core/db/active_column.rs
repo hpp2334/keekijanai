@@ -1,6 +1,8 @@
 
 use std::default::Default;
 
+use serde::Deserialize;
+
 macro_rules! impl_column {
     ($($x:ty),+) => {
         $(
@@ -13,10 +15,16 @@ macro_rules! impl_column {
     };
 }
 
-#[derive(PartialEq, Eq, Clone)]
+#[derive(PartialEq, Eq, Clone, Debug, Deserialize)]
 pub enum ActiveColumn<T> {
     Set(T),
     Unset
+}
+
+impl<T> Default for ActiveColumn<T> {
+    fn default() -> Self {
+        ActiveColumn::Unset
+    }
 }
 
 impl<T: Clone> ActiveColumn<T> {
@@ -29,19 +37,20 @@ impl<T: Clone> ActiveColumn<T> {
     pub fn is_set(&self) -> bool {
         !self.is_unset()
     }
-    pub fn unwrap(&self) -> T {
-        let cloned = self.clone();
-        if let ActiveColumn::Set(x) = cloned {
+    pub fn unwrap(&mut self) -> T {
+        if self.is_unset() {
+            panic!("value is unset");
+        }
+        let col = std::mem::take(self);
+        if let ActiveColumn::Set(x) = col {
             return x;
         }
         panic!("value is unset");
     }
-}
-
-impl<T> Default for ActiveColumn<T> {
-    fn default() -> ActiveColumn<T> {
-        ActiveColumn::Unset
+    pub fn unset(&mut self) {
+        std::mem::take(self);
     }
+
 }
 
 
