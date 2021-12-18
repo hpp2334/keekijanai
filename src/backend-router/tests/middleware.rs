@@ -8,8 +8,9 @@ use std::{
     sync::Mutex,
 };
 
+use async_trait::async_trait;
 use backend_router::{
-    Body, KeekijanaiError, Method, Request, Response, Router, WithResponseHelper,
+    Body, KeekijanaiError, Method, Request, Response, Router, WithResponseHelper, PreMiddleware,
 };
 use hyper::{StatusCode};
 use once_cell::sync::OnceCell;
@@ -53,22 +54,25 @@ impl WithRequestUser for Request {
     }
 }
 
-async fn user_middleware(req: Request) -> anyhow::Result<Request> {
-    let ignore_paths = vec![
-        "/login",
-        "/login/status",
-    ];
-    let path = req.info.uri.to_string();
-    let user = req.get_current_user();
-    if !ignore_paths.contains(&path.as_str()) && user.is_none() {
-        return Err(KeekijanaiError::Client {
-            status: StatusCode::UNAUTHORIZED,
-            message: "not login".to_string(),
-        }
-        .into());
-    }
+struct UserMiddleware {
+    pub ignore_paths: Vec<&'static str>
+}
 
-    return Ok(req);
+#[async_trait]
+impl PreMiddleware for UserMiddleware  {
+    async fn process(&self, req: &mut Request) -> anyhow::Result<()> {
+        let path = req.info.uri.to_string();
+        let user = req.get_current_user();
+        if !self.ignore_paths.contains(&path.as_str()) && user.is_none() {
+            let err = KeekijanaiError::Client {
+                status: StatusCode::UNAUTHORIZED,
+                message: "not login".to_string(),
+            };
+            return Err(err.into());
+        }
+    
+        return Ok(());
+    }
 }
 
 async fn login_as(req: Request) -> anyhow::Result<Response<Body>> {
@@ -114,7 +118,12 @@ async fn login_current_status(req: Request) -> anyhow::Result<Response<Body>> {
 
 pub fn build_server() -> String {
     let router = Router::builder()
-        .pre_middleware(user_middleware)
+        .pre_middleware(UserMiddleware {
+            ignore_paths: vec![
+                "/login",
+                "/login/status",
+            ]
+        })
         .add("/login", Method::POST, login_as)
         .add("/logout", Method::POST, logout)
         .add("/login/status", Method::GET, login_current_status)

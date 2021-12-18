@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 #[derive(Clone)]
 pub struct Request {
-    pub req_id: String,
+    pub req_id: Uuid,
     pub info: Arc<hyper::http::request::Parts>,
     pub raw_body: Bytes,
     pub(crate) params_name: Vec<String>,
@@ -14,12 +14,12 @@ pub struct Request {
 }
 
 impl Request {
-    pub async fn factory<T>(hyper_req: hyper::Request<T>, extern_req_id: Option<String>, params_name: Option<Vec<String>>) -> anyhow::Result<Request>
+    pub async fn from_hyper_req<T>(hyper_req: hyper::Request<T>) -> anyhow::Result<Request>
     where
         T: hyper::body::HttpBody + Send + Sync,
     {
         let (parts, raw_body) = hyper_req.into_parts();
-        let req_id = extern_req_id.unwrap_or(Self::generate_req_id());
+        let req_id = Self::generate_req_id();
         let raw_body = hyper::body::to_bytes(raw_body)
             .await
             .map_err(|_e| anyhow::anyhow!("to bytes error"))?;
@@ -27,13 +27,13 @@ impl Request {
             req_id,
             info: Arc::new(parts),
             raw_body,
-            params_name: params_name.unwrap_or(vec![]),
+            params_name: vec![],
             params: HashMap::new(),
         })
     }
 
-    pub fn generate_req_id() -> String {
-        return Uuid::new_v4().to_string()
+    pub fn generate_req_id() -> Uuid {
+        return Uuid::new_v4();
     }
 
     pub fn parse_query<'a, B>(&'a self) -> anyhow::Result<B>
@@ -53,8 +53,8 @@ impl Request {
         return Ok(deserialized);
     }
 
-    pub fn get_param(&self, param_name: &str) -> Option<&String> {
+    pub fn get_param(&self, param_name: &str) -> Option<String> {
         let param = self.params.get(param_name);
-        return param;
+        return param.map(|p| { p.clone() });
     }
 }

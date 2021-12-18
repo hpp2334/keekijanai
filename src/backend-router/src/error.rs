@@ -11,3 +11,13 @@ pub enum KeekijanaiError {
     #[error(transparent)]
     Internal(#[from] anyhow::Error)
 }
+
+impl KeekijanaiError {
+    pub fn is_client_error(&self) -> bool {
+        if let KeekijanaiError::Client { .. } = self {
+            true
+        } else {
+            false
+        }
+    }
+}

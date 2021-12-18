@@ -6,6 +6,7 @@ mod router;
 mod service;
 mod response;
 pub(crate) mod util;
+pub(crate) mod middleware;
 
 pub use error::{KeekijanaiError};
 pub use router::{Router};
@@ -14,3 +15,4 @@ pub use request::{Request};
 pub use response::{Response, WithResponseHelper};
 pub use method::{Method};
 pub use hyper::{Body};
+pub use middleware::{PreMiddleware};

@@ -5,50 +5,55 @@ use regex::Regex;
 use std::future::Future;
 use tracing::info;
 
-use crate::{error::KeekijanaiError, method::Method, request::Request, route::Route, util};
-
-type PreMiddlewareHandler<E> =
-    Box<dyn Fn(Request) -> PreMiddlewareHandlerMut<E> + Send + Sync + 'static>;
-type PreMiddlewareHandlerMut<E> = Box<dyn Future<Output = Result<Request, E>> + Send + 'static>;
-
-type PostMiddlewareHandler<R, E> =
-    Box<dyn Fn(Request, Response<R>) -> PostMiddlewareHandlerMut<R, E> + Send + Sync + 'static>;
-type PostMiddlewareHandlerMut<R, E> =
-    Box<dyn Future<Output = Result<(Request, Response<R>), E>> + Send + 'static>;
+use crate::{
+    error::KeekijanaiError,
+    method::Method,
+    middleware::{ErrorMiddleware, PostMiddleware, PreMiddleware},
+    request::Request,
+    route::Route,
+    util,
+};
 
 pub struct Router<R, E> {
     routes: Vec<Route<R, E>>,
-    pre_middlewares: Vec<PreMiddlewareHandler<E>>,
-    post_middlewares: Vec<PostMiddlewareHandler<R, E>>,
+    pre_middlewares: Vec<Box<dyn PreMiddleware + Send + Sync>>,
+    post_middlewares: Vec<Box<dyn PostMiddleware<R> + Send + Sync>>,
+    error_middlewares: Vec<Box<dyn ErrorMiddleware + Send + Sync>>,
 }
 
+#[derive(Default)]
 pub struct RouterBuilder<R, E> {
     routes: Vec<Route<R, E>>,
-    pre_middlewares: Vec<PreMiddlewareHandler<E>>,
-    post_middlewares: Vec<PostMiddlewareHandler<R, E>>,
+    pre_middlewares: Vec<Box<dyn PreMiddleware + Send + Sync>>,
+    post_middlewares: Vec<Box<dyn PostMiddleware<R> + Send + Sync>>,
+    error_middlewares: Vec<Box<dyn ErrorMiddleware + Send + Sync>>,
 }
 
 impl<R, E> RouterBuilder<R, E>
 where
     E: Into<anyhow::Error> + Send + 'static,
 {
-    pub fn pre_middleware<H, HMut>(mut self, handler: H) -> RouterBuilder<R, E>
-    where
-        H: Fn(Request) -> HMut + Send + Sync + 'static,
-        HMut: Future<Output = Result<Request, E>> + Send + 'static,
-    {
-        self.pre_middlewares
-            .push(Box::new(move |req| Box::new(handler(req))));
+    pub fn pre_middleware(
+        mut self,
+        middleware: impl PreMiddleware + Send + Sync + 'static,
+    ) -> RouterBuilder<R, E> {
+        self.pre_middlewares.push(Box::new(middleware));
         self
     }
 
-    pub fn post_middleware<H, HMut>(mut self, handler: H) -> RouterBuilder<R, E>
-    where
-        H: Fn(Request, Response<R>) -> HMut + Send + Sync + 'static,
-        HMut: Future<Output = Result<(Request, Response<R>), E>> + Send + 'static,
-    {
-        self.post_middlewares
-            .push(Box::new(move |req, res| Box::new(handler(req, res))));
+    pub fn post_middleware(
+        mut self,
+        middleware: impl PostMiddleware<R> + Send + Sync + 'static,
+    ) -> RouterBuilder<R, E> {
+        self.post_middlewares.push(Box::new(middleware));
+        self
+    }
+
+    pub fn error_middleware(
+        mut self,
+        middleware: impl ErrorMiddleware + Send + Sync + 'static,
+    ) -> RouterBuilder<R, E> {
+        self.error_middlewares.push(Box::new(middleware));
         self
     }
 
@@ -95,6 +100,7 @@ where
             routes: self.routes,
             pre_middlewares: self.pre_middlewares,
             post_middlewares: self.post_middlewares,
+            error_middlewares: self.error_middlewares,
         }
     }
 
@@ -125,25 +131,30 @@ where
             routes: vec![],
             pre_middlewares: vec![],
             post_middlewares: vec![],
+            error_middlewares: vec![],
         };
     }
 
-    pub async fn process<T>(
-        &self,
-        hyper_req: hyper::Request<T>,
-        extern_req_id: Option<String>,
-    ) -> anyhow::Result<Response<R>>
-    where
-        T: hyper::body::HttpBody + Send + Sync,
+    pub async fn process(&self, req: Request) -> anyhow::Result<Response<R>>
     {
-        let mut req = Request::factory(hyper_req, extern_req_id, None).await?;
+        let res = self.process_core(req.clone()).await;
+        if let Err(error) = &res {
+            for middleware in &self.error_middlewares {
+                middleware.process(&req, error).await;
+            }
+        }
+        res
+    }
+
+    async fn process_core(&self, mut req: Request) -> anyhow::Result<Response<R>>
+    {
         let url = req.info.uri.clone();
         let path = url.path();
 
         info!("request {}", req.info.uri);
 
         for middleware in &self.pre_middlewares {
-            req = Pin::from(middleware(req)).await.map_err(|e| e.into())?;
+            middleware.process(&mut req).await?;
         }
 
         let mut resp: Option<Response<R>> = None;
@@ -175,26 +186,19 @@ where
             }
         }
 
-        if resp.is_some() {
-            let mut processing_resp = resp.unwrap();
-            for middleware in &self.post_middlewares {
-                let res = Pin::from(middleware(req.clone(), processing_resp))
-                    .await
-                    .map_err(|e| e.into())?;
-                req = res.0;
-                processing_resp = res.1;
-            }
-            resp = Some(processing_resp);
-        }
-
-        if resp.is_some() {
-            Ok(resp.unwrap())
-        } else {
+        // none route match
+        if resp.is_none() {
             let err = KeekijanaiError::Client {
                 status: hyper::StatusCode::NOT_FOUND,
-                message: "NOT FOUND".to_owned(),
+                message: format!("Not found API {}", url.path()),
             };
-            Err(err.into())
+            return Err(err.into())
         }
+
+        let mut resp = resp.unwrap();
+        for middleware in &self.post_middlewares {
+            middleware.process(&mut req, &mut resp).await?;
+        }
+        Ok(resp)
     }
 }
