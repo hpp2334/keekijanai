@@ -1,7 +1,8 @@
 
 use std::default::Default;
 
-use serde::Deserialize;
+use poem_openapi::Object;
+use serde::{Deserialize, Serialize};
 
 macro_rules! impl_column {
     ($($x:ty),+) => {
@@ -15,7 +16,7 @@ macro_rules! impl_column {
     };
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
 pub enum ActiveColumn<T> {
     Set(T),
     Unset

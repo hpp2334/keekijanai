@@ -1,23 +1,23 @@
+#[macro_use]
+extern crate backend;
 extern crate derive_more;
 use std::net::SocketAddr;
 
-use backend::{RouterService, get_router};
+use backend::{modules::controller::get_keekijanai_route};
 use hyper::Server;
+use poem::{listener::TcpListener, Route};
+use tokio::io::AsyncWriteExt;
 
 #[tokio::main]
 pub async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     env_logger::init();
 
-    let router = get_router();
- 
-    let service = RouterService::new(router).unwrap();
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8080));
-    let server = Server::bind(&addr).serve(service);
+    let app = get_keekijanai_route();
 
-    println!("App is running on: {}", addr);
-
-    server.await?;
+    poem::Server::new(TcpListener::bind("127.0.0.1:3000"))
+        .run(app)
+        .await?;
 
     return Ok(());
 }

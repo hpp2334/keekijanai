@@ -3,8 +3,6 @@ use std::{
     sync::{Arc, Mutex},
 };
 
-use backend_router::{Request};
-
 use once_cell::sync::Lazy;
 use sea_query::{PostgresQueryBuilder, Query};
 use uuid::Uuid;
@@ -27,7 +25,7 @@ static REQ_USER_STORAGE: Lazy<Arc<Mutex<ReqUserStorage>>> = Lazy::new(|| {
     }))
 });
 
-pub struct UserService {}
+pub struct UserService;
 
 impl Service for UserService {
     fn serve() -> Self {
@@ -35,39 +33,6 @@ impl Service for UserService {
     }
 
     fn init() {}
-}
-
-impl UserService {
-    pub fn update_user_info_from_req(&mut self, req: &Request, user: &User) {
-        let user_id = user.id;
-
-        let mut req_user_storage = REQ_USER_STORAGE.lock().unwrap();
-        req_user_storage.req_id_map_user_id.insert(req.req_id, user_id);
-        req_user_storage.req_id_map_user.insert(req.req_id, user.clone());
-    }
-
-    pub fn clear_info_from_req(&mut self, req: &Request) {
-        let mut req_user_storage = REQ_USER_STORAGE.lock().unwrap();
-        req_user_storage.req_id_map_user_id.remove(&req.req_id);
-        req_user_storage.req_id_map_user.remove(&req.req_id);
-    }
-
-    pub fn has_user_info_from_req(&self, req: &Request) -> bool {
-        let req_user_storage = REQ_USER_STORAGE.lock().unwrap();
-        req_user_storage.req_id_map_user_id.contains_key(&req.req_id)
-    }
-
-    pub async fn get_user_id_from_req(&self, req: &Request) -> Option<i64> {
-        let req_user_storage = REQ_USER_STORAGE.lock().unwrap();
-        let user_id = req_user_storage.req_id_map_user_id.get(&req.req_id).map(|v| *v);
-        return user_id;
-    }
-
-    pub async fn get_user_from_req(&self, req: &Request) -> Option<User> {
-        let req_user_storage = REQ_USER_STORAGE.lock().unwrap();
-        let user = req_user_storage.req_id_map_user.get(&req.req_id);
-        return user.map(|user| user.clone());
-    }
 }
 
 impl UserService {

@@ -10,8 +10,6 @@ extern crate num_derive;
 mod core;
 mod helpers;
 
-pub use backend_router::{RouterService};
-
 pub mod modules;
 
-pub use modules::{controller::get_router};
+pub use modules::{controller::get_keekijanai_route};

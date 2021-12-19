@@ -1,5 +1,6 @@
 
 
+use poem_openapi::Object;
 use sea_query::{Iden, Value};
 use serde::{Deserialize, Serialize};
 
@@ -46,7 +47,7 @@ pub struct CommentModel {
     pub updated_time: i64,
 }
 
-#[derive(Default, Deserialize, Debug)]
+#[derive(Default, Debug, Clone, Object)]
 pub struct CommentActiveModel {
     pub id: ActiveColumn<i64>,
     pub belong: ActiveColumn<String>,
@@ -60,7 +61,7 @@ pub struct CommentActiveModel {
     pub updated_time: ActiveColumn<i64>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Object)]
 pub struct Comment {
     pub id: i64,
     pub belong: String,

@@ -1,5 +1,6 @@
 use num_derive::FromPrimitive;
 use num_traits::{FromPrimitive, ToPrimitive};
+use poem_openapi::Object;
 use sea_query::{Iden, Value};
 use serde::Deserialize;
 
@@ -34,7 +35,7 @@ pub struct StarModel {
     pub belong: String
 }
 
-#[derive(Default, Deserialize, Debug, Clone)]
+#[derive(Default, Debug, Clone, Object)]
 pub struct StarActiveModel {
     pub id: ActiveColumn<i64>,
     pub user_id: ActiveColumn<String>,

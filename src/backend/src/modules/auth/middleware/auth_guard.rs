@@ -1,66 +1,54 @@
-
-
 use async_trait::async_trait;
-use backend_router::{PreMiddleware, Request, KeekijanaiError};
-use hyper::StatusCode;
+use poem::{web::Data, Endpoint, EndpointExt, Middleware, Request};
 use serde::{Deserialize, Serialize};
 
-use crate::{core::setting::SETTING, modules::user::service::UserService};
-use crate::core::Service;
-
-#[derive(Debug, Deserialize, Serialize)]
-struct Claims {
-    exp: usize,
-    user_id: i64,
-}
-
+use crate::{core::{setting::SETTING, Service}, modules::user::{model::User, service::UserService}};
+use super::{UserInfoContext};
 
 pub struct AuthGuardMiddleware {
-    pub ignore_paths: Vec<&'static str>
+    ignores: Vec<&'static str>
 }
 
-fn map_err_to_unauthorized_error<RE>(_e: RE) -> anyhow::Error {
-    return get_unauthorized_error();
+impl AuthGuardMiddleware {
+    pub fn new(ignores: Vec<&'static str>) -> Self {
+        Self {
+            ignores
+        }
+    }
 }
 
-fn get_unauthorized_error() -> anyhow::Error {
-    return KeekijanaiError::Client {
-        status: StatusCode::UNAUTHORIZED,
-        message: "Not login".to_owned(),
-    }.into()
+impl<E: Endpoint> Middleware<E> for AuthGuardMiddleware {
+    type Output = AuthGuardMiddlewareImpl<E>;
+
+    fn transform(&self, ep: E) -> Self::Output {
+        AuthGuardMiddlewareImpl {
+            ignores: self.ignores.clone(),
+            ep
+        }
+    }
+}
+
+pub struct AuthGuardMiddlewareImpl<E> {
+    ignores: Vec<&'static str>,
+    ep: E,
 }
 
 #[async_trait]
-impl PreMiddleware for AuthGuardMiddleware {
-    async fn process(&self, req: &mut Request) -> Result<(), anyhow::Error> {
-        // If user info already registered in user service
-        // it is from developer
-        // so just skip validate token and register user info
-        if UserService::serve().has_user_info_from_req(req) {
-            return Ok(());
+impl<E: Endpoint> Endpoint for AuthGuardMiddlewareImpl<E> {
+    type Output = E::Output;
+
+    async fn call(&self, mut req: Request) -> poem::Result<Self::Output> {
+        let user_info = req.extensions().get::<UserInfoContext>();
+        
+        let should_ignore = self.ignores.iter().any(|ignore| {
+            req.uri().path().starts_with(ignore)
+        });
+        
+        if !should_ignore && user_info.is_none() {
+            return Err(anyhow::anyhow!("not login"))?;
         }
 
-        let token = req.info.headers.get("authorization");
-        if let Some(token) = token {
-            let token = token.to_str().unwrap().to_owned();
-            let secret = &SETTING.get().unwrap().auth.secret;
-
-            let token = jsonwebtoken::decode::<Claims>(
-                &token,
-                &jsonwebtoken::DecodingKey::from_secret(secret.as_bytes()),
-                &jsonwebtoken::Validation::default()
-            ).map_err(map_err_to_unauthorized_error)?;
-            let user_id = token.claims.user_id;
-
-
-            let user = UserService::serve().get(user_id).await?;
-            if user.is_none() {
-                return Err(get_unauthorized_error())
-            }
-            let user = user.unwrap();
-            UserService::serve().update_user_info_from_req(&req, &user);
-        }
-
-        return Ok(());
+        // call the inner endpoint.
+        self.ep.call(req).await
     }
 }

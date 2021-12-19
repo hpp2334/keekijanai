@@ -8,6 +8,5 @@ edition = "2021"
 [workspace]
 members = [
   "src/backend",
-  "src/backend-server",
-  "src/backend-router"
+  "src/backend-server"
 ]

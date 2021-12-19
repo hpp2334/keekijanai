@@ -1,14 +1,22 @@
+use poem_openapi::{Object, types::{ParseFromJSON, ToJSON, Type}};
 use serde::Serialize;
 
-#[derive(Serialize)]
-pub struct CursorPagination<T> {
-    pub cursor: Option<T>,
+#[derive(Object)]
+pub struct CursorPagination<C>
+where
+    C: Sync + Send + Type + ParseFromJSON + ToJSON,
+{
+    pub cursor: Option<C>,
     pub limit: i32,
     pub total: i32,
 }
 
-#[derive(Serialize)]
-pub struct CursorListData<T, C> {
+#[derive(Object)]
+pub struct CursorListData<T, C>
+where
+    T: Sync + Send + Type + ParseFromJSON + ToJSON,
+    C: Sync + Send + Type + ParseFromJSON + ToJSON,
+{
     pub data: Vec<T>,
-    pub pagination: CursorPagination<C>
+    pub pagination: CursorPagination<C>,
 }

@@ -1,11 +1,12 @@
-use backend_router::{Request, Response, Body, Router, Method};
+use poem_openapi::{payload::PlainText, OpenApi};
+use crate::core::ApiTags;
 
-async fn ping(_req: Request) -> anyhow::Result<Response<Body>> {
-    return Ok(Response::new("pong".into()));
-}
+pub struct PingController;
 
-pub fn get_router() -> Router<Body, anyhow::Error> {
-    Router::builder()
-        .add("/", Method::GET, ping)
-        .build()
+#[OpenApi(prefix_path = "/keekijanai/ping", tag = "ApiTags::Ping")]
+impl PingController {
+    #[oai(path = "/", method = "get")]
+    async fn ping(&self) -> poem::Result<PlainText<&'static str>> {
+        return Ok(PlainText("pong"));
+    }
 }

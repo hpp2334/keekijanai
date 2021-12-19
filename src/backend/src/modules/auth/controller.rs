@@ -1,7 +1,7 @@
-use backend_router::{Request, Response, Body, Router, Method};
+use poem_openapi::{OpenApi, param, payload::Json, payload::PlainText};
 use serde::Deserialize;
 
-use crate::core::Service;
+use crate::core::{Service, ApiTags};
 
 use super::{service::AuthService, oauth2::core::OAuth2Service};
 
@@ -11,25 +11,25 @@ struct OAuth2LoginQuery {
     code: String,
 }
 
-async fn outh2_login_url(req: Request) -> anyhow::Result<Response<Body>> {
-    let provider =  req.get_param("provider").unwrap();
-    let url = AuthService::serve().oauth2_mgr.get(provider.as_str())?.get_auth_url();
-    return Ok(Response::new(Body::from(url)));
-}
+pub struct AuthController;
 
-async fn outh2_login(req: Request) -> anyhow::Result<Response<Body>> {
-    println!("in oauth2 login");
-    let provider =  req.get_param("provider").unwrap();
-    let query = req.parse_query::<OAuth2LoginQuery>().unwrap();
+#[OpenApi(prefix_path = "/keekijanai/auth", tag = "ApiTags::Auth")]
+impl AuthController {
+    #[oai(path = "/:provider", method = "get")]
+    async fn outh2_login_url(&self, provider: param::Path<String>) -> poem::Result<PlainText<String>> {
+        let provider = (*provider).clone();
+        let url = AuthService::serve().oauth2_mgr.get(provider.as_str())?.get_auth_url();
 
-    AuthService::serve().login_oauth2(provider.as_str(), &query.code).await?;
-    println!("oauth2_login end");
-    return Ok(Response::new("".into()));
-}
+        Ok(PlainText(url))
+    }
 
-pub fn get_router() -> Router<Body, anyhow::Error> {
-    Router::builder()
-        .add("/oauth2/:provider", Method::GET, outh2_login_url)
-        .add("/oauth2/:provider/callback",Method::GET, outh2_login)
-        .build()
+    #[oai(path = "/:provider/callback", method = "get")]
+    async fn outh2_login(&self, provider: param::Path<String>, code: param::Query<String>) -> poem::Result<PlainText<&'static str>> {
+        let provider = (*provider).clone();
+        let code = (*code).clone();
+    
+        AuthService::serve().login_oauth2(provider.as_str(), &code).await?;
+        println!("oauth2_login end");
+        Ok(PlainText(""))
+    }
 }

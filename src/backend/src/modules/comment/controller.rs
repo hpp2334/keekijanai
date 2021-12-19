@@ -1,89 +1,101 @@
-
-
-use backend_router::{Request, Response, Body, Router, Method, WithResponseHelper};
+use poem_openapi::{param, payload::{Json, PlainText}, Object, OpenApi, };
 use serde::{Deserialize, Serialize};
 
-use crate::core::Service;
+use crate::core::{ApiTags, Service};
 
-use super::{service::CommentService, model::{CommentActiveModel, Comment}};
+use super::{
+    model::{Comment, CommentActiveModel},
+    service::{CommentService, ListCommentParams},
+};
 
-type ListCommentParams = super::service::ListCommentParams;
-
-#[derive(Deserialize)]
+#[derive(Object, Clone)]
 struct CreateCommentParams {
     pub payload: CommentActiveModel,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Object)]
 struct CreateCommentRespPayload {
     pub payload: Comment,
 }
 
-#[derive(Deserialize)]
+#[derive(Object, Clone)]
 struct UpdateCommentParams {
     pub payload: CommentActiveModel,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Object, Debug)]
 struct UpdateCommentRespPayload {
     pub payload: Comment,
 }
 
-async fn list_comment(req: Request) -> anyhow::Result<Response<Body>> {
-    let params = req.parse_query::<ListCommentParams>()?;
+pub struct CommentController;
 
-    let (comments, total) = CommentService::serve().list(params.clone()).await?;
+type ListCommentResult = crate::core::response::CursorListData<Comment, i64>;
 
-    let res = crate::core::response::CursorListData {
-        data: comments,
-        pagination: crate::core::response::CursorPagination {
-            total,
-            cursor: params.pagination.cursor.clone(),
-            limit: params.pagination.limit.clone(),
-        }
-    };
+#[OpenApi(prefix_path = "/keekijanai/comment", tag = "ApiTags::Comment")]
+impl CommentController {
+    #[oai(path = "/", method = "get")]
+    async fn list_comment(
+        &self,
+        user_id: param::Query<Option<i64>>,
+        parent_id: param::Query<Option<i64>>,
+        cursor: param::Query<Option<i64>>,
+        limit: param::Query<i32>,
+    ) -> poem::Result<Json<ListCommentResult>> {
+        let (comments, total) = CommentService::serve().list(ListCommentParams {
+            user_id: *user_id,
+            parent_id: *parent_id,
+            pagination: crate::core::request::CursorPagination {
+                cursor: *cursor,
+                limit: *limit,
+            }
+        }).await?;
 
-    Response::build_json(res)
-}
+        let res = crate::core::response::CursorListData {
+            data: comments,
+            pagination: crate::core::response::CursorPagination {
+                total,
+                cursor: *cursor,
+                limit: *limit,
+            },
+        };
 
-async fn create_comment(req: Request) -> anyhow::Result<Response<Body>> {
-    let params = req.parse_body::<CreateCommentParams>()?;
-    
-    let created = CommentService::serve().create(params.payload).await?;
+        Ok(Json(res))
+    }
 
-    let resp_payload = CreateCommentRespPayload {
-        payload: created.into(),
-    };
+    #[oai(path = "/", method = "post")]
+    async fn create_comment(&self, params: Json<CreateCommentParams>) -> poem::Result<Json<CreateCommentRespPayload>> {
+        let params = (*params).clone();
 
-    Response::build_json(resp_payload)
-}
+        let created = CommentService::serve().create(params.payload).await?;
 
-async fn update_comment(req: Request) -> anyhow::Result<Response<Body>> {
-    let params = req.parse_body::<UpdateCommentParams>()?;
-    let id = req.get_param("id").unwrap().parse::<i64>()?;
-    
-    let updated = CommentService::serve().update(id, params.payload).await?;
+        let resp_payload = CreateCommentRespPayload {
+            payload: created.into(),
+        };
 
-    let resp_payload = UpdateCommentRespPayload {
-        payload: updated.into(),
-    };
+        Ok(Json(resp_payload))
+    }
 
-    Response::build_json(resp_payload)
-}
+    #[oai(path = "/:id", method = "put")]
+    async fn update_comment(&self, id: param::Path<i64>, params: Json<UpdateCommentParams>) -> poem::Result<Json<UpdateCommentRespPayload>> {
+        let params = (*params).clone();
+        let id = (*id).clone();
 
-async fn delete_comment(req: Request) -> anyhow::Result<Response<Body>> {
-    let id = req.get_param("id").unwrap().parse::<i64>()?;
+        let updated = CommentService::serve().update(id, params.payload).await?;
 
-    let _res = CommentService::serve().remove(id).await?;
+        let resp_payload = UpdateCommentRespPayload {
+            payload: updated.into(),
+        };
 
-    Response::build_empty()
-}
+        Ok(Json(resp_payload))
+    }
 
-pub fn get_router() -> Router<Body, anyhow::Error> {
-    Router::builder()
-        .add("/", Method::GET, list_comment)
-        .add("/", Method::POST, create_comment)
-        .add("/:id", Method::PUT, update_comment)
-        .add("/:id", Method::DELETE, delete_comment)
-        .build()
+    #[oai(path = "/:id", method = "delete")]
+    async fn delete_comment(&self, id: param::Path<i64>) -> poem::Result<PlainText<&'static str>> {
+        let id = (*id).clone();
+
+        let _res = CommentService::serve().remove(id).await?;
+
+        Ok(PlainText(""))
+    }
 }

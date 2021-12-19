@@ -23,7 +23,7 @@ struct GetStarStatInfo {
     cnt: Option<i64>,
 }
 
-struct StarGroupedDetail {
+pub struct StarGroupedDetail {
     belong: String,
     star_type: StarType,
     total: i64,

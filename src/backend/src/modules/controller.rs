@@ -1,22 +1,33 @@
-use backend_router::{Body, Router};
+use poem::{EndpointExt, Route};
+use poem_openapi::{OpenApi, OpenApiService};
 
 use super::{
-    auth::{self, middleware::AuthGuardMiddleware},
-    comment, ping, star,
+    auth::{controller::AuthController, middleware::AuthGuardMiddleware, middleware::UserInfoMiddleware},
+    comment::controller::CommentController,
+    ping::controller::PingController,
+    star::controller::StarController,
 };
 
-fn get_auth_middleware() -> AuthGuardMiddleware {
-    AuthGuardMiddleware {
-        ignore_paths: vec!["/keekijanai/auth"],
-    }
-}
+pub fn get_keekijanai_route() -> impl poem::Endpoint {
+    let service = OpenApiService::new(
+        PingController
+            .combine(StarController)
+            .combine(CommentController)
+            .combine(AuthController),
+        "Keekijanai api",
+        "0.3",
+    );
 
-pub fn get_router() -> Router<Body, anyhow::Error> {
-    Router::builder()
-        .pre_middleware(get_auth_middleware())
-        .scope("/keekijanai/ping", ping::controller::get_router())
-        .scope("/keekijanai/auth", auth::controller::get_router())
-        .scope("/keekijanai/star", star::controller::get_router())
-        .scope("/keekijanai/comment", comment::controller::get_router())
-        .build()
+    let ui = service.swagger_ui();
+    let app = Route::new()
+        .nest("/keekijanai/doc", ui)
+        .nest("/", service)
+        .with(poem::middleware::Tracing)
+        .with(UserInfoMiddleware)
+        .with(AuthGuardMiddleware::new(vec![
+            "/keekijanai/auth",
+            "/keekijanai/doc"
+        ]));
+
+    app
 }
