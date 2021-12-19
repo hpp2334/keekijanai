@@ -10,7 +10,7 @@ struct Claims {
     user_id: i64,
 }
 
-pub struct UserInfoContext(i64, User);
+pub struct UserInfoContext(pub i64, pub User);
 
 
 pub struct UserInfoMiddleware;
