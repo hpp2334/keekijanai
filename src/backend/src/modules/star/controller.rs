@@ -30,7 +30,7 @@ async fn get_star(req: Request) -> anyhow::Result<Response<Body>> {
         .unwrap();
 
     let current = StarService::serve()
-        .get_current(user_id, belong.as_str())
+        .get_current(user_id, belong.clone())
         .await?;
     let total = StarService::serve().get_total(belong.as_str()).await?;
 

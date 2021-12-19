@@ -7,7 +7,7 @@ use serde::Deserialize;
 
 use crate::core::db::ActiveColumn;
 
-#[derive(FromPrimitive, ToPrimitive)]
+#[derive(FromPrimitive, ToPrimitive, PartialEq, Eq, Hash)]
 pub enum StarType {
     UnStar = 0,
     Bad,
