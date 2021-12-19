@@ -1,8 +1,7 @@
-use async_trait::async_trait;
-use poem_openapi::{OpenApi, payload::Json, param, payload::PlainText, Object};
-use serde::{Deserialize, Serialize};
 
-use crate::{core::Service, core::ApiTags, modules::user::service::UserService};
+use poem_openapi::{OpenApi, payload::Json, param, payload::PlainText, Object};
+
+use crate::{core::Service, core::ApiTags};
 
 use super::{service::{StarService}, model::StarActiveModel};
 

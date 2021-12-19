@@ -1,8 +1,8 @@
 use async_trait::async_trait;
-use poem::{web::Data, Endpoint, EndpointExt, Middleware, Request};
-use serde::{Deserialize, Serialize};
+use poem::{Endpoint, Middleware, Request};
 
-use crate::{core::{setting::SETTING, Service}, modules::user::{model::User, service::UserService}};
+
+
 use super::{UserInfoContext};
 
 pub struct AuthGuardMiddleware {
@@ -37,7 +37,7 @@ pub struct AuthGuardMiddlewareImpl<E> {
 impl<E: Endpoint> Endpoint for AuthGuardMiddlewareImpl<E> {
     type Output = E::Output;
 
-    async fn call(&self, mut req: Request) -> poem::Result<Self::Output> {
+    async fn call(&self, req: Request) -> poem::Result<Self::Output> {
         let user_info = req.extensions().get::<UserInfoContext>();
         
         let should_ignore = self.ignores.iter().any(|ignore| {

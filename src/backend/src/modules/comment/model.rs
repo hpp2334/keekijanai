@@ -2,7 +2,7 @@
 
 use poem_openapi::Object;
 use sea_query::{Iden, Value};
-use serde::{Deserialize, Serialize};
+use serde::{Serialize};
 
 // id INTEGER PRIMARY KEY AUTOINCREMENT,
 // scope varchar(150) NOT NULL,

@@ -1,12 +1,9 @@
-#[macro_use]
 extern crate backend;
 extern crate derive_more;
-use std::net::SocketAddr;
 
 use backend::{modules::controller::get_keekijanai_route};
-use hyper::Server;
-use poem::{listener::TcpListener, Route};
-use tokio::io::AsyncWriteExt;
+
+use poem::{listener::TcpListener};
 
 #[tokio::main]
 pub async fn main() -> anyhow::Result<()> {

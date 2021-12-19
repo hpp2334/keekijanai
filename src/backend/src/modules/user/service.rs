@@ -1,29 +1,14 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
 
-use once_cell::sync::Lazy;
+
+
 use sea_query::{PostgresQueryBuilder, Query};
-use uuid::Uuid;
+
 
 use super::model::{User, UserActiveModel, UserModel, UserModelColumns};
 use crate::{
     core::{db::get_pool, Service},
     modules::user::model::UserRole,
 };
-
-struct ReqUserStorage {
-    req_id_map_user_id: HashMap<Uuid, i64>,
-    req_id_map_user: HashMap<Uuid, User>,
-}
-
-static REQ_USER_STORAGE: Lazy<Arc<Mutex<ReqUserStorage>>> = Lazy::new(|| {
-    Arc::new(Mutex::new(ReqUserStorage {
-        req_id_map_user_id: HashMap::new(),
-        req_id_map_user: HashMap::new(),
-    }))
-});
 
 pub struct UserService;
 

@@ -1,7 +1,7 @@
 
 use std::default::Default;
 
-use poem_openapi::Object;
+
 use serde::{Deserialize, Serialize};
 
 macro_rules! impl_column {

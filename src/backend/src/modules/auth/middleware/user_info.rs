@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use poem::{web::Data, Endpoint, EndpointExt, Middleware, Request};
+use poem::{Endpoint, Middleware, Request};
 use serde::{Deserialize, Serialize};
 
 use crate::{core::{setting::SETTING, Service}, modules::user::{model::User, service::UserService}};

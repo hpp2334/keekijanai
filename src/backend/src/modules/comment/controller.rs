@@ -1,5 +1,5 @@
 use poem_openapi::{param, payload::{Json, PlainText}, Object, OpenApi, };
-use serde::{Deserialize, Serialize};
+use serde::{Serialize};
 
 use crate::core::{ApiTags, Service};
 

@@ -1,15 +1,9 @@
-use poem_openapi::{OpenApi, param, payload::Json, payload::PlainText};
-use serde::Deserialize;
+use poem_openapi::{OpenApi, param, payload::PlainText};
+
 
 use crate::core::{Service, ApiTags};
 
 use super::{service::AuthService, oauth2::core::OAuth2Service};
-
-
-#[derive(Deserialize)]
-struct OAuth2LoginQuery {
-    code: String,
-}
 
 pub struct AuthController;
 

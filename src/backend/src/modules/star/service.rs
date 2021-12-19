@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use num_traits::FromPrimitive;
 
 use sea_query::PostgresQueryBuilder;
-use sqlx::FromRow;
+
 
 
 use crate::{core::{db::get_pool, Service}, modules::{star::model::StarModelColumns}};
@@ -133,7 +133,7 @@ GROUP BY belong, star_type
         let mut result = vec![];
         let mut map: HashMap<String, HashMap<StarType, i64>> = HashMap::new();
 
-        query_result.into_iter().for_each(|GroupedDetailSQLResultItem { cnt, star_type, belong }| {
+        query_result.into_iter().for_each(|GroupedDetailSQLResultItem { cnt: _, star_type, belong }| {
             let star_type: StarType = FromPrimitive::from_i16(star_type).unwrap();
 
             let entry_belong_map = map.entry(belong).or_default();

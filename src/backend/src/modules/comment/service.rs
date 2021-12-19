@@ -1,5 +1,5 @@
 use crate::core::KeekijanaiError;
-use hyper::{rt::Executor, StatusCode};
+use hyper::{StatusCode};
 use sea_query::{Alias, Expr, PostgresQueryBuilder, SelectStatement};
 use serde::Deserialize;
 
