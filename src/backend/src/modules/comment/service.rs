@@ -1,4 +1,3 @@
-use crate::core::KeekijanaiError;
 use hyper::{StatusCode};
 use sea_query::{Alias, Expr, PostgresQueryBuilder, SelectStatement};
 use serde::Deserialize;
@@ -156,11 +155,7 @@ WHERE id = $1;
             .await?;
 
         if result.is_empty() {
-            return Err(KeekijanaiError::Client {
-                status: StatusCode::NOT_FOUND,
-                message: format!("Not found for comment {}", id),
-            }
-            .into());
+            return Err(crate::core::error::comm_error::ResourceNotFound("comment", id.to_string()))?;
         }
         let comment: Comment = result.pop().unwrap().into();
 
@@ -199,11 +194,7 @@ WHERE
         .rows_affected();
 
         if res == 0 {
-            return Err(KeekijanaiError::Client {
-                status: StatusCode::NOT_FOUND,
-                message: format!("Not found comment {}", id),
-            }
-            .into());
+            return Err(crate::core::error::comm_error::ResourceNotFound("comment", id.to_string()))?;
         }
 
         Ok(())

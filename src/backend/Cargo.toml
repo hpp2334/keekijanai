@@ -36,4 +36,8 @@ config = "0.11.0"
 once_cell = "1.9.0"
 poem = { version = "1.2.7", features = ["compression", "anyhow"] }
 poem-openapi = { version = "1.2.7", features = ["swagger-ui"] }
-
+syn = "1.0"
+quote = "1.0"
+proc-macro2 = "1.0"
+serve-resp-err-macro = { path = "../serve-resp-err-macro" }
+serve-resp-err = { path = "../serve-resp-err" }

@@ -7,7 +7,7 @@ use sea_query::PostgresQueryBuilder;
 
 
 
-use crate::{core::{db::get_pool, Service}, modules::{star::model::StarModelColumns}};
+use crate::{core::{db::get_pool, Service}, modules::{star::model::StarModelColumns, auth::UserInfoContext}};
 
 use super::model::{StarType, StarActiveModel};
 
@@ -43,7 +43,7 @@ impl Service for StarService {
 }
 
 impl StarService {
-    pub async fn update_star(&mut self, _user_id: i64, payload: StarActiveModel) -> anyhow::Result<()> {
+    pub async fn update_star(&mut self, UserInfoContext(user_id, user): &UserInfoContext, payload: StarActiveModel) -> anyhow::Result<()> {
         let conn = get_pool().await?;
 
         if payload.id.is_unset() {

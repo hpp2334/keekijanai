@@ -18,7 +18,7 @@ impl AuthController {
     }
 
     #[oai(path = "/:provider/callback", method = "get")]
-    async fn outh2_login(&self, provider: param::Path<String>, code: param::Query<String>) -> poem::Result<PlainText<&'static str>> {
+    async fn outh2_login(&self,  provider: param::Path<String>, code: param::Query<String>) -> poem::Result<PlainText<&'static str>> {
         let provider = (*provider).clone();
         let code = (*code).clone();
     

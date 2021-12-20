@@ -216,15 +216,20 @@ dependencies = [
  "once_cell",
  "poem",
  "poem-openapi",
+ "proc-macro2",
  "qstring",
+ "quote",
  "regex",
  "reqwest",
  "rustls 0.20.2",
  "sea-query",
  "serde 1.0.130",
  "serde_json",
+ "serve-resp-err",
+ "serve-resp-err-macro",
  "shaku",
  "sqlx",
+ "syn",
  "thiserror",
  "tokio",
  "tracing",
@@ -1586,9 +1591,9 @@ checksum = "dbf0c48bc1d91375ae5c3cd81e3722dff1abcf81a30960240640d223f59fe0e5"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.32"
+version = "1.0.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ba508cc11742c0dc5c1659771673afbab7a0efab23aa17e854cbab0837ed0b43"
+checksum = "2f84e92c0f7c9d58328b85a78557813e4bd845130db68d7184635344399423b1"
 dependencies = [
  "unicode-xid",
 ]
@@ -1980,6 +1985,23 @@ dependencies = [
  "itoa",
  "ryu",
  "serde 1.0.130",
+]
+
+[[package]]
+name = "serve-resp-err"
+version = "0.1.0"
+dependencies = [
+ "poem",
+ "serde 1.0.130",
+]
+
+[[package]]
+name = "serve-resp-err-macro"
+version = "0.1.0"
+dependencies = [
+ "quote",
+ "serve-resp-err",
+ "syn",
 ]
 
 [[package]]

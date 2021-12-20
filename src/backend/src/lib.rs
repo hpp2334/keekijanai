@@ -1,3 +1,4 @@
+extern crate proc_macro;
 extern crate dotenv;
 
 #[macro_use]
