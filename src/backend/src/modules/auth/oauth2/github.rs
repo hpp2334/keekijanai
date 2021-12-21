@@ -5,6 +5,7 @@ use serde::{Deserialize};
 
 
 use super::core::{OAuth2Config, OAuth2Service, UserProfile};
+use crate::modules::auth::error as auth_error;
 
 const AUTH_URL: &'static str = "https://github.com/login/oauth/authorize";
 const TOKEN_URL: &'static str = "https://github.com/login/oauth/access_token";
@@ -47,7 +48,7 @@ impl OAuth2Service for Github {
     }
 
     async fn get_access_token(&self, code: &str) -> anyhow::Result<String> {
-        log::debug!("[get_access_token] code is {}", code);
+        tracing::debug!("[get_access_token] code is {}", code);
         let client = build_client()?;
         let resp = client
             .request(Method::POST, TOKEN_URL)
@@ -60,19 +61,23 @@ impl OAuth2Service for Github {
             .await?
             .text()
             .await?;
-        log::debug!("get_access_token {}", resp);
+        tracing::debug!("get_access_token {}", resp);
 
         let qs = qstring::QString::from(resp.as_str());
-        log::debug!("parsed query {:?}", qs);
+        tracing::debug!("parsed query {:?}", qs);
 
         if qs.has("error") {
             let error = qs.get("error_description");
-            return Err(anyhow::anyhow!("error: {}", error.unwrap_or("unknown error")));
+            let err_msg = error.unwrap_or("unknown error");
+            let error = auth_error::OAuth2(err_msg.to_owned());
+            return Err(error)?;
         }
 
         let access_token = qs.get("access_token");
         if access_token.is_none() {
-            return Err(anyhow::anyhow!("access_token not found in query"));
+            let err_msg = "access_token not found in query";
+            let error = auth_error::OAuth2(err_msg.to_owned());
+            return Err(error)?;
         }
         let access_token = access_token.unwrap();
         return Ok(access_token.to_owned());

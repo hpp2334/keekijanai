@@ -8,7 +8,7 @@ use poem::{listener::TcpListener};
 #[tokio::main]
 pub async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     let app = get_keekijanai_route();
 

@@ -7,7 +7,7 @@ use sea_query::PostgresQueryBuilder;
 
 
 
-use crate::{core::{db::get_pool, Service}, modules::{star::model::StarModelColumns, auth::UserInfoContext}};
+use crate::{core::{db::get_pool, Service}, modules::{star::model::StarModelColumns, auth::{UserInfo}}};
 
 use super::model::{StarType, StarActiveModel};
 
@@ -43,7 +43,7 @@ impl Service for StarService {
 }
 
 impl StarService {
-    pub async fn update_star(&mut self, UserInfoContext(user_id, user): &UserInfoContext, payload: StarActiveModel) -> anyhow::Result<()> {
+    pub async fn update_star(&mut self, user_info: &UserInfo, payload: StarActiveModel) -> anyhow::Result<()> {
         let conn = get_pool().await?;
 
         if payload.id.is_unset() {
@@ -70,7 +70,7 @@ impl StarService {
         return Ok(())
     }
  
-    pub async fn get_current(&self, user_id: i64, belong: String) -> anyhow::Result<i64> {
+    pub async fn get_current(&self, user_info: &UserInfo, belong: String) -> anyhow::Result<i64> {
         let conn = get_pool().await?;
         let result_current: Vec<GetStarStatInfo> = sqlx::query_as!(GetStarStatInfo,
             "
@@ -83,7 +83,7 @@ WHERE belong = $1
 GROUP BY star_type
             ",
             belong,
-            user_id,
+            user_info.id,
         )
         .fetch_all(&conn)
         .await?;

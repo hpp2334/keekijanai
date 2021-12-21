@@ -1,4 +1,7 @@
 
+use std::sync::Arc;
+
+use once_cell::sync::Lazy;
 use sea_query::{Iden, Value};
 
 
@@ -71,7 +74,7 @@ pub struct UserActiveModel {
     pub email: ActiveColumn<String>,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct User {
     pub id: i64,
     pub name: String,
@@ -82,6 +85,20 @@ pub struct User {
     pub last_login: Option<i64>,
     pub avatar_url: Option<String>,
     pub email: Option<String>,
+}
+
+impl User {
+    pub fn is_anonymous_by_id(user_id: i64) -> bool {
+        user_id == ANONYMOUS_USER.id
+    }
+
+    pub fn is_anonymous(&self) -> bool {
+        self.role == UserRole::Anonymous
+    }
+
+    pub fn get_anonymous() -> Arc<User> {
+        Arc::clone(&ANONYMOUS_USER)
+    }
 }
 
 impl From<UserModel> for User {
@@ -188,3 +205,19 @@ impl UserActiveModel {
         return v;
     }
 }
+
+pub static ANONYMOUS_USER: Lazy<Arc<User>> = Lazy::new(|| {
+    let user = User {
+        id: -1,
+        name: "".to_string(),
+        role: UserRole::Anonymous,
+        password: None,
+        provider: "self".to_string(),
+        in_provider_id: "-1".to_string(),
+        last_login: None,
+        avatar_url: None,
+        email: None,
+    };
+
+    Arc::new(user)
+});

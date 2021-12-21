@@ -7,5 +7,4 @@ pub mod db;
 pub mod setting;
 
 pub use service::{Service};
-pub use controller::{request, response, ApiTags};
-
+pub use controller::{request, response, ApiTags, resp_error_middleware::RespErrorMiddleware};

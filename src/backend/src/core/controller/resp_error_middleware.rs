@@ -4,6 +4,7 @@ use poem::{
     Middleware, Request, Response, Body,
 };
 use serve_resp_err::ServeRespErr;
+use std::fmt::Debug;
 
 pub struct RespErrorMiddleware;
 
@@ -27,20 +28,30 @@ pub struct RespErrorMiddlewareImpl<E> {
     ep: E,
 }
 
+impl<E> Debug for RespErrorMiddlewareImpl<E> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "RespErrorMiddleware")
+    }
+}
+
 #[async_trait]
 impl<E: Endpoint> Endpoint for RespErrorMiddlewareImpl<E> {
     type Output = Response;
 
+    #[tracing::instrument]
     async fn call(&self, req: Request) -> poem::Result<Self::Output> {
-        // call the inner endpoint.
+        tracing::debug!("before call req");
         let res = self.ep.call(req).await;
 
         match res {
             Ok(resp) => {
+                tracing::debug!("get response");
                 let resp = resp.into_response();
                 Ok(resp)
             }
             Err(err) => {
+                tracing::error!("{:#?}", err);
+
                 let status = err.status();
                 let resp_error = downcast_to_serve_resp_err(err);
                 let body = Body::from_json(resp_error).unwrap();

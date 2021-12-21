@@ -19,3 +19,4 @@ env_logger = "0.8"
 log = "0.4"
 poem = { version = "1.2.7", features = ["compression", "anyhow"] }
 poem-openapi = { version = "1.2.7" }
+tracing-subscriber = "0.2"

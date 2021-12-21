@@ -2,7 +2,7 @@ use poem::{EndpointExt, Route};
 use poem_openapi::{OpenApi, OpenApiService};
 
 use super::{
-    auth::{controller::AuthController, middleware::AuthGuardMiddleware, middleware::UserInfoMiddleware},
+    auth::{controller::AuthController, middleware::UserInfoMiddleware},
     comment::controller::CommentController,
     ping::controller::PingController,
     star::controller::StarController,
@@ -22,12 +22,10 @@ pub fn get_keekijanai_route() -> impl poem::Endpoint {
     let app = Route::new()
         .nest("/keekijanai/doc", ui)
         .nest("/", service)
-        .with(poem::middleware::Tracing)
         .with(UserInfoMiddleware)
-        .with(AuthGuardMiddleware::new(vec![
-            "/keekijanai/auth",
-            "/keekijanai/doc"
-        ]));
+        .with(crate::modules::user::ConvertErrorMiddleware)
+        .with(crate::core::RespErrorMiddleware)
+        .with(poem::middleware::Tracing);
 
     app
 }
