@@ -1,4 +1,4 @@
-use poem::{http::StatusCode, Result};
+use poem::{http::StatusCode};
 use serve_resp_err_macro::KeekijanaiRespErr;
 
 /// OAuth2(error_msg)

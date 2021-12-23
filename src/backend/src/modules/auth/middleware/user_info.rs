@@ -17,12 +17,6 @@ pub type UserInfo = User;
 
 pub struct UserInfoMiddleware;
 
-impl UserInfoMiddleware {
-    pub fn new() -> Self {
-        Self
-    }
-}
-
 impl<E: Endpoint> Middleware<E> for UserInfoMiddleware {
     type Output = UserInfoMiddlewareImpl<E>;
 

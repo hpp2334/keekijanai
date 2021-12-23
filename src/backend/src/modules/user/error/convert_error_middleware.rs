@@ -2,10 +2,10 @@ use std::fmt::Debug;
 
 use async_trait::async_trait;
 use poem::{
-    Endpoint, IntoResponse,
-    Middleware, Request, Response, Body,
+    Endpoint,
+    Middleware, Request,
 };
-use serve_resp_err::ServeRespErr;
+
 
 use crate::modules::user::model::User;
 

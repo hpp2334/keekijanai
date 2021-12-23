@@ -1,5 +1,5 @@
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, LitStr, parse::Parse, Ident, punctuated::Punctuated, Type, Token, parenthesized, DeriveInput, Data, token};
+use syn::{parse_macro_input, LitStr, parse::Parse, Token, DeriveInput};
 use quote::{quote};
 
 struct RespErrAttrArgs {

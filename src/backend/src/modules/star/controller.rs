@@ -4,7 +4,7 @@ use poem_openapi::{param, payload::Json, payload::PlainText, Object, OpenApi};
 use crate::{
     core::ApiTags,
     core::Service,
-    modules::{auth::UserInfo, user::model::UserRole},
+    modules::{auth::UserInfo},
 };
 
 use super::{model::StarActiveModel, service::StarService};

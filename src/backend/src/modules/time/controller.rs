@@ -1,5 +1,5 @@
 use crate::core::ApiTags;
-use poem_openapi::{payload::Json, payload::PlainText, Object, OpenApi};
+use poem_openapi::{payload::Json, Object, OpenApi};
 
 pub struct TimeController;
 
