@@ -54,15 +54,6 @@ impl StarController {
         let UpdateStarRequestPayload { star } = &*req_body;
         let user_info = *user_info;
 
-        if user_info.is_anonymous() {
-            return Err(crate::modules::user::error::InsufficientPrivilege(
-                user_info.id,
-                "star".to_string(),
-                star.id.clone().unwrap().to_string(),
-            )
-            .into());
-        }
-
         StarService::serve()
             .update_star(user_info, star.clone())
             .await?;

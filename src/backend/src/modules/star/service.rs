@@ -7,9 +7,10 @@ use sea_query::PostgresQueryBuilder;
 
 
 
-use crate::{core::{db::get_pool, Service}, modules::{star::model::StarModelColumns, auth::{UserInfo}}};
+use crate::{core::{db::get_pool, Service}, modules::{star::model::StarModelColumns, auth::{UserInfo}, user::error::OpType}};
 
 use super::model::{StarType, StarActiveModel};
+use crate::modules::user::error as user_error;
 
 #[derive(sqlx::FromRow)]
 struct GroupedDetailSQLResultItem {
@@ -168,5 +169,26 @@ GROUP BY belong, star_type
             prev + cnt * (curr as i64)
         });
         return score;
+    }
+}
+
+impl StarService {
+    pub async fn check_priv_update(&self, user_info: &UserInfo) -> anyhow::Result<()> {
+        let ok = self.has_priv_update(user_info).await?;
+        if !ok {
+            return Err(user_error::InsufficientPrivilege(
+                user_info.id,
+                "star",
+                OpType::UPDATE,
+                String::default(),
+            ))?;
+        }
+        Ok(())
+    }
+    pub async fn has_priv_update(&self, user_info: &UserInfo) -> anyhow::Result<bool> {
+        if user_info.is_anonymous() {
+            return Ok(false)
+        }
+        Ok(true)
     }
 }

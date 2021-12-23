@@ -1,13 +1,22 @@
-use hyper::{StatusCode};
+use async_trait::async_trait;
+use hyper::StatusCode;
 use sea_query::{Alias, Expr, PostgresQueryBuilder, SelectStatement};
 use serde::Deserialize;
 
 use crate::{
     core::{db::get_pool, Service},
-    modules::comment::model::{CommentModel, CommentModelColumns}, helpers,
+    modules::{
+        auth::UserInfo,
+        comment::model::{CommentModel, CommentModelColumns},
+        user::{error::OpType, model::UserRole},
+    },
 };
 
-use super::model::{Comment, CommentActiveModel};
+use super::{
+    data::CommentData,
+    model::{Comment, CommentActiveModel},
+};
+use crate::modules::user::error as user_error;
 
 #[derive(Deserialize, Clone)]
 pub struct ListCommentParams {
@@ -27,28 +36,7 @@ impl Service for CommentService {
 }
 
 impl CommentService {
-    pub async fn get(&self, id: i64) -> anyhow::Result<Comment> {
-        let pool = get_pool().await?;
-        let comments = sqlx::query_as!(CommentModel,
-            r#"
-SELECT * from keekijanai_comment
-  WHERE id = $1;
-            "#,
-            id,
-        ).fetch_all(&pool)
-        .await?
-        .into_iter()
-        .map(|comment| { comment.into() })
-        .collect::<Vec<Comment>>();
-
-        let comment = helpers::db::single(comments)?;
-        Ok(comment)
-    }
-
-    pub async fn list(
-        &self,
-        params: ListCommentParams,
-    ) -> anyhow::Result<(Vec<Comment>, i32)> {
+    pub async fn list(&self, params: ListCommentParams) -> anyhow::Result<(Vec<Comment>, i32)> {
         let conn = get_pool().await?;
 
         fn build_sql<'a, P>(params: &ListCommentParams, pre_build: P) -> String
@@ -93,14 +81,23 @@ SELECT * from keekijanai_comment
         let res_comments = sqlx::query_as::<_, CommentModel>(query_sql.as_str())
             .fetch_all(&conn)
             .await?;
-        let res_comments = res_comments.into_iter().map(|comment| comment.into()).collect::<Vec<Comment>>();
+        let res_comments = res_comments
+            .into_iter()
+            .map(|comment| comment.into())
+            .collect::<Vec<Comment>>();
 
         let res_count: (i32,) = sqlx::query_as(count_sql.as_str()).fetch_one(&conn).await?;
 
         return Ok((res_comments, res_count.0));
     }
 
-    pub async fn create(&mut self, payload: CommentActiveModel) -> anyhow::Result<Comment> {
+    pub async fn create(
+        &mut self,
+        user_info: &UserInfo,
+        payload: CommentActiveModel,
+    ) -> anyhow::Result<Comment> {
+        let _chk_priv = self.check_priv_create(user_info).await?;
+
         let pool = get_pool().await?;
         let (columns, values) = payload.get_set_columns();
         let create_sql = sea_query::Query::insert()
@@ -136,9 +133,12 @@ WHERE id = $1;
 
     pub async fn update(
         &mut self,
+        user_info: &UserInfo,
         id: i64,
         mut payload: CommentActiveModel,
     ) -> anyhow::Result<Comment> {
+        let _chk_priv = self.check_priv_update(user_info, id).await?;
+
         payload.id = id.into();
         payload.reference_id.unset();
         payload.parent_id.unset();
@@ -155,14 +155,19 @@ WHERE id = $1;
             .await?;
 
         if result.is_empty() {
-            return Err(crate::core::error::comm_error::ResourceNotFound("comment", id.to_string()))?;
+            return Err(crate::core::error::comm_error::ResourceNotFound(
+                "comment",
+                id.to_string(),
+            ))?;
         }
         let comment: Comment = result.pop().unwrap().into();
 
         Ok(comment)
     }
 
-    pub async fn remove(&mut self, id: i64) -> anyhow::Result<()> {
+    pub async fn remove(&mut self, user_info: &UserInfo, id: i64) -> anyhow::Result<()> {
+        let _chk_priv = self.check_priv_remove(user_info, id).await?;
+
         let pool = get_pool().await?;
 
         let mut transaction = pool.begin().await?;
@@ -194,9 +199,74 @@ WHERE
         .rows_affected();
 
         if res == 0 {
-            return Err(crate::core::error::comm_error::ResourceNotFound("comment", id.to_string()))?;
+            return Err(crate::core::error::comm_error::ResourceNotFound(
+                "comment",
+                id.to_string(),
+            ))?;
         }
 
         Ok(())
+    }
+}
+
+impl CommentService {
+    pub async fn check_priv_create(&self, user_info: &UserInfo) -> anyhow::Result<()> {
+        let ok = self.has_priv_create(user_info).await?;
+        if !ok {
+            return Err(user_error::InsufficientPrivilege(
+                user_info.id,
+                "comment",
+                OpType::CREATE,
+                "".to_owned(),
+            ))?;
+        }
+        Ok(())
+    }
+    pub async fn check_priv_remove(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<()> {
+        let ok = self.has_priv_remove(user_info, id).await?;
+        if !ok {
+            return Err(user_error::InsufficientPrivilege(
+                user_info.id,
+                "comment",
+                OpType::DELETE,
+                id.to_string(),
+            ))?;
+        }
+        Ok(())
+    }
+    pub async fn check_priv_update(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<()> {
+        let ok = self.has_priv_update(user_info, id).await?;
+        if !ok {
+            return Err(user_error::InsufficientPrivilege(
+                user_info.id,
+                "comment",
+                OpType::UPDATE,
+                id.to_string(),
+            ))?;
+        }
+        Ok(())
+    }
+
+    pub async fn has_priv_create(&self, user_info: &UserInfo) -> anyhow::Result<bool> {
+        if user_info.is_anonymous() {
+            return Ok(false);
+        }
+        Ok(true)
+    }
+
+    pub async fn has_priv_remove(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<bool> {
+        self.has_priv_update(user_info, id).await
+    }
+
+    pub async fn has_priv_update(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<bool> {
+        if user_info.role == UserRole::Admin {
+            return Ok(true);
+        }
+        let comment_data = CommentData::new();
+        let comment = comment_data.get(id).await?;
+        if comment.user_id != user_info.id {
+            return Ok(false);
+        }
+        Ok(true)
     }
 }

@@ -13,7 +13,7 @@ struct Claims {
     user_id: i64,
 }
 
-pub type UserInfo = Arc<User>;
+pub type UserInfo = User;
 
 pub struct UserInfoMiddleware;
 

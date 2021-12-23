@@ -1,7 +1,15 @@
-use poem_openapi::{param, payload::{Json, PlainText}, Object, OpenApi, };
-use serde::{Serialize};
+use poem::web;
+use poem_openapi::{
+    param,
+    payload::{Json, PlainText},
+    Object, OpenApi,
+};
+use serde::Serialize;
 
-use crate::core::{ApiTags, Service};
+use crate::{
+    core::{ApiTags, Service},
+    modules::auth::UserInfo,
+};
 
 use super::{
     model::{Comment, CommentActiveModel},
@@ -42,14 +50,16 @@ impl CommentController {
         cursor: param::Query<Option<i64>>,
         limit: param::Query<i32>,
     ) -> poem::Result<Json<ListCommentResult>> {
-        let (comments, total) = CommentService::serve().list(ListCommentParams {
-            user_id: *user_id,
-            parent_id: *parent_id,
-            pagination: crate::core::request::CursorPagination {
-                cursor: *cursor,
-                limit: *limit,
-            }
-        }).await?;
+        let (comments, total) = CommentService::serve()
+            .list(ListCommentParams {
+                user_id: *user_id,
+                parent_id: *parent_id,
+                pagination: crate::core::request::CursorPagination {
+                    cursor: *cursor,
+                    limit: *limit,
+                },
+            })
+            .await?;
 
         let res = crate::core::response::CursorListData {
             data: comments,
@@ -64,10 +74,17 @@ impl CommentController {
     }
 
     #[oai(path = "/", method = "post")]
-    async fn create_comment(&self, params: Json<CreateCommentParams>) -> poem::Result<Json<CreateCommentRespPayload>> {
+    async fn create_comment(
+        &self,
+        user_info: web::Data<&UserInfo>,
+        params: Json<CreateCommentParams>,
+    ) -> poem::Result<Json<CreateCommentRespPayload>> {
         let params = (*params).clone();
+        let user_info = *user_info;
 
-        let created = CommentService::serve().create(params.payload).await?;
+        let created = CommentService::serve()
+            .create(user_info, params.payload)
+            .await?;
 
         let resp_payload = CreateCommentRespPayload {
             payload: created.into(),
@@ -77,11 +94,19 @@ impl CommentController {
     }
 
     #[oai(path = "/:id", method = "put")]
-    async fn update_comment(&self, id: param::Path<i64>, params: Json<UpdateCommentParams>) -> poem::Result<Json<UpdateCommentRespPayload>> {
+    async fn update_comment(
+        &self,
+        user_info: web::Data<&UserInfo>,
+        id: param::Path<i64>,
+        params: Json<UpdateCommentParams>,
+    ) -> poem::Result<Json<UpdateCommentRespPayload>> {
         let params = (*params).clone();
         let id = (*id).clone();
+        let user_info = *user_info;
 
-        let updated = CommentService::serve().update(id, params.payload).await?;
+        let updated = CommentService::serve()
+            .update(user_info, id, params.payload)
+            .await?;
 
         let resp_payload = UpdateCommentRespPayload {
             payload: updated.into(),
@@ -91,10 +116,15 @@ impl CommentController {
     }
 
     #[oai(path = "/:id", method = "delete")]
-    async fn delete_comment(&self, id: param::Path<i64>) -> poem::Result<PlainText<&'static str>> {
+    async fn delete_comment(
+        &self,
+        user_info: web::Data<&UserInfo>,
+        id: param::Path<i64>,
+    ) -> poem::Result<PlainText<&'static str>> {
         let id = (*id).clone();
+        let user_info = *user_info;
 
-        let _res = CommentService::serve().remove(id).await?;
+        let _res = CommentService::serve().remove(user_info, id).await?;
 
         Ok(PlainText(""))
     }
