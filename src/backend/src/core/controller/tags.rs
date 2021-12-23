@@ -6,4 +6,5 @@ pub enum ApiTags {
     Star,
     Comment,
     Auth,
+    Time,
 }

@@ -6,11 +6,13 @@ use super::{
     comment::controller::CommentController,
     ping::controller::PingController,
     star::controller::StarController,
+    time::controller::TimeController,
 };
 
 pub fn get_keekijanai_route() -> impl poem::Endpoint {
     let service = OpenApiService::new(
         PingController
+            .combine(TimeController)
             .combine(StarController)
             .combine(CommentController)
             .combine(AuthController),
