@@ -45,6 +45,7 @@ impl Service for StarService {
 
 impl StarService {
     pub async fn update_star(&mut self, user_info: &UserInfo, payload: StarActiveModel) -> anyhow::Result<()> {
+        let _chk_priv = self.check_priv_update(user_info).await?;
         let conn = get_pool().await?;
 
         if payload.id.is_unset() {
@@ -72,6 +73,7 @@ impl StarService {
     }
  
     pub async fn get_current(&self, user_info: &UserInfo, belong: String) -> anyhow::Result<i64> {
+        let _chk_priv = self.check_priv_read(user_info).await?;
         let conn = get_pool().await?;
         let result_current: Vec<GetStarStatInfo> = sqlx::query_as!(GetStarStatInfo,
             "
@@ -173,6 +175,18 @@ GROUP BY belong, star_type
 }
 
 impl StarService {
+    pub async fn check_priv_read(&self, user_info: &UserInfo) -> anyhow::Result<()> {
+        let ok = self.has_priv_read(user_info).await?;
+        if !ok {
+            return Err(user_error::InsufficientPrivilege(
+                user_info.id,
+                "star",
+                OpType::READ,
+                String::default(),
+            ))?;
+        }
+        Ok(())
+    }
     pub async fn check_priv_update(&self, user_info: &UserInfo) -> anyhow::Result<()> {
         let ok = self.has_priv_update(user_info).await?;
         if !ok {
@@ -184,6 +198,12 @@ impl StarService {
             ))?;
         }
         Ok(())
+    }
+    pub async fn has_priv_read(&self, user_info: &UserInfo) -> anyhow::Result<bool> {
+        if user_info.is_anonymous() {
+            return Ok(false)
+        }
+        Ok(true)
     }
     pub async fn has_priv_update(&self, user_info: &UserInfo) -> anyhow::Result<bool> {
         if user_info.is_anonymous() {
