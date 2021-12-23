@@ -45,7 +45,7 @@ impl StarController {
         Ok(Json(GetStarResponse { current, total }))
     }
 
-    #[oai(path = "/", method = "post")]
+    #[oai(path = "/", method = "put")]
     async fn update_star(
         &self,
         user_info: web::Data<&UserInfo>,
