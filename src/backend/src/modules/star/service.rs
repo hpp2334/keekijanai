@@ -58,7 +58,7 @@ impl StarService {
             let result = sqlx::query(sql.as_str())
                 .execute(&conn)
                 .await?;
-            log::info!("{:?}", result);
+            tracing::info!("{:?}", result);
         } else {
             let entries = payload.get_set_entries();
             let sql = sea_query::Query::update()
@@ -66,7 +66,7 @@ impl StarService {
                 .values(entries)
                 .to_string(PostgresQueryBuilder);
             let result = sqlx::query(sql.as_str()).execute(&conn).await?;
-            log::info!("{:?}", result);
+            tracing::info!("{:?}", result);
         }
 
         return Ok(())

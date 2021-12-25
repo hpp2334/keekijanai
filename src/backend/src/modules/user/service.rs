@@ -81,7 +81,7 @@ WHERE provider = $1 AND in_provider_id = $2
         user_id: Option<i64>,
         mut payload: UserActiveModel,
     ) -> anyhow::Result<()> {
-        log::debug!("[upsert] to update {:?}", user_id);
+        tracing::debug!("[upsert] to update {:?}", user_id);
 
         let conn = get_pool().await?;
         if user_id.is_none() {
@@ -97,7 +97,7 @@ WHERE provider = $1 AND in_provider_id = $2
             let result = sqlx::query_as::<_, UserModel>(sql.as_str())
                 .fetch_one(&conn)
                 .await?;
-            log::info!("{:?}", result);
+            tracing::info!("{:?}", result);
         } else {
             payload.id = user_id.clone().unwrap().into();
             let entries = payload.get_set_entries();
@@ -106,7 +106,7 @@ WHERE provider = $1 AND in_provider_id = $2
                 .values(entries)
                 .to_string(PostgresQueryBuilder);
             let result = sqlx::query(sql.as_str()).execute(&conn).await?;
-            log::info!("{:?}", result);
+            tracing::info!("{:?}", result);
         }
         return Ok(());
     }

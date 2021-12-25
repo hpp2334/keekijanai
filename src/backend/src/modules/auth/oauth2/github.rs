@@ -84,7 +84,7 @@ impl OAuth2Service for Github {
     }
 
     async fn get_user_profile(&self, access_token: &str) -> anyhow::Result<UserProfile> {
-        log::debug!("use access_token {}", access_token);
+        tracing::debug!("use access_token {}", access_token);
 
         let client = build_client()?;
         let resp = client
@@ -95,10 +95,10 @@ impl OAuth2Service for Github {
             .send()
             .await?;
 
-        log::debug!("get_user_profile resp text: {:?}", &resp);
+        tracing::debug!("get_user_profile resp text: {:?}", &resp);
 
         if resp.status().is_client_error() || resp.status().is_server_error() {
-            log::debug!("error status {:?}", resp.status());
+            tracing::debug!("error status {:?}", resp.status());
             return Err(anyhow::anyhow!(resp.text().await?));
         }
 
@@ -111,7 +111,7 @@ impl OAuth2Service for Github {
             email: user_profile.email,
         };
 
-        log::debug!("user_profile: {:?}", user_profile);
+        tracing::debug!("user_profile: {:?}", user_profile);
 
         return Ok(user_profile);
     }
