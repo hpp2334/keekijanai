@@ -78,17 +78,18 @@ fn downcast_to_serve_resp_err(mut error: poem::Error) -> ServeRespErr {
     use crate::modules::auth::error as auth_error;
     use crate::modules::user::error as user_error;
 
-    if error.is::<poem::error::NotFoundError>() {
-        return ServeRespErr {
-            code: "General/NotFoundError",
-            params: vec![error.to_string()],
-        }
-    }
-
     try_downcast_err! {
         error,
         user_error::InsufficientPrivilege,
         auth_error::HasLogin
+    }
+
+    let status = error.status().as_u16();
+    if status >= 400 && status < 500 {
+        return ServeRespErr {
+            code: "General/CommonError",
+            params: vec![error.to_string()],
+        }
     }
 
     return ServeRespErr::default();
