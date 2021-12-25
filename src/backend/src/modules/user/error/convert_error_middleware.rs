@@ -33,7 +33,7 @@ pub struct ConvertErrorMiddlewareImpl<E> {
 
 impl<E> Debug for ConvertErrorMiddlewareImpl<E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ConvertErrorMiddleware")
+        write!(f, "User/ConvertErrorMiddleware")
     }
 }
 

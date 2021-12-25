@@ -13,7 +13,7 @@ struct Claims {
     user_id: i64,
 }
 
-pub type UserInfo = User;
+pub type UserInfo = Arc<User>;
 
 pub struct UserInfoMiddleware;
 
@@ -64,10 +64,10 @@ impl<E: Endpoint> Endpoint for UserInfoMiddlewareImpl<E> {
 
                 tracing::info!("req.extensions use user (user_id = {})", user_id);
                 let user = Arc::new(user.unwrap());
-                req.extensions_mut().insert(user);
+                req.extensions_mut().insert::<UserInfo>(user);
             } else {
                 tracing::info!("without token, req.extensions use anonymous user");
-                req.extensions_mut().insert(User::get_anonymous());
+                req.extensions_mut().insert::<UserInfo>(User::get_anonymous());
             }
         } else {
             tracing::info!("already have user_info, reuse it");

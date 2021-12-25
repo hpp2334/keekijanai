@@ -79,6 +79,8 @@ impl AuthService {
             )))?;
         }
         let user = user.unwrap();
+        tracing::debug!("load user {:#?}", user);
+
         let hashed_password = if user.password.is_some() {
             user.password.clone().unwrap()
         } else {

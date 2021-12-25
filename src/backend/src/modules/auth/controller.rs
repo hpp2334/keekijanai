@@ -24,6 +24,7 @@ struct RegisterParams {
     password: String,
 }
 
+#[derive(Debug)]
 pub struct AuthController;
 
 #[OpenApi(prefix_path = "/keekijanai/auth", tag = "ApiTags::Auth")]
@@ -48,11 +49,14 @@ impl AuthController {
 
     #[oai(path = "/login", method = "post")]
     async fn legacy_login(&self, user_info: web::Data<&UserInfo>, params: Json<LoginParams>) -> poem::Result<Json<LoginRespPayload>> {
+        tracing::debug!("in legacy_login");
         if !user_info.is_anonymous() {
             return Err(super::error::HasLogin(user_info.id))?;
         }
 
         let auth_service = AuthService::serve();
+
+        tracing::debug!("before call legacy_login (id = {})", user_info.id);
         let auth_login_res = auth_service.legacy_login(params.username.as_str(), params.password.as_str()).await?;
         let resp = LoginRespPayload {
             user: auth_login_res.user,

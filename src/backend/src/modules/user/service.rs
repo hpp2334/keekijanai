@@ -1,8 +1,4 @@
-
-
-
-use sea_query::{PostgresQueryBuilder, Query};
-
+use sea_query::{PostgresQueryBuilder, Query, Expr};
 
 use super::model::{User, UserActiveModel, UserModel, UserModelColumns};
 use crate::{
@@ -10,6 +6,7 @@ use crate::{
     modules::user::model::UserRole,
 };
 
+#[derive(Debug)]
 pub struct UserService;
 
 impl Service for UserService {
@@ -46,11 +43,17 @@ WHERE id = $1
         return Ok(Some(user));
     }
 
+    #[tracing::instrument]
     pub async fn get_by_provider(
         &self,
         provider: &str,
         in_provider_id: &str,
     ) -> anyhow::Result<Option<User>> {
+        tracing::debug!(
+            "provider = {}, in_provider_id = {}",
+            provider,
+            in_provider_id
+        );
         let conn = get_pool().await?;
         let mut user = sqlx::query_as!(
             UserModel,
@@ -71,8 +74,7 @@ WHERE provider = $1 AND in_provider_id = $2
         if user.len() == 0 {
             return Ok(None);
         }
-        let mut user = user.pop().unwrap();
-        user.password = None;
+        let user = user.pop().unwrap();
         return Ok(Some(user));
     }
 
@@ -99,10 +101,12 @@ WHERE provider = $1 AND in_provider_id = $2
                 .await?;
             tracing::info!("{:?}", result);
         } else {
-            payload.id = user_id.clone().unwrap().into();
+            let user_id = user_id.clone().unwrap();
+            payload.id = user_id.into();
             let entries = payload.get_set_entries();
             let sql = Query::update()
                 .table(UserModelColumns::Table)
+                .and_where(Expr::col(UserModelColumns::Id).eq(user_id))
                 .values(entries)
                 .to_string(PostgresQueryBuilder);
             let result = sqlx::query(sql.as_str()).execute(&conn).await?;
@@ -111,4 +115,3 @@ WHERE provider = $1 AND in_provider_id = $2
         return Ok(());
     }
 }
-
