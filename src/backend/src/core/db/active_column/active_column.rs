@@ -51,7 +51,9 @@ impl<T: Clone> ActiveColumn<T> {
     pub fn unset(&mut self) {
         std::mem::take(self);
     }
-
+    pub fn set(&mut self, value: T) {
+        std::mem::replace(self, ActiveColumn::Set(value));
+    }
 }
 
 

@@ -1,5 +1,7 @@
-use crate::core::ApiTags;
+use crate::core::{ApiTags, Service};
 use poem_openapi::{payload::Json, Object, OpenApi};
+
+use super::service::TimeService;
 
 pub struct TimeController;
 
@@ -12,13 +14,11 @@ struct GetTimeResponse {
 impl TimeController {
     #[oai(path = "/", method = "get")]
     async fn time(&self) -> poem::Result<Json<GetTimeResponse>> {
-        let time = std::time::SystemTime::now();
-        let timestamp = time
-            .duration_since(std::time::SystemTime::UNIX_EPOCH)
-            .map_err(|e| anyhow::anyhow!("{}", e.to_string()))?;
-        let timestamp = timestamp.as_millis();
+        let time_service = TimeService::serve();
+        let timestamp = time_service.now().await?;
+        let time = timestamp.as_millis();
         return Ok(Json(GetTimeResponse {
-            time: timestamp.to_string(),
+            time: time.to_string(),
         }));
     }
 }

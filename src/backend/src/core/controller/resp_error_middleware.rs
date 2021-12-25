@@ -1,8 +1,5 @@
 use async_trait::async_trait;
-use poem::{
-    Endpoint, IntoResponse,
-    Middleware, Request, Response, Body,
-};
+use poem::{Body, Endpoint, IntoResponse, Middleware, Request, Response};
 use serve_resp_err::ServeRespErr;
 use std::fmt::Debug;
 
@@ -18,9 +15,7 @@ impl<E: Endpoint> Middleware<E> for RespErrorMiddleware {
     type Output = RespErrorMiddlewareImpl<E>;
 
     fn transform(&self, ep: E) -> Self::Output {
-        RespErrorMiddlewareImpl {
-            ep
-        }
+        RespErrorMiddlewareImpl { ep }
     }
 }
 
@@ -55,7 +50,10 @@ impl<E: Endpoint> Endpoint for RespErrorMiddlewareImpl<E> {
                 let status = err.status();
                 let resp_error = downcast_to_serve_resp_err(err);
                 let body = Body::from_json(resp_error).unwrap();
-                let resp = Response::builder().status(status).body(body);
+                let resp = Response::builder()
+                    .typed_header(poem::web::headers::ContentType::json())
+                    .status(status)
+                    .body(body);
                 Ok(resp)
             }
         }
@@ -80,7 +78,14 @@ fn downcast_to_serve_resp_err(mut error: poem::Error) -> ServeRespErr {
     use crate::modules::auth::error as auth_error;
     use crate::modules::user::error as user_error;
 
-    try_downcast_err!{
+    if error.is::<poem::error::NotFoundError>() {
+        return ServeRespErr {
+            code: "General/NotFoundError",
+            params: vec![error.to_string()],
+        }
+    }
+
+    try_downcast_err! {
         error,
         user_error::InsufficientPrivilege,
         auth_error::HasLogin

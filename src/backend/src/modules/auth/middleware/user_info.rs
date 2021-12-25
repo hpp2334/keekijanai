@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use poem::{Endpoint, Middleware, Request};
 use serde::{Deserialize, Serialize};
 
-use crate::{core::{setting::SETTING, Service}, modules::user::{model::User, service::UserService}};
+use crate::{core::{setting::SETTING, Service}, modules::{user::{model::User, service::UserService}, auth::service::AuthService}};
 use std::fmt::Debug;
 
 #[derive(Debug, Deserialize, Serialize)]
@@ -48,23 +48,18 @@ impl<E: Endpoint> Endpoint for UserInfoMiddlewareImpl<E> {
         
         if user_info.is_none() {
             let user_service = UserService::serve();
+            let auth_service = AuthService::serve();
             let token = req.headers().get("authorization");
             if let Some(token) = token {
                 tracing::info!("with token");
                 let token = token.to_str().unwrap().to_owned();
-                let secret = &SETTING.get().unwrap().auth.secret;
-    
-                let token = jsonwebtoken::decode::<Claims>(
-                    &token,
-                    &jsonwebtoken::DecodingKey::from_secret(secret.as_bytes()),
-                    &jsonwebtoken::Validation::default()
-                ).map_err(|_e| { crate::modules::auth::error::ExpiredToken })?;
+                let token = auth_service.decode_token(token)?;
                 let user_id = token.claims.user_id;
                 tracing::info!("decode token (user_id = {})", user_id);
 
                 let user = user_service.get(user_id).await?;
                 if user.is_none() {
-                    return Err(super::super::error::UserNotFound(user_id))?;
+                    return Err(super::super::error::UserNotFound(format!("id = {}", user_id)))?;
                 }
 
                 tracing::info!("req.extensions use user (user_id = {})", user_id);

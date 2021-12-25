@@ -13,9 +13,14 @@ pub struct OAuth2(pub String);
 pub struct NotLogin;
 
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
-#[error("Not Login")]
+#[error("User Not Found ({0})")]
 #[resp_err = "Auth/UserNotFound"]
-pub struct UserNotFound(pub i64);
+pub struct UserNotFound(pub String);
+
+#[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
+#[error("User exists")]
+#[resp_err = "Auth/UserExists"]
+pub struct UserExists(pub String);
 
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
 #[error("Expired Token")]
@@ -25,7 +30,12 @@ pub struct ExpiredToken;
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
 #[error("Has login (user = {0})")]
 #[resp_err = "Auth/HasLogin"]
-pub struct HasLogin(String);
+pub struct HasLogin(pub i64);
+
+#[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
+#[error("Password not match ({0})")]
+#[resp_err = "Auth/PasswordNotMatch"]
+pub struct PasswordNotMatch(pub String);
 
 impl poem::error::ResponseError for OAuth2 {
     fn status(&self) -> StatusCode {
@@ -36,6 +46,12 @@ impl poem::error::ResponseError for OAuth2 {
 impl poem::error::ResponseError for NotLogin {
     fn status(&self) -> StatusCode {
         StatusCode::UNAUTHORIZED
+    }
+}
+
+impl poem::error::ResponseError for UserExists {
+    fn status(&self) -> StatusCode {
+        StatusCode::BAD_REQUEST
     }
 }
 
@@ -57,3 +73,8 @@ impl poem::error::ResponseError for HasLogin {
     }
 }
 
+impl poem::error::ResponseError for PasswordNotMatch {
+    fn status(&self) -> StatusCode {
+        StatusCode::UNAUTHORIZED
+    }
+}

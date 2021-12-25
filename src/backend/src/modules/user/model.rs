@@ -2,13 +2,14 @@
 use std::sync::Arc;
 
 use once_cell::sync::Lazy;
+use poem_openapi::{Object, Enum};
 use sea_query::{Iden, Value};
 
 
 
 use crate::core::db::ActiveColumn;
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Enum)]
 pub enum UserRole {
     Anonymous = 0,
     Public,
@@ -74,7 +75,7 @@ pub struct UserActiveModel {
     pub email: ActiveColumn<String>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Object)]
 pub struct User {
     pub id: i64,
     pub name: String,

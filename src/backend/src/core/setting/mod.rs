@@ -11,6 +11,7 @@ pub struct Github {
 #[derive(Debug, Deserialize)]
 pub struct Auth {
     pub secret: String,
+    pub legacy_auth_salt: String,
 
     pub github: Option<Github>,
 }

@@ -25,6 +25,7 @@ pub fn get_keekijanai_route() -> impl poem::Endpoint {
         .nest("/keekijanai/doc", ui)
         .nest("/", service)
         .with(UserInfoMiddleware)
+        .with(crate::modules::auth::ConvertErrorMiddleware)
         .with(crate::modules::user::ConvertErrorMiddleware)
         .with(crate::core::RespErrorMiddleware)
         .with(poem::middleware::Tracing);
