@@ -9,6 +9,7 @@ use poem::{listener::TcpListener};
 pub async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     tracing_subscriber::fmt::init();
+    backend::init();
 
     let app = get_keekijanai_route();
 
