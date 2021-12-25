@@ -45,9 +45,12 @@ impl<E: Endpoint> Endpoint for RespErrorMiddlewareImpl<E> {
                 Ok(resp)
             }
             Err(err) => {
-                tracing::error!("{:#?}", err);
-
                 let status = err.status();
+
+                if status.as_u16() >= 500 {
+                    tracing::error!("{:?}", err);
+                }
+
                 let resp_error = downcast_to_serve_resp_err(err);
                 let body = Body::from_json(resp_error).unwrap();
                 let resp = Response::builder()

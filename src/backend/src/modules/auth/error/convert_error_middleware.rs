@@ -42,7 +42,6 @@ impl<E: Endpoint> Endpoint for ConvertErrorMiddlewareImpl<E> {
     async fn call(&self, req: Request) -> poem::Result<Self::Output> {
         tracing::debug!("before call req");
         let res = self.ep.call(req).await;
-        tracing::debug!("after call req");
 
 
         match res {
@@ -56,7 +55,6 @@ impl<E: Endpoint> Endpoint for ConvertErrorMiddlewareImpl<E> {
                     let err = downcasted.unwrap();
                     Err(super::PasswordNotMatch(err.0))?
                 } else {
-                    tracing::debug!("other error");
                     let err = downcasted.unwrap_err();
                     Err(err)
                 }
