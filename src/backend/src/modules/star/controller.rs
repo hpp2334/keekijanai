@@ -7,12 +7,12 @@ use crate::{
     modules::{auth::UserInfo},
 };
 
-use super::{model::StarActiveModel, service::StarService};
+use super::{model::{StarActiveModel, StarType}, service::StarService};
 use crate::modules::user::error as user_error;
 
 #[derive(Debug, Object)]
-struct UpdateStarRequestPayload {
-    star: StarActiveModel,
+struct UpdateStarReqPayload {
+    star_type: i16,
 }
 
 #[derive(Object)]
@@ -64,13 +64,13 @@ impl StarController {
     async fn update_star(
         &self,
         user_info: web::Data<&UserInfo>,
-        req_body: Json<UpdateStarRequestPayload>,
+        belong: param::Query<String>,
+        req_body: Json<UpdateStarReqPayload>,
     ) -> poem::Result<PlainText<&'static str>> {
-        let UpdateStarRequestPayload { star } = &*req_body;
         let user_info = *user_info;
 
         StarService::serve()
-            .update_star(user_info, star.clone())
+            .update_star_by_belong_and_star_type(user_info, belong.as_str(), &req_body.star_type)
             .await?;
 
         Ok(PlainText(""))

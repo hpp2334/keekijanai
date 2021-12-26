@@ -1,15 +1,16 @@
-
 use std::collections::HashMap;
 
-use num_traits::FromPrimitive;
+use num_traits::{FromPrimitive, ToPrimitive};
 
+use poem_openapi::Object;
 use sea_query::PostgresQueryBuilder;
 
+use crate::{
+    core::{db::get_pool, Service},
+    modules::{auth::UserInfo, star::model::StarModelColumns, user::error::OpType},
+};
 
-
-use crate::{core::{db::get_pool, Service}, modules::{star::model::StarModelColumns, auth::{UserInfo}, user::error::OpType}};
-
-use super::model::{StarType, StarActiveModel};
+use super::model::{StarActiveModel, StarType};
 use crate::modules::user::error as user_error;
 
 #[derive(sqlx::FromRow)]
@@ -30,22 +31,39 @@ pub struct StarGroupedDetail {
     total: i64,
 }
 
-
 pub struct StarService;
 
 impl Service for StarService {
     fn serve() -> Self {
-        StarService {  }
+        StarService {}
     }
 
-    fn init() {
-
-    }
+    fn init() {}
 }
 
 impl StarService {
-    pub async fn update_star(&mut self, user_info: &UserInfo, payload: StarActiveModel) -> anyhow::Result<()> {
+    pub async fn update_star_by_belong_and_star_type(
+        &mut self,
+        user_info: &UserInfo,
+        belong: &str,
+        star_type: &i16,
+    ) -> anyhow::Result<()> {
+        let mut payload = StarActiveModel::default();
+        payload.user_id = user_info.id.into();
+        payload.belong = belong.to_owned().into();
+        payload.star_type = ToPrimitive::to_i32(star_type).unwrap().into();
+
+        let res = self.update_star(user_info, &payload).await;
+        res
+    }
+
+    pub async fn update_star(
+        &mut self,
+        user_info: &UserInfo,
+        payload: &StarActiveModel,
+    ) -> anyhow::Result<()> {
         let _chk_priv = self.check_priv_update(user_info).await?;
+
         let conn = get_pool().await?;
 
         if payload.id.is_unset() {
@@ -55,9 +73,7 @@ impl StarService {
                 .columns(columns)
                 .values_panic(values)
                 .to_string(PostgresQueryBuilder);
-            let result = sqlx::query(sql.as_str())
-                .execute(&conn)
-                .await?;
+            let result = sqlx::query(sql.as_str()).execute(&conn).await?;
             tracing::info!("{:?}", result);
         } else {
             let entries = payload.get_set_entries();
@@ -69,13 +85,14 @@ impl StarService {
             tracing::info!("{:?}", result);
         }
 
-        return Ok(())
+        return Ok(());
     }
- 
+
     pub async fn get_current(&self, user_info: &UserInfo, belong: String) -> anyhow::Result<i64> {
         let _chk_priv = self.check_priv_read(user_info).await?;
         let conn = get_pool().await?;
-        let result_current: Vec<GetStarStatInfo> = sqlx::query_as!(GetStarStatInfo,
+        let result_current: Vec<GetStarStatInfo> = sqlx::query_as!(
+            GetStarStatInfo,
             "
 SELECT
   star_type,
@@ -97,7 +114,8 @@ GROUP BY star_type
 
     pub async fn get_total(&self, belong: &str) -> anyhow::Result<i64> {
         let conn = get_pool().await?;
-        let result_current: Vec<GetStarStatInfo> = sqlx::query_as!(GetStarStatInfo,
+        let result_current: Vec<GetStarStatInfo> = sqlx::query_as!(
+            GetStarStatInfo,
             "
 SELECT
   star_type,
@@ -115,10 +133,14 @@ GROUP BY star_type
         Ok(total)
     }
 
-    pub async fn get_grouped_detail(&self, belongs: Vec<String>) -> anyhow::Result<Vec<StarGroupedDetail>> {
+    pub async fn get_grouped_detail(
+        &self,
+        belongs: Vec<String>,
+    ) -> anyhow::Result<Vec<StarGroupedDetail>> {
         let belong_str = belongs.join(",");
         let pool = get_pool().await?;
-        let query_result: Vec<GroupedDetailSQLResultItem> = sqlx::query_as!(GroupedDetailSQLResultItem,
+        let query_result: Vec<GroupedDetailSQLResultItem> = sqlx::query_as!(
+            GroupedDetailSQLResultItem,
             r#"
 SELECT
   COUNT(id) as cnt,
@@ -136,14 +158,20 @@ GROUP BY belong, star_type
         let mut result = vec![];
         let mut map: HashMap<String, HashMap<StarType, i64>> = HashMap::new();
 
-        query_result.into_iter().for_each(|GroupedDetailSQLResultItem { cnt: _, star_type, belong }| {
-            let star_type: StarType = FromPrimitive::from_i16(star_type).unwrap();
+        query_result.into_iter().for_each(
+            |GroupedDetailSQLResultItem {
+                 cnt: _,
+                 star_type,
+                 belong,
+             }| {
+                let star_type: StarType = FromPrimitive::from_i16(star_type).unwrap();
 
-            let entry_belong_map = map.entry(belong).or_default();
-            let entry_star_cnt = entry_belong_map.entry(star_type).or_default();
+                let entry_belong_map = map.entry(belong).or_default();
+                let entry_star_cnt = entry_belong_map.entry(star_type).or_default();
 
-            *entry_star_cnt += 1;
-        });
+                *entry_star_cnt += 1;
+            },
+        );
 
         map.into_iter().for_each(|(belong, star_cnt_map)| {
             star_cnt_map.into_iter().for_each(|(star_type, total)| {
@@ -159,17 +187,19 @@ GROUP BY belong, star_type
     }
 
     fn get_score_from_star_stat_info(&self, stat_info: &Vec<GetStarStatInfo>) -> i64 {
-        let score = stat_info.iter().fold(0i64, |prev, GetStarStatInfo { star_type, cnt }| {
-            let star_type = FromPrimitive::from_i16(*star_type).unwrap_or(StarType::UnStar);
-            let cnt = cnt.unwrap_or(0);
-            let curr = match star_type {
-                StarType::UnStar => 0,
-                StarType::Bad => -1,
-                StarType::JustOK => 0,
-                StarType::Good => 1,
-            };
-            prev + cnt * (curr as i64)
-        });
+        let score = stat_info
+            .iter()
+            .fold(0i64, |prev, GetStarStatInfo { star_type, cnt }| {
+                let star_type = FromPrimitive::from_i16(*star_type).unwrap_or(StarType::UnStar);
+                let cnt = cnt.unwrap_or(0);
+                let curr = match star_type {
+                    StarType::UnStar => 0,
+                    StarType::Bad => -1,
+                    StarType::JustOK => 0,
+                    StarType::Good => 1,
+                };
+                prev + cnt * (curr as i64)
+            });
         return score;
     }
 }
@@ -201,13 +231,13 @@ impl StarService {
     }
     pub async fn has_priv_read(&self, user_info: &UserInfo) -> anyhow::Result<bool> {
         if user_info.is_anonymous() {
-            return Ok(false)
+            return Ok(false);
         }
         Ok(true)
     }
     pub async fn has_priv_update(&self, user_info: &UserInfo) -> anyhow::Result<bool> {
         if user_info.is_anonymous() {
-            return Ok(false)
+            return Ok(false);
         }
         Ok(true)
     }

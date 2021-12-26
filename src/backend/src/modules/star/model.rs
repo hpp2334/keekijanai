@@ -1,14 +1,11 @@
 use num_derive::FromPrimitive;
 use num_traits::{FromPrimitive, ToPrimitive};
-use poem_openapi::Object;
+use poem_openapi::{Enum, Object};
 use sea_query::{Iden, Value};
-
-
-
 
 use crate::core::db::ActiveColumn;
 
-#[derive(FromPrimitive, ToPrimitive, PartialEq, Eq, Hash)]
+#[derive(FromPrimitive, ToPrimitive, PartialEq, Eq, Hash, Enum, Debug)]
 pub enum StarType {
     UnStar = 0,
     Bad,
@@ -21,8 +18,8 @@ pub enum KeekijanaiStar {
     Table,
     Id,
     UserId,
-    Star,
-    Belong
+    StarType,
+    Belong,
 }
 
 pub type StarModelColumns = KeekijanaiStar;
@@ -30,24 +27,24 @@ pub type StarModelColumns = KeekijanaiStar;
 #[derive(sqlx::FromRow, Debug)]
 pub struct StarModel {
     pub id: i64,
-    pub user_id: String,
+    pub user_id: i64,
     pub star_type: i32,
-    pub belong: String
+    pub belong: String,
 }
 
 #[derive(Default, Debug, Clone, Object)]
 pub struct StarActiveModel {
     pub id: ActiveColumn<i64>,
-    pub user_id: ActiveColumn<String>,
+    pub user_id: ActiveColumn<i64>,
     pub star_type: ActiveColumn<i32>,
-    pub belong: ActiveColumn<String>
+    pub belong: ActiveColumn<String>,
 }
 
 pub struct Star {
     pub id: i64,
-    pub user_id: String,
+    pub user_id: i64,
     pub star_type: StarType,
-    pub belong: String
+    pub belong: String,
 }
 
 impl From<StarModel> for Star {
@@ -98,7 +95,7 @@ impl StarActiveModel {
             values.push(self.user_id.clone().unwrap().into());
         }
         if self.star_type.is_set() {
-            columns.push(StarModelColumns::Star);
+            columns.push(StarModelColumns::StarType);
             values.push(self.star_type.clone().unwrap().into());
         }
         if self.belong.is_set() {
