@@ -13,7 +13,7 @@ mod helpers;
 
 pub mod modules;
 
-pub use modules::{controller::get_keekijanai_route};
+pub use modules::{get_keekijanai_route};
 
 pub fn init() {
     crate::core::setting::Setting::init();

@@ -1,7 +1,7 @@
 extern crate backend;
 extern crate derive_more;
 
-use backend::{modules::controller::get_keekijanai_route};
+use backend::{modules::get_keekijanai_route};
 
 use poem::{listener::TcpListener};
 
@@ -11,7 +11,7 @@ pub async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
     backend::init();
 
-    let app = get_keekijanai_route();
+    let app = get_keekijanai_route().await;
 
     poem::Server::new(TcpListener::bind("127.0.0.1:3000"))
         .run(app)
