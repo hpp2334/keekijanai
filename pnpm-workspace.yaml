@@ -1,0 +1,4 @@
+packages:
+  - 'src/keekijanai-frontend-core'
+  - 'src/keekijanai-frontend-toolkit'
+  - 'src/keekijanai-react'

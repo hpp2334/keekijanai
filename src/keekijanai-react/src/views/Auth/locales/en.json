@@ -1,0 +1,4 @@
+{
+  "oauth2.auth-with": "Continue with %s",
+  "oauth2.callback": "Login successfully. You will back to home after %d seconds."
+}

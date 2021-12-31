@@ -1,0 +1,12 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "paths": {
+      "@/*": ["./*", "../../keekijanai-frontend-core/src/*"],
+      "@keekijanai/frontend-core": ["../../keekijanai-frontend-core/src/index.ts"]
+    }
+  }
+}
