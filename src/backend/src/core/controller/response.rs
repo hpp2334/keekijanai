@@ -9,6 +9,7 @@ where
     pub cursor: Option<C>,
     pub limit: i32,
     pub total: i32,
+    pub has_more: bool,
 }
 
 #[derive(Object)]

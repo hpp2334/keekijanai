@@ -39,7 +39,7 @@ async fn write_keekijanai_openapi_spec(out_path: &str) -> tokio::io::Result<()> 
 }
 
 pub async fn get_keekijanai_route() -> impl poem::Endpoint {
-    write_keekijanai_openapi_spec("src/keekijanai-frontend-services/generated/keekijanai-api.json")
+    write_keekijanai_openapi_spec("src/keekijanai-frontend-core/src/generated/keekijanai-api.json")
         .await
         .unwrap();
 

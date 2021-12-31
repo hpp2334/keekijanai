@@ -36,6 +36,11 @@ struct UpdateCommentRespPayload {
     pub payload: Comment,
 }
 
+#[derive(Debug, Object)]
+struct GetCommentTreeRespPayload {
+    pub payload: Vec<Comment>
+}
+
 pub struct CommentController;
 
 type ListCommentResult = crate::core::response::CursorListData<Comment, i64>;
@@ -50,7 +55,7 @@ impl CommentController {
         cursor: param::Query<Option<i64>>,
         limit: param::Query<i32>,
     ) -> poem::Result<Json<ListCommentResult>> {
-        let (comments, total) = CommentService::serve()
+        let (comments, total, has_more) = CommentService::serve()
             .list(ListCommentParams {
                 user_id: *user_id,
                 parent_id: *parent_id,
@@ -67,10 +72,31 @@ impl CommentController {
                 total,
                 cursor: *cursor,
                 limit: *limit,
+                has_more,
             },
         };
 
         Ok(Json(res))
+    }
+
+    #[oai(path = "/tree", method = "get")]
+    async fn get_comment_tree(
+        &self,
+        roots_limit: param::Query<i32>,
+        leaves_limit: param::Query<i32>,
+        cursor: param::Query<Option<i64>>,
+    ) -> poem::Result<Json<GetCommentTreeRespPayload>> {
+        let comment_service = CommentService::serve();
+        let res = comment_service.list_as_tree(
+            *roots_limit,
+            *leaves_limit,
+        ).await?;
+
+        let resp = GetCommentTreeRespPayload {
+            payload: res,
+        };
+
+        Ok(Json(resp))
     }
 
     #[oai(path = "/", method = "post")]

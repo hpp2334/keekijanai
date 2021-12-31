@@ -1,5 +1,7 @@
 
 
+use std::collections::{HashSet, HashMap};
+
 use sea_query::{Alias, Expr, PostgresQueryBuilder, SelectStatement};
 use serde::Deserialize;
 
@@ -36,7 +38,46 @@ impl Service for CommentService {
 }
 
 impl CommentService {
-    pub async fn list(&self, params: ListCommentParams) -> anyhow::Result<(Vec<Comment>, i32)> {
+    pub async fn list_as_tree(&self, roots_limit: i32, leaves_limit: i32) -> anyhow::Result<Vec<Comment>> {
+        let pool = get_pool().await?;
+
+        let mut roots = sqlx::query_as!(Comment,
+            r#"
+SELECT *
+FROM keekijanai_comment
+ORDER BY id DESC
+LIMIT $1
+            "#,
+            roots_limit as i64,
+        ).fetch_all(&pool).await?;
+        let root_ids = roots.iter().map(|v| { v.id }).collect::<Vec<i64>>();
+
+        let leaves = sqlx::query_as!(Comment,
+            r#"
+SELECT *
+FROM keekijanai_comment
+WHERE parent_id IN (SELECT * FROM UNNEST($1::bigint[]))
+ORDER BY id DESC
+            "#,
+            root_ids.as_slice()
+        ).fetch_all(&pool).await?;
+
+        let mut leaves_count: HashMap<i64, i32> = HashMap::new();
+        let mut leaves = leaves.into_iter().filter(|comment| {
+            let entry = leaves_count.entry(comment.parent_id).or_insert(0);
+            if *entry < leaves_limit {
+                *entry += 1;
+                return true;
+            }
+            return false;
+        }).collect();
+
+        roots.append(&mut leaves);
+        
+        Ok(roots)
+    }
+
+    pub async fn list(&self, params: ListCommentParams) -> anyhow::Result<(Vec<Comment>, i32, bool)> {
         let conn = get_pool().await?;
 
         fn build_sql<'a, P>(params: &ListCommentParams, pre_build: P) -> String
@@ -67,7 +108,7 @@ impl CommentService {
             }
 
             sql = sql
-                .limit(params.pagination.limit.clone() as u64)
+                .limit(params.pagination.limit.clone() as u64 + 1)
                 .order_by(CommentModelColumns::Id, sea_query::Order::Desc);
 
             sql.to_string(PostgresQueryBuilder)
@@ -81,14 +122,22 @@ impl CommentService {
         let res_comments = sqlx::query_as::<_, CommentModel>(query_sql.as_str())
             .fetch_all(&conn)
             .await?;
-        let res_comments = res_comments
+        let mut res_comments = res_comments
             .into_iter()
             .map(|comment| comment.into())
             .collect::<Vec<Comment>>();
 
         let res_count: (i32,) = sqlx::query_as(count_sql.as_str()).fetch_one(&conn).await?;
 
-        return Ok((res_comments, res_count.0));
+        let has_more;
+        if res_comments.len() == params.pagination.limit as usize {
+            has_more = true;
+            res_comments.pop();
+        } else {
+            has_more = false;
+        }
+
+        return Ok((res_comments, res_count.0, has_more));
     }
 
     pub async fn create(

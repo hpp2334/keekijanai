@@ -24,6 +24,11 @@ struct RegisterParams {
     password: String,
 }
 
+#[derive(Debug, Object)]
+struct CurrentRespPayload {
+    user: User,
+}
+
 #[derive(Debug)]
 pub struct AuthController;
 
@@ -57,7 +62,8 @@ impl AuthController {
         let auth_service = AuthService::serve();
 
         tracing::debug!("before call legacy_login (id = {})", user_info.id);
-        let auth_login_res = auth_service.legacy_login(params.username.as_str(), params.password.as_str()).await?;
+        let mut auth_login_res = auth_service.legacy_login(params.username.as_str(), params.password.as_str()).await?;
+        auth_login_res.user.password = None;
         let resp = LoginRespPayload {
             user: auth_login_res.user,
             token: auth_login_res.token,
@@ -71,5 +77,18 @@ impl AuthController {
 
         let _res = auth_service.legacy_register(params.username.as_str(), params.password.as_str()).await?;
         Ok(PlainText(""))
+    }
+
+    #[oai(path = "/current", method = "get")]
+    async fn current(&self, user_info: web::Data<&UserInfo>) -> poem::Result<Json<CurrentRespPayload>> {
+        if user_info.is_anonymous() {
+            return Err(super::error::NotLogin)?;
+        }
+        let mut user = User::clone(*user_info);
+        user.password = None;
+        let resp = CurrentRespPayload {
+            user,
+        };
+        Ok(Json(resp))
     }
 }
