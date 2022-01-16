@@ -47,6 +47,10 @@ pub async fn get_keekijanai_route() -> impl poem::Endpoint {
 
     let ui = service.swagger_ui();
     let app = Route::new()
+        .at(
+            "/keekijanai/auth/oauth2/:provider/callback",
+            crate::modules::auth::controller::outh2_login,
+        )
         .nest("/keekijanai/doc", ui)
         .nest("/", service)
         .with(UserInfoMiddleware)

@@ -7,12 +7,15 @@ use poem_openapi::{
 use serde::Serialize;
 
 use crate::{
-    core::{ApiTags, Service},
-    modules::auth::UserInfo,
+    core::{response::CursorPagination, ApiTags, Service},
+    modules::{
+        auth::UserInfo,
+        user::model::{User, UserVO},
+    },
 };
 
 use super::{
-    model::{Comment, CommentActiveModel},
+    model::{Comment, CommentActiveModel, CommentVO},
     service::{CommentService, ListCommentParams},
 };
 
@@ -23,7 +26,8 @@ struct CreateCommentParams {
 
 #[derive(Object)]
 struct CreateCommentRespPayload {
-    pub payload: Comment,
+    pub payload: CommentVO,
+    pub user: UserVO,
 }
 
 #[derive(Object, Clone)]
@@ -38,12 +42,19 @@ struct UpdateCommentRespPayload {
 
 #[derive(Debug, Object)]
 struct GetCommentTreeRespPayload {
-    pub payload: Vec<Comment>
+    pub comments: Vec<CommentVO>,
+    pub users: Vec<UserVO>,
+    pub pagination: CursorPagination<i64>,
+}
+
+#[derive(Debug, Object)]
+struct ListCommentRespPayload {
+    pub comments: Vec<CommentVO>,
+    pub users: Vec<UserVO>,
+    pub pagination: CursorPagination<i64>,
 }
 
 pub struct CommentController;
-
-type ListCommentResult = crate::core::response::CursorListData<Comment, i64>;
 
 #[OpenApi(prefix_path = "/keekijanai/comment", tag = "ApiTags::Comment")]
 impl CommentController {
@@ -54,8 +65,8 @@ impl CommentController {
         parent_id: param::Query<Option<i64>>,
         cursor: param::Query<Option<i64>>,
         limit: param::Query<i32>,
-    ) -> poem::Result<Json<ListCommentResult>> {
-        let (comments, total, has_more) = CommentService::serve()
+    ) -> poem::Result<Json<ListCommentRespPayload>> {
+        let (comments, users, total, has_more) = CommentService::serve()
             .list(ListCommentParams {
                 user_id: *user_id,
                 parent_id: *parent_id,
@@ -66,10 +77,17 @@ impl CommentController {
             })
             .await?;
 
-        let res = crate::core::response::CursorListData {
-            data: comments,
+        let comments = comments
+            .into_iter()
+            .map(|c| c.into())
+            .collect::<Vec<CommentVO>>();
+        let users = users.into_iter().map(|c| c.into()).collect::<Vec<UserVO>>();
+
+        let res = ListCommentRespPayload {
+            comments,
+            users,
             pagination: crate::core::response::CursorPagination {
-                total,
+                total: total,
                 cursor: *cursor,
                 limit: *limit,
                 has_more,
@@ -87,13 +105,26 @@ impl CommentController {
         cursor: param::Query<Option<i64>>,
     ) -> poem::Result<Json<GetCommentTreeRespPayload>> {
         let comment_service = CommentService::serve();
-        let res = comment_service.list_as_tree(
-            *roots_limit,
-            *leaves_limit,
-        ).await?;
+        let (coments, users, total, has_more) = comment_service
+            .list_as_tree(*roots_limit, *leaves_limit, *cursor)
+            .await?;
+        let res = (
+            coments
+                .into_iter()
+                .map(|c| c.into())
+                .collect::<Vec<CommentVO>>(),
+            users.into_iter().map(|c| c.into()).collect::<Vec<UserVO>>(),
+        );
 
         let resp = GetCommentTreeRespPayload {
-            payload: res,
+            comments: res.0,
+            users: res.1,
+            pagination: CursorPagination {
+                cursor: *cursor,
+                limit: *roots_limit,
+                total: total,
+                has_more,
+            },
         };
 
         Ok(Json(resp))
@@ -114,6 +145,7 @@ impl CommentController {
 
         let resp_payload = CreateCommentRespPayload {
             payload: created.into(),
+            user: User::clone(user_info).into(),
         };
 
         Ok(Json(resp_payload))

@@ -1,15 +1,29 @@
+use once_cell::sync::OnceCell;
+use sqlx::postgres::{PgPool, PgPoolOptions};
+use std::{env, future::Future};
 
+use crate::core::setting::{Setting, SETTING};
 
-use sqlx::postgres::{PgPoolOptions, PgPool};
-use std::env;
+static POOL: OnceCell<PgPool> = OnceCell::new();
 
+pub async fn init_pool() -> anyhow::Result<()> {
+    let setting = SETTING.get().unwrap();
 
-pub async fn get_pool() -> anyhow::Result<PgPool> {
-    let database_url = env::var("DATABASE_URL").expect(r#""DATABASE_URL" should in env"#);
+    let database_url = setting.database.url.as_str();
 
     let pool = PgPoolOptions::new()
         .max_connections(20)
-        .connect(database_url.as_str()).await?;
+        .connect(database_url)
+        .await?;
 
-    Ok(pool)
+    POOL.set(pool)
+        .map_err(|_e| anyhow::anyhow!("set pool error"))?;
+
+    Ok(())
+}
+
+pub fn get_pool() -> PgPool {
+    let p = POOL.get();
+    let p = p.unwrap().clone();
+    p
 }

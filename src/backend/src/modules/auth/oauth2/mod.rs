@@ -2,17 +2,18 @@ pub mod core;
 mod github;
 
 use self::core::OAuth2Service;
-use crate::modules::auth::oauth2::core::OAuth2Config;
+use crate::{core::setting::SETTING, modules::auth::oauth2::core::OAuth2Config};
 use github::Github;
 
-use std::{env};
+use std::env;
 
 lazy_static! {
     static ref GITHUB: Github = {
+        let setting = SETTING.get().unwrap();
+        let setting_github = setting.auth.github.as_ref().unwrap();
         return Github::new(OAuth2Config {
-            client_id: env::var("GITHUB_CLIENT_ID").expect("GITHUB_CLIENT_ID not in var"),
-            client_secret: env::var("GITHUB_CLIENT_SECRET")
-                .expect("GITHUB_CLIENT_SECRET not in var"),
+            client_id: setting_github.client_id.clone(),
+            client_secret: setting_github.client_secret.clone(),
         });
     };
 }

@@ -25,6 +25,10 @@ struct GetStarStatInfo {
     cnt: Option<i64>,
 }
 
+struct GetStarCurrent {
+    star_type: i16,
+}
+
 pub struct StarGroupedDetail {
     belong: String,
     star_type: StarType,
@@ -64,15 +68,21 @@ impl StarService {
     ) -> anyhow::Result<()> {
         let _chk_priv = self.check_priv_update(user_info).await?;
 
-        let conn = get_pool().await?;
+        let conn = get_pool();
 
         if payload.id.is_unset() {
             let (columns, values) = payload.get_set_columns();
-            let sql = sea_query::Query::insert()
+            let star_type = payload.star_type.clone().unwrap();
+            let mut sql = sea_query::Query::insert()
                 .into_table(StarModelColumns::Table)
                 .columns(columns)
                 .values_panic(values)
                 .to_string(PostgresQueryBuilder);
+            sql += format!(
+                r#" ON CONFLICT ("user_id", "belong") DO UPDATE SET star_type = {}"#,
+                star_type
+            )
+            .as_ref();
             let result = sqlx::query(sql.as_str()).execute(&conn).await?;
             tracing::info!("{:?}", result);
         } else {
@@ -88,32 +98,34 @@ impl StarService {
         return Ok(());
     }
 
-    pub async fn get_current(&self, user_info: &UserInfo, belong: String) -> anyhow::Result<i64> {
+    pub async fn get_current(
+        &self,
+        user_info: &UserInfo,
+        belong: String,
+    ) -> anyhow::Result<StarType> {
         let _chk_priv = self.check_priv_read(user_info).await?;
-        let conn = get_pool().await?;
-        let result_current: Vec<GetStarStatInfo> = sqlx::query_as!(
-            GetStarStatInfo,
+        let conn = get_pool();
+        let result_current = sqlx::query_as!(
+            GetStarCurrent,
             "
 SELECT
-  star_type,
-  COUNT(*) as cnt
+  star_type
 FROM keekijanai_star
 WHERE belong = $1
   AND user_id = $2
-GROUP BY star_type
             ",
             belong,
             user_info.id,
         )
-        .fetch_all(&conn)
+        .fetch_one(&conn)
         .await?;
 
-        let current = self.get_score_from_star_stat_info(&result_current);
+        let current: StarType = FromPrimitive::from_i16(result_current.star_type).unwrap();
         Ok(current)
     }
 
     pub async fn get_total(&self, belong: &str) -> anyhow::Result<i64> {
-        let conn = get_pool().await?;
+        let conn = get_pool();
         let result_current: Vec<GetStarStatInfo> = sqlx::query_as!(
             GetStarStatInfo,
             "
@@ -138,7 +150,7 @@ GROUP BY star_type
         belongs: Vec<String>,
     ) -> anyhow::Result<Vec<StarGroupedDetail>> {
         let belong_str = belongs.join(",");
-        let pool = get_pool().await?;
+        let pool = get_pool();
         let query_result: Vec<GroupedDetailSQLResultItem> = sqlx::query_as!(
             GroupedDetailSQLResultItem,
             r#"

@@ -1,36 +1,17 @@
-
 use std::sync::Arc;
 
+use num_traits::{FromPrimitive, ToPrimitive};
 use once_cell::sync::Lazy;
-use poem_openapi::{Object, Enum};
+use poem_openapi::{Enum, Object};
 use sea_query::{Iden, Value};
-
-
 
 use crate::core::db::ActiveColumn;
 
-#[derive(Clone, Debug, PartialEq, Enum)]
+#[derive(Clone, Debug, PartialEq, Enum, FromPrimitive, ToPrimitive)]
 pub enum UserRole {
     Anonymous = 0,
     Public,
-    Admin
-}
-
-impl From<i32> for UserRole {
-    fn from(v: i32) -> Self {
-        match v {
-            0 => UserRole::Anonymous,
-            1 => UserRole::Public,
-            2 => UserRole::Admin,
-            _ => UserRole::Anonymous
-        }
-    }
-}
-
-impl From<UserRole> for i32 {
-    fn from(role: UserRole) -> Self {
-        role as i32
-    }
+    Admin,
 }
 
 #[derive(Iden)]
@@ -88,6 +69,16 @@ pub struct User {
     pub email: Option<String>,
 }
 
+#[derive(Debug, Object)]
+pub struct UserVO {
+    pub id: i64,
+    pub name: String,
+    pub role: i16,
+    pub provider: String,
+    pub avatar_url: Option<String>,
+    pub email: Option<String>,
+}
+
 impl User {
     pub fn is_anonymous_by_id(user_id: i64) -> bool {
         user_id == ANONYMOUS_USER.id
@@ -107,11 +98,24 @@ impl From<UserModel> for User {
         Self {
             id: user.id,
             name: user.name,
-            role: user.role.into(),
+            role: FromPrimitive::from_i32(user.role).unwrap(),
             password: user.password,
             provider: user.provider,
             in_provider_id: user.in_provider_id,
             last_login: user.last_login,
+            avatar_url: user.avatar_url,
+            email: user.email,
+        }
+    }
+}
+
+impl From<User> for UserVO {
+    fn from(user: User) -> Self {
+        Self {
+            id: user.id,
+            name: user.name,
+            role: ToPrimitive::to_i16(&user.role).unwrap(),
+            provider: user.provider,
             avatar_url: user.avatar_url,
             email: user.email,
         }
@@ -123,7 +127,7 @@ impl From<User> for UserModel {
         Self {
             id: user.id,
             name: user.name,
-            role: user.role.into(),
+            role: ToPrimitive::to_i32(&user.role).unwrap(),
             password: user.password,
             provider: user.provider,
             in_provider_id: user.in_provider_id,
@@ -136,7 +140,7 @@ impl From<User> for UserModel {
 
 impl From<User> for UserActiveModel {
     fn from(user: User) -> Self {
-        let role: i32 = user.role.into();
+        let role: i32 = ToPrimitive::to_i32(&user.role).unwrap();
         Self {
             id: user.id.into(),
             name: user.name.into(),

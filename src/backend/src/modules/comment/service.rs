@@ -1,6 +1,4 @@
-
-
-use std::collections::{HashSet, HashMap};
+use std::collections::{HashMap, HashSet};
 
 use sea_query::{Alias, Expr, PostgresQueryBuilder, SelectStatement};
 use serde::Deserialize;
@@ -10,13 +8,18 @@ use crate::{
     modules::{
         auth::UserInfo,
         comment::model::{CommentModel, CommentModelColumns},
-        user::{error::OpType, model::UserRole},
+        time::service::TimeService,
+        user::{
+            error::OpType,
+            model::{User, UserRole, UserVO},
+            service::UserService,
+        },
     },
 };
 
 use super::{
     data::CommentData,
-    model::{Comment, CommentActiveModel},
+    model::{Comment, CommentActiveModel, CommentVO},
 };
 use crate::modules::user::error as user_error;
 
@@ -26,6 +29,8 @@ pub struct ListCommentParams {
     pub parent_id: Option<i64>,
     pub pagination: crate::core::request::CursorPagination<i64>,
 }
+
+const NO_PARENT_ID: i64 = -1;
 
 pub struct CommentService;
 
@@ -38,21 +43,69 @@ impl Service for CommentService {
 }
 
 impl CommentService {
-    pub async fn list_as_tree(&self, roots_limit: i32, leaves_limit: i32) -> anyhow::Result<Vec<Comment>> {
-        let pool = get_pool().await?;
+    pub async fn list_as_tree(
+        &self,
+        roots_limit: i32,
+        leaves_limit: i32,
+        cursor: Option<i64>,
+    ) -> anyhow::Result<(Vec<Comment>, Vec<User>, i64, bool)> {
+        let pool = get_pool();
 
-        let mut roots = sqlx::query_as!(Comment,
+        let (total,): (i64,) = sqlx::query_as(
             r#"
+SELECT COUNT(*)
+FROM keekijanai_comment
+            "#,
+        )
+        .fetch_one(&pool)
+        .await?;
+        let roots = if cursor.is_some() {
+            sqlx::query_as!(
+                CommentModel,
+                r#"
 SELECT *
 FROM keekijanai_comment
+WHERE id < $1
+  AND parent_id = $2
 ORDER BY id DESC
-LIMIT $1
-            "#,
-            roots_limit as i64,
-        ).fetch_all(&pool).await?;
-        let root_ids = roots.iter().map(|v| { v.id }).collect::<Vec<i64>>();
+LIMIT $3
+                "#,
+                cursor.unwrap(),
+                NO_PARENT_ID,
+                (roots_limit + 1) as i64,
+            )
+            .fetch_all(&pool)
+            .await?
+        } else {
+            sqlx::query_as!(
+                CommentModel,
+                r#"
+SELECT *
+FROM keekijanai_comment
+WHERE parent_id = $1
+ORDER BY id DESC
+LIMIT $2
+                "#,
+                NO_PARENT_ID,
+                (roots_limit + 1) as i64,
+            )
+            .fetch_all(&pool)
+            .await?
+        };
+        let mut roots = roots
+            .into_iter()
+            .map(|c| c.into())
+            .collect::<Vec<Comment>>();
 
-        let leaves = sqlx::query_as!(Comment,
+        let has_more = roots.len() > roots_limit as usize;
+        if has_more {
+            roots.pop();
+        }
+
+        let root_ids = roots.iter().map(|v| v.id).collect::<Vec<i64>>();
+
+        let leaves = sqlx::query_as!(
+            CommentModel,
             r#"
 SELECT *
 FROM keekijanai_comment
@@ -60,33 +113,51 @@ WHERE parent_id IN (SELECT * FROM UNNEST($1::bigint[]))
 ORDER BY id DESC
             "#,
             root_ids.as_slice()
-        ).fetch_all(&pool).await?;
+        )
+        .fetch_all(&pool)
+        .await?
+        .into_iter()
+        .map(|c| c.into())
+        .collect::<Vec<Comment>>();
 
         let mut leaves_count: HashMap<i64, i32> = HashMap::new();
-        let mut leaves = leaves.into_iter().filter(|comment| {
-            let entry = leaves_count.entry(comment.parent_id).or_insert(0);
-            if *entry < leaves_limit {
-                *entry += 1;
-                return true;
-            }
-            return false;
-        }).collect();
+        let mut leaves = leaves
+            .into_iter()
+            .filter(|comment| {
+                let entry = leaves_count.entry(comment.parent_id).or_insert(0);
+                if *entry < leaves_limit {
+                    *entry += 1;
+                    return true;
+                }
+                return false;
+            })
+            .collect();
 
         roots.append(&mut leaves);
-        
-        Ok(roots)
+
+        let user_ids = roots.iter().map(|r| r.user_id).collect::<Vec<i64>>();
+        let users = UserService::serve().batch_get(user_ids).await?;
+
+        Ok((roots, users, total, has_more))
     }
 
-    pub async fn list(&self, params: ListCommentParams) -> anyhow::Result<(Vec<Comment>, i32, bool)> {
-        let conn = get_pool().await?;
+    pub async fn list(
+        &self,
+        params: ListCommentParams,
+    ) -> anyhow::Result<(Vec<Comment>, Vec<User>, i64, bool)> {
+        let conn = get_pool();
 
-        fn build_sql<'a, P>(params: &ListCommentParams, pre_build: P) -> String
-        where
-            P: Fn(&mut SelectStatement) -> &mut SelectStatement,
-        {
+        fn build_sql<'a>(params: &ListCommentParams, is_count: bool) -> String {
             let mut sql_builder = sea_query::Query::select();
             let sql = sql_builder.from(CommentModelColumns::Table);
-            let mut sql = pre_build(sql);
+            let mut sql = if is_count {
+                sql.expr_as(
+                    Expr::col(CommentModelColumns::Id).count(),
+                    Alias::new("cnt"),
+                )
+            } else {
+                sql.expr(Expr::cust("*"))
+            };
             if params.user_id.is_some() {
                 sql = sql.and_where(
                     Expr::col(CommentModelColumns::UserId).eq(params.user_id.clone().unwrap()),
@@ -107,17 +178,17 @@ ORDER BY id DESC
                 );
             }
 
-            sql = sql
-                .limit(params.pagination.limit.clone() as u64 + 1)
-                .order_by(CommentModelColumns::Id, sea_query::Order::Desc);
+            if !is_count {
+                sql = sql
+                    .limit(params.pagination.limit.clone() as u64 + 1)
+                    .order_by(CommentModelColumns::Id, sea_query::Order::Desc);
+            }
 
             sql.to_string(PostgresQueryBuilder)
         }
 
-        let query_sql = build_sql(&params, |sql| sql.expr(Expr::value("*")));
-        let count_sql = build_sql(&params, |sql| {
-            sql.expr_as(Expr::val("*").count(), Alias::new("cnt"))
-        });
+        let query_sql = build_sql(&params, false);
+        let count_sql = build_sql(&params, true);
 
         let res_comments = sqlx::query_as::<_, CommentModel>(query_sql.as_str())
             .fetch_all(&conn)
@@ -127,27 +198,36 @@ ORDER BY id DESC
             .map(|comment| comment.into())
             .collect::<Vec<Comment>>();
 
-        let res_count: (i32,) = sqlx::query_as(count_sql.as_str()).fetch_one(&conn).await?;
+        let res_count: (i64,) = sqlx::query_as(count_sql.as_str()).fetch_one(&conn).await?;
 
         let has_more;
-        if res_comments.len() == params.pagination.limit as usize {
+        if res_comments.len() > params.pagination.limit as usize {
             has_more = true;
             res_comments.pop();
         } else {
             has_more = false;
         }
 
-        return Ok((res_comments, res_count.0, has_more));
+        let user_ids = res_comments.iter().map(|r| r.user_id).collect::<Vec<i64>>();
+        let users = UserService::serve().batch_get(user_ids).await?;
+
+        return Ok((res_comments, users, res_count.0, has_more));
     }
 
     pub async fn create(
         &mut self,
         user_info: &UserInfo,
-        payload: CommentActiveModel,
+        mut payload: CommentActiveModel,
     ) -> anyhow::Result<Comment> {
         let _chk_priv = self.check_priv_create(user_info).await?;
 
-        let pool = get_pool().await?;
+        let time_service = TimeService::serve();
+        let now = time_service.now().await?.as_millis() as i64;
+        payload.user_id = user_info.id.into();
+        payload.created_time = now.into();
+        payload.updated_time = now.into();
+
+        let pool = get_pool();
         let (columns, values) = payload.get_set_columns();
         let create_sql = sea_query::Query::insert()
             .into_table(CommentModelColumns::Table)
@@ -192,7 +272,7 @@ WHERE id = $1;
         payload.reference_id.unset();
         payload.parent_id.unset();
 
-        let conn = get_pool().await?;
+        let conn = get_pool();
         let entries = payload.get_set_entries();
         let sql = sea_query::Query::update()
             .table(CommentModelColumns::Table)
@@ -217,7 +297,7 @@ WHERE id = $1;
     pub async fn remove(&mut self, user_info: &UserInfo, id: i64) -> anyhow::Result<()> {
         let _chk_priv = self.check_priv_remove(user_info, id).await?;
 
-        let pool = get_pool().await?;
+        let pool = get_pool();
 
         let mut transaction = pool.begin().await?;
 
@@ -253,6 +333,7 @@ WHERE
                 id.to_string(),
             ))?;
         }
+        transaction.commit().await?;
 
         Ok(())
     }
@@ -313,6 +394,13 @@ impl CommentService {
         }
         let comment_data = CommentData::new();
         let comment = comment_data.get(id).await?;
+        if comment.is_none() {
+            return Err(crate::core::error::comm_error::ResourceNotFound(
+                "comment",
+                id.to_string(),
+            ))?;
+        }
+        let comment = comment.unwrap();
         if comment.user_id != user_info.id {
             return Ok(false);
         }

@@ -1,13 +1,13 @@
+use num_traits::ToPrimitive;
 use poem::web;
 use poem_openapi::{param, payload::Json, payload::PlainText, Object, OpenApi};
 
-use crate::{
-    core::ApiTags,
-    core::Service,
-    modules::{auth::UserInfo},
-};
+use crate::{core::ApiTags, core::Service, modules::auth::UserInfo};
 
-use super::{model::{StarActiveModel, StarType}, service::StarService};
+use super::{
+    model::{StarActiveModel, StarType},
+    service::StarService,
+};
 use crate::modules::user::error as user_error;
 
 #[derive(Debug, Object)]
@@ -17,21 +17,8 @@ struct UpdateStarReqPayload {
 
 #[derive(Object)]
 struct GetStarResponse {
-    current: Option<i64>,
+    current: Option<i16>,
     total: i64,
-}
-
-fn transform_current(current_res: anyhow::Result<i64>) -> anyhow::Result<Option<i64>> {
-    if current_res.is_ok() {
-        Ok(Some(current_res.unwrap()))
-    } else {
-        let err = current_res.unwrap_err();
-        if err.is::<user_error::InsufficientPrivilege>() {
-            Ok(None)
-        } else {
-            Err(err)
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -48,10 +35,15 @@ impl StarController {
         let user_info = *user_info;
 
         tracing::debug!("before get_current");
-        let current = StarService::serve()
-            .get_current(&user_info, belong.clone())
-            .await;
-        let current = transform_current(current)?;
+        let current = if user_info.is_anonymous() {
+            None
+        } else {
+            StarService::serve()
+                .get_current(&user_info, belong.clone())
+                .await
+                .map(|s| Some(s))?
+        };
+        let current = current.map(|s| ToPrimitive::to_i16(&s).unwrap());
         tracing::debug!("get_current (curret = {:?})", current);
         tracing::debug!("before get_total");
         let total = StarService::serve().get_total(belong.as_str()).await?;

@@ -1,6 +1,7 @@
-use sea_query::{PostgresQueryBuilder, Query, Expr};
+use poem_openapi::Object;
+use sea_query::{Expr, PostgresQueryBuilder, Query};
 
-use super::model::{User, UserActiveModel, UserModel, UserModelColumns};
+use super::model::{User, UserActiveModel, UserModel, UserModelColumns, UserVO};
 use crate::{
     core::{db::get_pool, Service},
     modules::user::model::UserRole,
@@ -18,8 +19,29 @@ impl Service for UserService {
 }
 
 impl UserService {
+    pub async fn batch_get(&self, user_ids: Vec<i64>) -> anyhow::Result<Vec<User>> {
+        let conn = get_pool();
+        let mut users = sqlx::query_as!(
+            UserModel,
+            r#"
+SELECT *
+FROM keekijanai_user
+WHERE id IN (SELECT * FROM UNNEST($1::bigint[]))
+ORDER BY id DESC
+            "#,
+            user_ids.as_slice()
+        )
+        .fetch_all(&conn)
+        .await?
+        .into_iter()
+        .map(|u| u.into())
+        .collect::<Vec<User>>();
+
+        return Ok(users);
+    }
+
     pub async fn get(&self, user_id: i64) -> anyhow::Result<Option<User>> {
-        let conn = get_pool().await?;
+        let conn = get_pool();
         let mut user = sqlx::query_as!(
             UserModel,
             "
@@ -54,7 +76,7 @@ WHERE id = $1
             provider,
             in_provider_id
         );
-        let conn = get_pool().await?;
+        let conn = get_pool();
         let mut user = sqlx::query_as!(
             UserModel,
             "
@@ -82,10 +104,11 @@ WHERE provider = $1 AND in_provider_id = $2
         &self,
         user_id: Option<i64>,
         mut payload: UserActiveModel,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<User> {
         tracing::debug!("[upsert] to update {:?}", user_id);
 
-        let conn = get_pool().await?;
+        let conn = get_pool();
+        let res_user;
         if user_id.is_none() {
             payload.role = (UserRole::Public as i32).into();
 
@@ -99,7 +122,7 @@ WHERE provider = $1 AND in_provider_id = $2
             let result = sqlx::query_as::<_, UserModel>(sql.as_str())
                 .fetch_one(&conn)
                 .await?;
-            tracing::info!("{:?}", result);
+            res_user = result;
         } else {
             let user_id = user_id.clone().unwrap();
             payload.id = user_id.into();
@@ -109,9 +132,12 @@ WHERE provider = $1 AND in_provider_id = $2
                 .and_where(Expr::col(UserModelColumns::Id).eq(user_id))
                 .values(entries)
                 .to_string(PostgresQueryBuilder);
-            let result = sqlx::query(sql.as_str()).execute(&conn).await?;
-            tracing::info!("{:?}", result);
+            let sql = sql + " RETURNING *";
+            let result = sqlx::query_as::<_, UserModel>(sql.as_str())
+                .fetch_one(&conn)
+                .await?;
+            res_user = result;
         }
-        return Ok(());
+        return Ok(res_user.into());
     }
 }

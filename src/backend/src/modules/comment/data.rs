@@ -1,4 +1,4 @@
-use crate::{helpers, modules::comment::model::CommentModel, core::db::get_pool};
+use crate::{core::db::get_pool, helpers, modules::comment::model::CommentModel};
 
 use super::model::Comment;
 
@@ -9,21 +9,27 @@ impl CommentData {
         Self
     }
 
-    pub async fn get(&self, id: i64) -> anyhow::Result<Comment> {
-        let pool = get_pool().await?;
-        let comments = sqlx::query_as!(CommentModel,
+    pub async fn get(&self, id: i64) -> anyhow::Result<Option<Comment>> {
+        let pool = get_pool();
+        let comments = sqlx::query_as!(
+            CommentModel,
             r#"
 SELECT * from keekijanai_comment
   WHERE id = $1;
             "#,
             id,
-        ).fetch_all(&pool)
+        )
+        .fetch_all(&pool)
         .await?
         .into_iter()
-        .map(|comment| { comment.into() })
+        .map(|comment| comment.into())
         .collect::<Vec<Comment>>();
 
+        if comments.len() == 0 {
+            return Ok(None);
+        }
+
         let comment = helpers::db::single(comments)?;
-        Ok(comment)
+        Ok(Some(comment))
     }
 }

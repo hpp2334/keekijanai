@@ -1,8 +1,6 @@
-
-
 use poem_openapi::Object;
 use sea_query::{Iden, Value};
-use serde::{Serialize};
+use serde::Serialize;
 
 // id INTEGER PRIMARY KEY AUTOINCREMENT,
 // scope varchar(150) NOT NULL,
@@ -14,7 +12,7 @@ use serde::{Serialize};
 // parent_id bigint,
 // child_counts int DEFAULT 0
 
-use crate::core::db::ActiveColumn;
+use crate::{core::db::ActiveColumn, modules::user::model::UserVO};
 
 #[derive(Iden)]
 pub enum KeekijanaiComment {
@@ -75,8 +73,38 @@ pub struct Comment {
     pub updated_time: i64,
 }
 
+#[derive(Debug, Object)]
+pub struct CommentVO {
+    pub id: i64,
+    pub belong: String,
+    pub user_id: i64,
+    pub content: String,
+    pub reference_id: Option<i64>,
+    pub parent_id: i64,
+    pub child_count: i32,
+
+    pub created_time: i64,
+    pub updated_time: i64,
+}
+
 impl From<CommentModel> for Comment {
     fn from(comment: CommentModel) -> Self {
+        Self {
+            id: comment.id,
+            belong: comment.belong,
+            user_id: comment.user_id,
+            content: comment.content,
+            reference_id: comment.reference_id,
+            parent_id: comment.parent_id,
+            child_count: comment.child_count,
+            created_time: comment.created_time,
+            updated_time: comment.updated_time,
+        }
+    }
+}
+
+impl From<Comment> for CommentVO {
+    fn from(comment: Comment) -> Self {
         Self {
             id: comment.id,
             belong: comment.belong,

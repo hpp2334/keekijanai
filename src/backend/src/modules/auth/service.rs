@@ -3,7 +3,7 @@ use crate::{
     modules::{
         time::service::TimeService,
         user::{
-            model::{User, UserActiveModel},
+            model::{User, UserActiveModel, UserRole},
             service::UserService,
         },
     },
@@ -29,6 +29,11 @@ pub struct LegacyLogin {
     pub user: User,
 }
 
+pub struct LoginOauth2RespPayload {
+    pub token: String,
+    pub user: User,
+}
+
 pub struct AuthService {
     pub oauth2_mgr: OAuth2Manager,
 }
@@ -44,7 +49,11 @@ impl Service for AuthService {
 }
 
 impl AuthService {
-    pub async fn login_oauth2(&self, service: &str, code: &str) -> anyhow::Result<()> {
+    pub async fn login_oauth2(
+        &self,
+        service: &str,
+        code: &str,
+    ) -> anyhow::Result<LoginOauth2RespPayload> {
         let oauth2 = self.oauth2_mgr.get(service)?;
         let access_token = oauth2.get_access_token(code).await?;
         let user_profile = oauth2.get_user_profile(access_token.as_str()).await?;
@@ -52,24 +61,39 @@ impl AuthService {
         let user = UserService::serve()
             .get_by_provider(service, user_profile.id.to_string().as_str())
             .await?;
+        let time = TimeService::serve().now().await?.as_millis();
         let id = user.as_ref().map(|u| u.id);
-        let user_active_model: UserActiveModel = if user.is_none() {
+        let mut user_active_model: UserActiveModel = if user.is_none() {
             let model: UserActiveModel = UserActiveModel {
                 in_provider_id: user_profile.id.to_string().into(),
                 email: user_profile.email.into(),
                 name: user_profile.name.into(),
                 provider: service.to_owned().into(),
+                role: (UserRole::Public as i32).into(),
+                last_login: (time as i64).into(),
                 ..Default::default()
             };
             model
         } else {
             user.unwrap().into()
         };
-        let resp = UserService::serve().upsert(id, user_active_model).await?;
-        return Ok(resp);
+
+        let user_profile = oauth2.get_user_profile(access_token.as_str()).await?;
+        user_active_model.avatar_url = user_profile.avatar_url.into();
+        user_active_model.email = user_profile.email.into();
+
+        let user = UserService::serve().upsert(id, user_active_model).await?;
+        let token = self.encode_to_token(user.id).await?;
+
+        let res = LoginOauth2RespPayload { token, user };
+        return Ok(res);
     }
 
-    pub async fn legacy_login(&self, username: &str, password: &str) -> anyhow::Result<LegacyLogin> {
+    pub async fn legacy_login(
+        &self,
+        username: &str,
+        password: &str,
+    ) -> anyhow::Result<LegacyLogin> {
         let user_service = UserService::serve();
         let user = user_service.get_by_provider("self", username).await?;
         if user.is_none() {
@@ -104,10 +128,7 @@ impl AuthService {
         to_update.last_login.set(time as i64);
         let _update_res = user_service.upsert(Some(user.id), to_update).await?;
 
-        let res = LegacyLogin {
-            token,
-            user,
-        };
+        let res = LegacyLogin { token, user };
 
         return Ok(res);
     }
