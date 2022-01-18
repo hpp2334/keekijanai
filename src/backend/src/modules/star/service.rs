@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use num_traits::{FromPrimitive, ToPrimitive};
 
-use poem_openapi::Object;
+
 use sea_query::PostgresQueryBuilder;
 
 use crate::{

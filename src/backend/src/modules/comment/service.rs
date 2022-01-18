@@ -1,6 +1,6 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
-use sea_query::{Alias, Expr, PostgresQueryBuilder, SelectStatement};
+use sea_query::{Alias, Expr, PostgresQueryBuilder};
 use serde::Deserialize;
 
 use crate::{
@@ -11,7 +11,7 @@ use crate::{
         time::service::TimeService,
         user::{
             error::OpType,
-            model::{User, UserRole, UserVO},
+            model::{User, UserRole},
             service::UserService,
         },
     },
@@ -19,7 +19,7 @@ use crate::{
 
 use super::{
     data::CommentData,
-    model::{Comment, CommentActiveModel, CommentVO},
+    model::{Comment, CommentActiveModel},
 };
 use crate::modules::user::error as user_error;
 

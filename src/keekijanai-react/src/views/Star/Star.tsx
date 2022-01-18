@@ -1,14 +1,13 @@
 import { useService } from "@/common/service/useService";
-import { IconButton, Typography, styled } from "@/components";
+import { IconButton, styled, Statical } from "@/components";
 import { AuthService, StarService, StarType } from "@keekijanai/frontend-core";
 import {
   SentimentSatisfiedOutlined,
   SentimentNeutralOutlined,
   SentimentDissatisfiedOutlined,
 } from "@mui/icons-material";
-import { useObservableEagerState, useObservableState } from "observable-hooks";
+import { useObservableEagerState } from "observable-hooks";
 import { useCallback } from "react";
-import { useSpring, animated, useTransition } from "react-spring";
 import { showAuthModal } from "..";
 
 export interface StarProps {
@@ -20,43 +19,6 @@ const StarContainer = styled("div")({
   flexDirection: "column",
   alignItems: "center",
 });
-
-const StarTextDivWrapper = styled("div")(({ theme }) => ({
-  position: "relative",
-  height: theme.typography.h4.fontSize,
-  width: "100%",
-  overflow: "hidden",
-}));
-
-const StarTextDiv = styled(animated.div)(({ theme }) => ({
-  position: "absolute",
-  fontSize: theme.typography.h4.fontSize,
-  left: "50%",
-  top: "50%",
-}));
-
-const StarText = ({ value }: { value: number | null | undefined }) => {
-  const text = value ?? 0;
-  const transitions = useTransition(text, {
-    from: {
-      transform: "translateX(-50%) translateY(50%)",
-    },
-    enter: {
-      transform: "translateX(-50%) translateY(-50%)",
-    },
-    leave: {
-      transform: "translateX(-50%) translateY(-150%)",
-    },
-  });
-
-  return (
-    <StarTextDivWrapper>
-      {transitions((style, item) => (
-        <StarTextDiv style={{ ...style }}>{item}</StarTextDiv>
-      ))}
-    </StarTextDivWrapper>
-  );
-};
 
 const starConfig = [
   {
@@ -87,14 +49,14 @@ export const Star = ({ belong }: StarProps) => {
         showAuthModal();
       }
     },
-    []
+    [authService, starService]
   );
 
   console.debug("[React][Star]", { star });
 
   return (
     <StarContainer>
-      <StarText value={star?.total} />
+      <Statical value={star?.total} />
       <div>
         {starConfig.map(({ type, Icon }, index) => (
           <IconButton

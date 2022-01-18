@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use poem::{Endpoint, Middleware, Request};
 use serde::{Deserialize, Serialize};
 
-use crate::{core::{setting::SETTING, Service}, modules::{user::{model::User, service::UserService}, auth::service::AuthService}};
+use crate::{core::{Service}, modules::{user::{model::User, service::UserService}, auth::service::AuthService}};
 use std::fmt::Debug;
 
 #[derive(Debug, Deserialize, Serialize)]

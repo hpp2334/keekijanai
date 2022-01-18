@@ -12,7 +12,7 @@ use serde::Serialize;
 // parent_id bigint,
 // child_counts int DEFAULT 0
 
-use crate::{core::db::ActiveColumn, modules::user::model::UserVO};
+use crate::{core::db::ActiveColumn};
 
 #[derive(Iden)]
 pub enum KeekijanaiComment {

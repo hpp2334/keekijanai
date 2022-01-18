@@ -1,7 +1,7 @@
-use poem_openapi::Object;
+
 use sea_query::{Expr, PostgresQueryBuilder, Query};
 
-use super::model::{User, UserActiveModel, UserModel, UserModelColumns, UserVO};
+use super::model::{User, UserActiveModel, UserModel, UserModelColumns};
 use crate::{
     core::{db::get_pool, Service},
     modules::user::model::UserRole,
@@ -21,7 +21,7 @@ impl Service for UserService {
 impl UserService {
     pub async fn batch_get(&self, user_ids: Vec<i64>) -> anyhow::Result<Vec<User>> {
         let conn = get_pool();
-        let mut users = sqlx::query_as!(
+        let users = sqlx::query_as!(
             UserModel,
             r#"
 SELECT *

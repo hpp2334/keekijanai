@@ -1,8 +1,8 @@
 use once_cell::sync::OnceCell;
 use sqlx::postgres::{PgPool, PgPoolOptions};
-use std::{env, future::Future};
 
-use crate::core::setting::{Setting, SETTING};
+
+use crate::core::setting::{SETTING};
 
 static POOL: OnceCell<PgPool> = OnceCell::new();
 

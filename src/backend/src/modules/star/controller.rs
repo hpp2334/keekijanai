@@ -5,10 +5,9 @@ use poem_openapi::{param, payload::Json, payload::PlainText, Object, OpenApi};
 use crate::{core::ApiTags, core::Service, modules::auth::UserInfo};
 
 use super::{
-    model::{StarActiveModel, StarType},
     service::StarService,
 };
-use crate::modules::user::error as user_error;
+
 
 #[derive(Debug, Object)]
 struct UpdateStarReqPayload {

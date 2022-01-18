@@ -9,31 +9,8 @@
  * ---------------------------------------------------------------
  */
 
-export interface UserVO {
-  /** @format int64 */
-  id: number;
-  name: string;
-
-  /** @format int16 */
-  role: number;
-  provider: string;
-  avatar_url?: string;
-  email?: string;
-}
-
-export interface UpdateCommentParams {
-  payload: CommentActiveModel;
-}
-
-export interface GetCommentTreeRespPayload {
-  comments: CommentVO[];
-  users: UserVO[];
-  pagination: CursorPagination;
-}
-
-export interface UpdateStarReqPayload {
-  /** @format int16 */
-  star_type: number;
+export interface CurrentRespPayload {
+  user: UserVO;
 }
 
 export interface GetStarResponse {
@@ -42,6 +19,11 @@ export interface GetStarResponse {
 
   /** @format int64 */
   total: number;
+}
+
+export interface LoginParams {
+  username: string;
+  password: string;
 }
 
 export interface CommentVO {
@@ -69,8 +51,49 @@ export interface CommentVO {
   updated_time: number;
 }
 
+export interface UpdateCommentParams {
+  payload: CommentActiveModel;
+}
+
+export interface UpdateCommentRespPayload {
+  payload: Comment;
+}
+
+export interface RegisterParams {
+  username: string;
+  password: string;
+}
+
 export interface CreateCommentParams {
   payload: CommentActiveModel;
+}
+
+export interface UpdateStarReqPayload {
+  /** @format int16 */
+  star_type: number;
+}
+
+export interface CursorPagination {
+  /** @format int64 */
+  cursor?: number;
+
+  /** @format int32 */
+  limit: number;
+
+  /** @format int64 */
+  total: number;
+  has_more: boolean;
+}
+
+export interface GetCommentTreeRespPayload {
+  comments: CommentVO[];
+  users: UserVO[];
+  pagination: CursorPagination;
+}
+
+export interface LoginRespPayload {
+  user: UserVO;
+  token: string;
 }
 
 export interface CommentActiveModel {
@@ -98,44 +121,16 @@ export interface CommentActiveModel {
   updated_time?: number;
 }
 
-export interface CurrentRespPayload {
-  user: UserVO;
-}
-
-export interface ListCommentRespPayload {
-  comments: CommentVO[];
-  users: UserVO[];
-  pagination: CursorPagination;
-}
-
-export interface CursorPagination {
+export interface VisitRespPayload {
   /** @format int64 */
-  cursor?: number;
+  pv: number;
 
-  /** @format int32 */
-  limit: number;
-
-  /** @format int32 */
-  total: number;
-  has_more: boolean;
+  /** @format int64 */
+  uv: number;
 }
 
 export interface GetTimeResponse {
   time: string;
-}
-
-export interface LoginRespPayload {
-  user: UserVO;
-  token: string;
-}
-
-export interface UpdateCommentRespPayload {
-  payload: Comment;
-}
-
-export interface CreateCommentRespPayload {
-  payload: CommentVO;
-  user: UserVO;
 }
 
 export interface Comment {
@@ -163,12 +158,25 @@ export interface Comment {
   updated_time: number;
 }
 
-export interface LoginParams {
-  username: string;
-  password: string;
+export interface UserVO {
+  /** @format int64 */
+  id: number;
+  name: string;
+
+  /** @format int16 */
+  role: number;
+  provider: string;
+  avatar_url?: string;
+  email?: string;
 }
 
-export interface RegisterParams {
-  username: string;
-  password: string;
+export interface ListCommentRespPayload {
+  comments: CommentVO[];
+  users: UserVO[];
+  pagination: CursorPagination;
+}
+
+export interface CreateCommentRespPayload {
+  payload: CommentVO;
+  user: UserVO;
 }

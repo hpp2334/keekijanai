@@ -2,6 +2,7 @@ pub mod auth;
 pub mod comment;
 pub mod ping;
 pub mod star;
+pub mod stat;
 pub mod time;
 pub mod user;
 use poem::{EndpointExt, Route};
@@ -13,6 +14,7 @@ use self::{
     comment::controller::CommentController,
     ping::controller::PingController,
     star::controller::StarController,
+    stat::controller::StatController,
     time::controller::TimeController,
 };
 
@@ -21,7 +23,8 @@ fn get_keekijanai_openapi() -> impl poem_openapi::OpenApi {
         .combine(TimeController)
         .combine(StarController)
         .combine(CommentController)
-        .combine(AuthController);
+        .combine(AuthController)
+        .combine(StatController);
     api
 }
 
@@ -54,9 +57,11 @@ pub async fn get_keekijanai_route() -> impl poem::Endpoint {
         .nest("/keekijanai/doc", ui)
         .nest("/", service)
         .with(UserInfoMiddleware)
+        .with(crate::modules::stat::UuidMiddleware)
         .with(crate::modules::auth::ConvertErrorMiddleware)
         .with(crate::modules::user::ConvertErrorMiddleware)
         .with(crate::core::RespErrorMiddleware)
+        .with(poem::middleware::CookieJarManager::new())
         .with(poem::middleware::Tracing);
 
     app

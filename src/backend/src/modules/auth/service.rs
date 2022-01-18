@@ -10,7 +10,7 @@ use crate::{
 };
 use argon2::{self};
 use jsonwebtoken::TokenData;
-use poem_openapi::Object;
+
 use serde::{Deserialize, Serialize};
 
 use super::oauth2::{core::OAuth2Service, OAuth2Manager};

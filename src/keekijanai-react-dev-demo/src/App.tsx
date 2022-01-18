@@ -1,5 +1,5 @@
 import React from "react";
-import { AuthAvatar, Star, KeekijanaiProvider, Comment, OAuth2CallbackRedirect } from "@keekijanai/react";
+import { AuthAvatar, Star, KeekijanaiProvider, Comment, Stat, OAuth2CallbackRedirect } from "@keekijanai/react";
 import { BrowserRouter as Router, Routes, Route, Link, useParams } from "react-router-dom";
 
 const Navs = () => {
@@ -26,6 +26,7 @@ const Main = () => {
     <div>
       <div style={{ display: "flex" }}>
         <Star belong={belong} />
+        <Stat belong={belong} />
       </div>
       <AuthAvatar />
       <Comment belong={belong} />

@@ -106,7 +106,7 @@ impl AuthController {
         if user_info.is_anonymous() {
             return Err(super::error::NotLogin)?;
         }
-        let mut user = User::clone(*user_info);
+        let user = User::clone(*user_info);
         let resp = CurrentRespPayload { user: user.into() };
         Ok(Json(resp))
     }
