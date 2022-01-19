@@ -58,6 +58,7 @@ export class AuthService implements OnInit {
       current.onclick = () => {
         this.api.getUrlOfOAuth2Login(provider).subscribe((href) => {
           console.debug("[auth][createOAuth2LoginRef]", "href", href);
+          current.disabled = true;
           window.location.href = href;
         });
       };
@@ -96,6 +97,15 @@ export class AuthService implements OnInit {
       catchError(() => {
         return this.clearToken();
       })
+    );
+  }
+
+  public logout(): Observable<unknown> {
+    return of(null).pipe(
+      switchTap(() => {
+        this.current$.next(null);
+      }),
+      switchTap(() => this.clearToken())
     );
   }
 

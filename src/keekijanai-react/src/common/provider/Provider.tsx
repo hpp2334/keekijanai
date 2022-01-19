@@ -4,6 +4,8 @@ import { I18nProvider } from "../i18n/provider";
 import { ScopedCssBaseline } from "@/components";
 import _ from "lodash-es";
 import { useEffect, useLayoutEffect } from "react";
+import { AuthProvider } from "@/views";
+import { EMPTY_LIST } from "../helper";
 
 const initialize = _.once(() => {
   if (typeof document !== "undefined" && typeof window !== "undefined") {
@@ -27,7 +29,9 @@ export const KeekijanaiProvider: React.FC<{}> = ({ children }) => {
   return (
     <ScopedCssBaseline>
       <NiceModal.Provider>
-        <I18nProvider>{children}</I18nProvider>
+        <AuthProvider args={EMPTY_LIST}>
+          <I18nProvider>{children}</I18nProvider>
+        </AuthProvider>
       </NiceModal.Provider>
     </ScopedCssBaseline>
   );

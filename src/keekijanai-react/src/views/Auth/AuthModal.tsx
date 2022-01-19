@@ -7,12 +7,26 @@ import GitHubIcon from "@mui/icons-material/GitHub";
 import { useService } from "@/common/service/useService";
 import { AuthService, OAuth2 } from "@keekijanai/frontend-core";
 
-const OAuth2ButtonRoot = styled("div")(({ theme }) => ({
+const OAuth2ButtonRoot = styled("button")(({ theme }) => ({
   cursor: "pointer",
   padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
   background: theme.palette.background.paper,
   border: `1px solid ${theme.palette.grey[300]}`,
   borderRadius: 4,
+  transition: "border-color 0.2s",
+  "&:hover:enabled": {
+    borderColor: theme.palette.primary.main,
+  },
+  "&:disabled": {
+    cursor: "not-allowed",
+  },
+}));
+
+const AuthModalTitle = styled(Typography)(({ theme }) => ({
+  margin: `${theme.spacing(1)} 0`,
+  fontSize: theme.typography.h5.fontSize,
+  display: "flex",
+  justifyContent: "center",
 }));
 
 const ModalContent = styled("div")(({ theme }) => ({
@@ -20,7 +34,7 @@ const ModalContent = styled("div")(({ theme }) => ({
   padding: theme.spacing(4),
   background: theme.palette.background.paper,
   position: "absolute" as const,
-  top: "50%",
+  top: "40%",
   left: "50%",
   transform: "translate(-50%, -50%)",
   borderRadius: 4,
@@ -46,12 +60,15 @@ const AuthModalContent = () => {
 
   return (
     <ModalContent>
-      <OAuth2Button ref={githubElRef.ref}>
-        <Stack direction="row" spacing={1}>
-          <GitHubIcon />
-          <Typography>{sprintf(t("oauth2.auth-with"), "Github")}</Typography>
-        </Stack>
-      </OAuth2Button>
+      <Stack direction="column" spacing={2}>
+        <AuthModalTitle>{t("modal.title")}</AuthModalTitle>
+        <OAuth2Button ref={githubElRef.ref}>
+          <Stack direction="row" spacing={1}>
+            <GitHubIcon />
+            <Typography>{sprintf(t("oauth2.auth-with"), "Github")}</Typography>
+          </Stack>
+        </OAuth2Button>
+      </Stack>
     </ModalContent>
   );
 };

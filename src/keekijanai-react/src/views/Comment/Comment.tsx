@@ -13,6 +13,7 @@ import { CommentTime } from "./CommentTime";
 import { useRemote } from "@/common/hooks/useRemote";
 import { StateType } from "@/common/state";
 import { ConfirmPopover } from "@/components/ConfirmPopover";
+import { showAuthModal, useAuthService } from "../Auth";
 
 export interface CommentProps {
   belong: string;
@@ -198,6 +199,7 @@ const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
 const CommentInner = () => {
   const { t } = useTranslation("Comment");
   const commentService = useCommentService();
+  const authService = useAuthService();
 
   const commentTree = useObservableEagerState(commentService.commentTree$);
 
@@ -206,12 +208,30 @@ const CommentInner = () => {
     refComment: undefined,
   });
 
-  const toReply = useCallback((params: { refComment?: TreeComment }) => {
-    setCommentPostState({
-      expand: true,
-      refComment: params.refComment,
-    });
-  }, []);
+  const handleCommentPostExpandChange = useCallback(
+    (expand: boolean) => {
+      if (expand && !authService.isLogin()) {
+        showAuthModal();
+        return;
+      }
+      setCommentPostState({ expand, refComment: undefined });
+    },
+    [authService]
+  );
+
+  const toReply = useCallback(
+    (params: { refComment?: TreeComment }) => {
+      if (authService.isLogin()) {
+        setCommentPostState({
+          expand: true,
+          refComment: params.refComment,
+        });
+      } else {
+        showAuthModal();
+      }
+    },
+    [authService]
+  );
 
   const ctxValue = useMemo(
     () => ({
@@ -236,7 +256,7 @@ const CommentInner = () => {
           {commentTree && <CommentRoots commentTree={commentTree} />}
           <CommentPost
             expand={commentPostState.expand}
-            onExpandChange={(expand) => setCommentPostState({ expand, refComment: undefined })}
+            onExpandChange={handleCommentPostExpandChange}
             refComment={commentPostState.refComment}
           />
         </Stack>

@@ -6,3 +6,5 @@ export const useRefreshToken = () => {
 
   return [token, refresh] as const;
 };
+
+export const EMPTY_LIST = Object.seal([]) as any;
