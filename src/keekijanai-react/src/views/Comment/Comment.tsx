@@ -53,6 +53,16 @@ const CommentButton = styled("div")(({ theme }) => ({
   },
 }));
 
+const CommentEmptyContent = styled("div")(({ theme }) => ({
+  padding: `20px 0`,
+}));
+
+const CommentEmptyText = styled(Typography)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "center",
+  color: theme.palette.text.secondary,
+}));
+
 const RemoveCommentContentContainer = styled("div")(({ theme }) => ({
   padding: theme.spacing(1),
 }));
@@ -174,7 +184,17 @@ function CommentLoading() {
   return null;
 }
 
+function CommentEmpty() {
+  const { t } = useTranslation("Comment");
+  return (
+    <CommentEmptyContent>
+      <CommentEmptyText>{t("empty.title")}</CommentEmptyText>
+    </CommentEmptyContent>
+  );
+}
+
 const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
+  const hasComments = commentTree.data.length > 0;
   const service = useCommentService();
   const loadMore = useCallback(() => {
     return firstValueFrom(service.loadMoreRoot());
@@ -182,11 +202,14 @@ const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
 
   return (
     <div>
-      <Stack spacing={2}>
-        {commentTree.data.map((comment) => (
-          <CommentBlock key={comment.id} comment={comment} />
-        ))}
-      </Stack>
+      {hasComments && (
+        <Stack spacing={2}>
+          {commentTree.data.map((comment) => (
+            <CommentBlock key={comment.id} comment={comment} />
+          ))}
+        </Stack>
+      )}
+      {!hasComments && <CommentEmpty />}
       {commentTree.pagination.has_more && (
         <div>
           <CommentLoadMoreButton handler={loadMore} />
