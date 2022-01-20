@@ -2,7 +2,6 @@ use std::collections::HashMap;
 
 use num_traits::{FromPrimitive, ToPrimitive};
 
-
 use sea_query::PostgresQueryBuilder;
 
 use crate::{
@@ -105,7 +104,7 @@ impl StarService {
     ) -> anyhow::Result<StarType> {
         let _chk_priv = self.check_priv_read(user_info).await?;
         let conn = get_pool();
-        let result_current = sqlx::query_as!(
+        let mut result_current = sqlx::query_as!(
             GetStarCurrent,
             "
 SELECT
@@ -117,8 +116,16 @@ WHERE belong = $1
             belong,
             user_info.id,
         )
-        .fetch_one(&conn)
+        .fetch_all(&conn)
         .await?;
+
+        let result_current = if result_current.len() == 0 {
+            GetStarCurrent {
+                star_type: ToPrimitive::to_i16(&StarType::UnStar).unwrap(),
+            }
+        } else {
+            result_current.pop().unwrap()
+        };
 
         let current: StarType = FromPrimitive::from_i16(result_current.star_type).unwrap();
         Ok(current)
