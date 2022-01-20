@@ -24,6 +24,7 @@ const Main = () => {
 
   return (
     <div>
+      <Navs />
       <div style={{ display: "flex" }}>
         <Star belong={belong} />
         <Stat belong={belong} />

@@ -3,7 +3,7 @@ import { assert } from "@/utils/assert";
 import { switchTap } from "@/utils/rxjs-helper";
 import { omit, noop } from "lodash-es";
 import { BehaviorSubject, catchError, Observable, of, switchMap, switchMapTo } from "rxjs";
-import { singleton } from "tsyringe";
+import { injectable } from "tsyringe";
 import { AuthService, UserRole } from "../auth";
 import { CommentApi } from "./api";
 import * as Data from "./data";
@@ -15,7 +15,7 @@ const DEFAULT_PAGINATION = {
   has_more: false,
 };
 
-@singleton()
+@injectable()
 export class CommentService {
   private rootsLimit: number;
   private leavesLimit: number;

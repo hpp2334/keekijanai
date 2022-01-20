@@ -1,12 +1,12 @@
 import { switchTap } from "@/utils/rxjs-helper";
 import { callInit, OnInit } from "@/core/service";
 import { BehaviorSubject, catchError, Observable, of, switchMapTo } from "rxjs";
-import { singleton } from "tsyringe";
+import { injectable } from "tsyringe";
 import { StarApi } from "./api";
 import { Star, StarType } from "./data";
 import { AuthService } from "../auth";
 
-@singleton()
+@injectable()
 export class StarService implements OnInit<[string]> {
   public belong!: string;
   public current$: BehaviorSubject<Star | null>;

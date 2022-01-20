@@ -1,12 +1,12 @@
 import { switchTap } from "@/utils/rxjs-helper";
 import { callInit, OnInit } from "@/core/service";
 import { BehaviorSubject, catchError, Observable, of, switchMapTo } from "rxjs";
-import { singleton } from "tsyringe";
+import { injectable } from "tsyringe";
 import { StatApi } from "./api";
 import * as Data from "./data";
 import { AuthService } from "../auth";
 
-@singleton()
+@injectable()
 export class StatService implements OnInit<[string]> {
   public belong!: string;
   public visit$: BehaviorSubject<Data.Visit | null>;
