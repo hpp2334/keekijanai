@@ -4,12 +4,18 @@ export interface OnInit<ARGS extends any[] = []> {
   initialize: (...args: ARGS) => void;
 }
 
-const hasInitSet = new WeakSet<any>();
+export interface OnDestroy {
+  destroy: () => void;
+}
 
-const SYM_ONINIT = Symbol("OnInit");
+const hasInitSet = new WeakSet<any>();
 
 const hasImplOnInit = <S>(x: S): x is S & OnInit<any> => {
   return x && typeof x === "object" && "initialize" in x;
+};
+
+const hasImplOnDestroy = <S>(x: S): x is S & OnDestroy => {
+  return x && typeof x === "object" && "destroy" in x;
 };
 
 export const callInit = <ARGS extends any[], S extends { initialize: (...args: ARGS) => void }>(
@@ -31,4 +37,10 @@ export const createService = <S extends new (...args: any[]) => any>(
     callInit(service, ...args);
   }
   return service;
+};
+
+export const destoryService = (service: unknown) => {
+  if (hasImplOnDestroy(service)) {
+    service.destroy();
+  }
 };
