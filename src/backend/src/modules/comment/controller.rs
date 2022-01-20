@@ -100,13 +100,14 @@ impl CommentController {
     #[oai(path = "/tree", method = "get")]
     async fn get_comment_tree(
         &self,
+        belong: param::Query<String>,
         roots_limit: param::Query<i32>,
         leaves_limit: param::Query<i32>,
         cursor: param::Query<Option<i64>>,
     ) -> poem::Result<Json<GetCommentTreeRespPayload>> {
         let comment_service = CommentService::serve();
         let (coments, users, total, has_more) = comment_service
-            .list_as_tree(*roots_limit, *leaves_limit, *cursor)
+            .list_as_tree(&*belong, *roots_limit, *leaves_limit, *cursor)
             .await?;
         let res = (
             coments

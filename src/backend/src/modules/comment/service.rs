@@ -1,4 +1,4 @@
-use std::collections::{HashMap};
+use std::collections::HashMap;
 
 use sea_query::{Alias, Expr, PostgresQueryBuilder};
 use serde::Deserialize;
@@ -45,6 +45,7 @@ impl Service for CommentService {
 impl CommentService {
     pub async fn list_as_tree(
         &self,
+        belong: &str,
         roots_limit: i32,
         leaves_limit: i32,
         cursor: Option<i64>,
@@ -55,8 +56,10 @@ impl CommentService {
             r#"
 SELECT COUNT(*)
 FROM keekijanai_comment
+WHERE belong = $1
             "#,
         )
+        .bind(belong)
         .fetch_one(&pool)
         .await?;
         let roots = if cursor.is_some() {
@@ -65,11 +68,13 @@ FROM keekijanai_comment
                 r#"
 SELECT *
 FROM keekijanai_comment
-WHERE id < $1
-  AND parent_id = $2
+WHERE belong = $1
+  AND id < $2
+  AND parent_id = $3
 ORDER BY id DESC
-LIMIT $3
+LIMIT $4
                 "#,
+                belong,
                 cursor.unwrap(),
                 NO_PARENT_ID,
                 (roots_limit + 1) as i64,
@@ -82,10 +87,12 @@ LIMIT $3
                 r#"
 SELECT *
 FROM keekijanai_comment
-WHERE parent_id = $1
+WHERE belong = $1
+  AND parent_id = $2
 ORDER BY id DESC
-LIMIT $2
+LIMIT $3
                 "#,
+                belong,
                 NO_PARENT_ID,
                 (roots_limit + 1) as i64,
             )
@@ -109,9 +116,11 @@ LIMIT $2
             r#"
 SELECT *
 FROM keekijanai_comment
-WHERE parent_id IN (SELECT * FROM UNNEST($1::bigint[]))
+WHERE belong = $1
+  AND parent_id IN (SELECT * FROM UNNEST($2::bigint[]))
 ORDER BY id DESC
             "#,
+            belong,
             root_ids.as_slice()
         )
         .fetch_all(&pool)
