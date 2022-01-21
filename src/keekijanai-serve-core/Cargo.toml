@@ -1,5 +1,5 @@
 [package]
-name = "backend"
+name = "keekijanai-serve-core"
 version = "0.1.0"
 edition = "2021"
 
@@ -36,5 +36,5 @@ poem = { version = "1.2.7", features = ["compression", "anyhow", "cookie"] }
 poem-openapi = { version = "1.2.7", features = ["swagger-ui"] }
 proc-macro2 = "1.0"
 rust-argon2 = "0.8"
-serve-resp-err-macro = { path = "../serve-resp-err-macro" }
-serve-resp-err = { path = "../serve-resp-err" }
+keekijanai-serve-resp-err-macro = { path = "../keekijanai-serve-resp-err-macro" }
+keekijanai-serve-resp-err = { path = "../keekijanai-serve-resp-err" }

@@ -1,5 +1,5 @@
-use poem::{http::StatusCode};
-use serve_resp_err_macro::KeekijanaiRespErr;
+use keekijanai_serve_resp_err_macro::KeekijanaiRespErr;
+use poem::http::StatusCode;
 
 /// OAuth2(error_msg)
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]

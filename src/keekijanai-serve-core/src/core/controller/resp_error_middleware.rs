@@ -1,6 +1,6 @@
 use async_trait::async_trait;
+use keekijanai_serve_resp_err::ServeRespErr;
 use poem::{Body, Endpoint, IntoResponse, Middleware, Request, Response};
-use serve_resp_err::ServeRespErr;
 use std::fmt::Debug;
 
 pub struct RespErrorMiddleware;
@@ -92,7 +92,7 @@ fn downcast_to_serve_resp_err(mut error: poem::Error) -> ServeRespErr {
         return ServeRespErr {
             code: "General/CommonError",
             params: vec![error.to_string()],
-        }
+        };
     }
 
     return ServeRespErr::default();

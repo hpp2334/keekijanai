@@ -198,64 +198,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "cdb031dd78e28731d87d56cc8ffef4a8f36ca26c38fe2de700543e627f8a464a"
 
 [[package]]
-name = "backend"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "chrono",
- "config",
- "derive_more",
- "dotenv",
- "hyper",
- "jsonwebtoken",
- "lazy_static",
- "num-derive",
- "num-traits 0.2.14",
- "once_cell",
- "poem",
- "poem-openapi",
- "proc-macro2",
- "qstring",
- "regex",
- "reqwest",
- "rust-argon2",
- "rustls 0.20.2",
- "sea-query",
- "serde 1.0.130",
- "serde_json",
- "serve-resp-err",
- "serve-resp-err-macro",
- "sqlx",
- "thiserror",
- "tokio",
- "tracing",
- "tracing-subscriber 0.3.3",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "backend-server"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "backend",
- "derive_more",
- "dotenv",
- "env_logger",
- "hyper",
- "log",
- "poem",
- "poem-openapi",
- "qstring",
- "serde 1.0.130",
- "serde_json",
- "tokio",
- "tracing-subscriber 0.2.25",
-]
-
-[[package]]
 name = "backtrace"
 version = "0.3.63"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1098,6 +1040,81 @@ dependencies = [
  "serde 1.0.130",
  "serde_json",
  "simple_asn1",
+]
+
+[[package]]
+name = "keekijanai-serve-core"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "config",
+ "derive_more",
+ "dotenv",
+ "hyper",
+ "jsonwebtoken",
+ "keekijanai-serve-resp-err",
+ "keekijanai-serve-resp-err-macro",
+ "lazy_static",
+ "num-derive",
+ "num-traits 0.2.14",
+ "once_cell",
+ "poem",
+ "poem-openapi",
+ "proc-macro2",
+ "qstring",
+ "regex",
+ "reqwest",
+ "rust-argon2",
+ "rustls 0.20.2",
+ "sea-query",
+ "serde 1.0.130",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-subscriber 0.3.3",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "keekijanai-serve-resp-err"
+version = "0.1.0"
+dependencies = [
+ "poem",
+ "serde 1.0.130",
+]
+
+[[package]]
+name = "keekijanai-serve-resp-err-macro"
+version = "0.1.0"
+dependencies = [
+ "keekijanai-serve-resp-err",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "keekijanai-serve-rust-server-demo"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "derive_more",
+ "dotenv",
+ "env_logger",
+ "hyper",
+ "keekijanai-serve-core",
+ "log",
+ "poem",
+ "poem-openapi",
+ "qstring",
+ "serde 1.0.130",
+ "serde_json",
+ "tokio",
+ "tracing-subscriber 0.2.25",
 ]
 
 [[package]]
@@ -2030,23 +2047,6 @@ dependencies = [
  "itoa",
  "ryu",
  "serde 1.0.130",
-]
-
-[[package]]
-name = "serve-resp-err"
-version = "0.1.0"
-dependencies = [
- "poem",
- "serde 1.0.130",
-]
-
-[[package]]
-name = "serve-resp-err-macro"
-version = "0.1.0"
-dependencies = [
- "quote",
- "serve-resp-err",
- "syn",
 ]
 
 [[package]]

@@ -1,5 +1,5 @@
 [package]
-name = "serve-resp-err-macro"
+name = "keekijanai-serve-resp-err-macro"
 version = "0.1.0"
 edition = "2021"
 
@@ -11,4 +11,4 @@ proc-macro = true
 [dependencies]
 syn = "1.0"
 quote = "1.0"
-serve-resp-err = { path = "../serve-resp-err" }
+keekijanai-serve-resp-err = { path = "../keekijanai-serve-resp-err" }

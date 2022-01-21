@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, LitStr, parse::Parse, Token, DeriveInput};
-use quote::{quote};
+use quote::quote;
+use syn::{parse::Parse, parse_macro_input, DeriveInput, LitStr, Token};
 
 struct RespErrAttrArgs {
     _eq: Token![=],
@@ -30,20 +30,24 @@ pub fn derive_keekijanai_resp_err(input: TokenStream) -> TokenStream {
 
     let attr = input.attrs.pop().expect("need resp_err attr");
 
-    let RespErrAttrArgs { code, .. } = syn::parse2::<RespErrAttrArgs>(attr.tokens).expect(r#"attr "code" not found"#);
+    let RespErrAttrArgs { code, .. } =
+        syn::parse2::<RespErrAttrArgs>(attr.tokens).expect(r#"attr "code" not found"#);
 
     let fields = data.fields;
-    let num_list = (0..fields.len()).step_by(1).map(|i| { syn::Index::from(i) }).collect::<Vec<syn::Index>>();
+    let num_list = (0..fields.len())
+        .step_by(1)
+        .map(|i| syn::Index::from(i))
+        .collect::<Vec<syn::Index>>();
     let num_list = num_list.iter();
 
     let expanded = quote! {
 
-        impl std::convert::Into<serve_resp_err::ServeRespErr> for #name {
-            fn into(self) -> serve_resp_err::ServeRespErr {
+        impl std::convert::Into<keekijanai_serve_resp_err::ServeRespErr> for #name {
+            fn into(self) -> keekijanai_serve_resp_err::ServeRespErr {
                 let mut v = std::vec::Vec::new();
                 #( v.push(self.#num_list.to_string()); )*
 
-                serve_resp_err::ServeRespErr {
+                keekijanai_serve_resp_err::ServeRespErr {
                     code: #code,
                     params: v,
                 }

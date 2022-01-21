@@ -1,7 +1,7 @@
-extern crate backend;
 extern crate derive_more;
+extern crate keekijanai_serve_core;
 
-use backend::modules::get_keekijanai_route;
+use keekijanai_serve_core::modules::get_keekijanai_route;
 
 use poem::listener::TcpListener;
 
@@ -9,7 +9,7 @@ use poem::listener::TcpListener;
 pub async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
     tracing_subscriber::fmt::init();
-    backend::init().await;
+    keekijanai_serve_core::init().await;
 
     let app = get_keekijanai_route().await;
 

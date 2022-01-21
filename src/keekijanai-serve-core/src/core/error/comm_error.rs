@@ -1,5 +1,5 @@
 use hyper::StatusCode;
-use serve_resp_err_macro::KeekijanaiRespErr;
+use keekijanai_serve_resp_err_macro::KeekijanaiRespErr;
 
 /// ResourceNotFound(resourceKey, id)
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]

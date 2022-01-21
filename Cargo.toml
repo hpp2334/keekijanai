@@ -7,8 +7,8 @@ edition = "2021"
 
 [workspace]
 members = [
-  "src/backend",
-  "src/backend-server",
-  "src/serve-resp-err",
-  "src/serve-resp-err-macro",
+  "src/keekijanai-serve-core",
+  "src/keekijanai-serve-rust-server-demo",
+  "src/keekijanai-serve-resp-err",
+  "src/keekijanai-serve-resp-err-macro",
 ]
