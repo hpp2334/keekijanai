@@ -27,6 +27,16 @@ pub struct Setting {
     pub database: Database,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct EnvSetting {
+    pub database: String,
+    pub github_id: Option<String>,
+    pub github_secret: Option<String>,
+    pub auth_secret: String,
+    pub legacy_auth_salt: String,
+    pub redirect: Option<String>,
+}
+
 pub static SETTING: OnceCell<Setting> = OnceCell::new();
 
 impl Setting {
@@ -35,12 +45,48 @@ impl Setting {
         SETTING.set(setting).unwrap();
     }
 
-    fn new() -> Result<Self, anyhow::Error> {
+    fn try_from_conf_file() -> Result<Self, anyhow::Error> {
         let mut config = config::Config::default();
-
         config.merge(config::File::with_name("keekijanai_config"))?;
-
         let setting: Setting = config.try_into()?;
         Ok(setting)
+    }
+
+    fn try_from_env() -> Result<Self, anyhow::Error> {
+        let mut config = config::Config::default();
+        config.merge(config::Environment::with_prefix("KKJN"))?;
+
+        let setting: EnvSetting = config.try_into()?;
+        let setting: Setting = Setting {
+            auth: Auth {
+                secret: setting.auth_secret,
+                legacy_auth_salt: setting.legacy_auth_salt,
+                redirect_url: setting.redirect,
+                github: if setting.github_id.is_none() {
+                    None
+                } else {
+                    Some(Github {
+                        client_id: setting.github_id.unwrap(),
+                        client_secret: setting.github_secret.unwrap(),
+                    })
+                },
+            },
+            database: Database {
+                url: setting.database,
+            },
+        };
+        Ok(setting)
+    }
+
+    fn new() -> Result<Self, anyhow::Error> {
+        let setting = Setting::try_from_conf_file();
+        if setting.is_ok() {
+            return setting;
+        }
+        let setting = Setting::try_from_env();
+        if setting.is_ok() {
+            return setting;
+        }
+        anyhow::bail!("No config found in config file and env");
     }
 }

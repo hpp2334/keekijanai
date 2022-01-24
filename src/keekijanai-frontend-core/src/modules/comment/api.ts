@@ -11,7 +11,7 @@ import { StyledCommentVO } from "./data";
 export class CommentApi {
   public list(query?: Data.ListCommentQuery) {
     return ajax<Data.ListCommentRespPayload, unknown>({
-      url: "/keekijanai/comment",
+      url: "/comment",
       params: query,
     }).pipe(
       switchMap((resp) => {
@@ -28,7 +28,7 @@ export class CommentApi {
 
   public getTree(query: Data.GetTreeCommentQuery) {
     return ajax<Data.GetCommentTreeRespPayload, unknown>({
-      url: "/keekijanai/comment/tree",
+      url: "/comment/tree",
       params: query,
     }).pipe(
       switchMap((resp) => {
@@ -46,7 +46,7 @@ export class CommentApi {
   public create(params: Data.CreateCommentParams) {
     return ajax<Data.CreateCommentRespPayload, unknown>({
       method: "POST",
-      url: "/keekijanai/comment",
+      url: "/comment",
       data: params,
     }).pipe(
       switchMap((resp) => {
@@ -69,7 +69,7 @@ export class CommentApi {
   public remove(id: number): Observable<AxiosResponse<void>> {
     return ajax({
       method: "DELETE",
-      url: `/keekijanai/comment/${id}`,
+      url: `/comment/${id}`,
     });
   }
 

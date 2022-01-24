@@ -6,9 +6,9 @@ import { AxiosResponse } from "axios";
 
 @singleton()
 export class TimeApi {
-  now(): Observable<AxiosResponse<ApiTypes.GetTimeResponse>> {
+  public now(): Observable<AxiosResponse<ApiTypes.GetTimeResponse>> {
     return ajax({
-      url: "/keekijanai/time",
+      url: "/time",
     });
   }
 }

@@ -6,6 +6,11 @@ import _ from "lodash-es";
 import { useEffect, useLayoutEffect } from "react";
 import { AuthProvider } from "@/views";
 import { EMPTY_LIST } from "../helper";
+import { keekijanaiConfig } from "@keekijanai/frontend-core";
+
+interface KeekijanaiProviderProps {
+  queryRoute?: boolean;
+}
 
 const initialize = _.once(() => {
   if (typeof document !== "undefined" && typeof window !== "undefined") {
@@ -21,7 +26,9 @@ const initialize = _.once(() => {
   }
 });
 
-export const KeekijanaiProvider: React.FC<{}> = ({ children }) => {
+export const KeekijanaiProvider: React.FC<KeekijanaiProviderProps> = ({ queryRoute, children }) => {
+  keekijanaiConfig.queryRoute = queryRoute ?? false;
+
   useLayoutEffect(() => {
     initialize();
   }, []);

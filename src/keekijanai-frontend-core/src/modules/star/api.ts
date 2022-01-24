@@ -8,7 +8,7 @@ import { AxiosResponse } from "axios";
 export class StarApi {
   public getCurrent(belong: string): Observable<AxiosResponse<Data.GetStarResponse>> {
     return ajax({
-      url: "/keekijanai/star",
+      url: "/star",
       params: {
         belong,
       },
@@ -17,7 +17,7 @@ export class StarApi {
 
   public update(belong: string, payload: Data.UpdateStarReqPayload): Observable<AxiosResponse<void>> {
     return ajax({
-      url: "/keekijanai/star",
+      url: "/star",
       method: "PUT",
       params: {
         belong,

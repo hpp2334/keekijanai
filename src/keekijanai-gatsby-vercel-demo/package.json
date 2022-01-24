@@ -1,0 +1,23 @@
+{
+  "private": true,
+  "scripts": {
+    "develop": "gatsby develop",
+    "start": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby serve",
+    "clean": "gatsby clean",
+    "vercel:dev": "vercel dev"
+  },
+  "dependencies": {
+    "@keekijanai/react": "workspace:*",
+    "gatsby": "^4.5.4",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "reflect-metadata": "^0.1.13"
+  },
+  "devDependencies": {
+    "gatsby-plugin-pnpm": "^1.2.10",
+    "gatsby-plugin-typescript": "^4.5.2",
+    "vercel": "^23.1.2"
+  }
+}

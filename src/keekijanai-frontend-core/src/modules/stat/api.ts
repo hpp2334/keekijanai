@@ -6,7 +6,7 @@ import type * as Data from "./data";
 export class StatApi {
   public update(belong: string) {
     return ajax<Data.VisitRespPayload, unknown>({
-      url: "/keekijanai/stat",
+      url: "/stat",
       method: "PUT",
       params: {
         belong,

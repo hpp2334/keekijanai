@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/keekijanai.rs": {
+      "runtime": "vercel-rust@3.1.2"
+    }
+  }
+}

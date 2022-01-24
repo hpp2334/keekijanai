@@ -122,7 +122,6 @@ pub async fn outh2_login(
     let res = AuthService::serve()
         .login_oauth2(provider.as_str(), code.as_str())
         .await?;
-    println!("oauth2_login end");
 
     let setting = SETTING.get().unwrap();
     let redirect_url = setting.auth.redirect_url.as_ref().clone().unwrap();

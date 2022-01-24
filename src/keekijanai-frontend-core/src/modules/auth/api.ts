@@ -10,7 +10,7 @@ export class AuthApi {
   public legacyLogin(params: Data.LoginParams): Observable<AxiosResponse<Data.LoginRespPayload>> {
     return ajax({
       method: "POST",
-      url: "/keekijanai/auth/login",
+      url: "/auth/login",
       data: params,
     });
   }
@@ -18,20 +18,20 @@ export class AuthApi {
   public legacyRegister(params: Data.RegisterParams): Observable<AxiosResponse<void>> {
     return ajax({
       method: "POST",
-      url: "/keekijanai/auth/register",
+      url: "/auth/register",
       data: params,
     });
   }
 
   public current(): Observable<AxiosResponse<Data.CurrentRespPayload>> {
     return ajax({
-      url: "/keekijanai/auth/current",
+      url: "/auth/current",
     });
   }
 
   public getUrlOfOAuth2Login(provider: Data.OAuth2.Provider): Observable<string> {
     return ajax({
-      url: `/keekijanai/auth/oauth2/${provider}`,
+      url: `/auth/oauth2/${provider}`,
     }).pipe(
       switchMap((resp) => {
         return of(resp.data as string);

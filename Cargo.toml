@@ -7,8 +7,12 @@ edition = "2021"
 
 [workspace]
 members = [
-  "src/keekijanai-serve-core",
-  "src/keekijanai-serve-rust-server-demo",
   "src/keekijanai-serve-resp-err",
   "src/keekijanai-serve-resp-err-macro",
+  "src/keekijanai-serve-core",
+  "src/keekijanai-serve-vercel-adapter",
+  "src/keekijanai-serve-rust-server-demo"
+]
+exclude = [
+  "src/keekijanai-gatsby-vercel-demo/api"
 ]

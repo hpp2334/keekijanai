@@ -6,3 +6,8 @@ dist
 keekijanai_config.yml
 
 *.log
+
+/src/keekijanai-gatsby-vercel-demo/public
+/src/keekijanai-gatsby-vercel-demo/.cache
+/src/keekijanai-gatsby-vercel-demo/.vercel
+/src/keekijanai-gatsby-vercel-demo/api/target

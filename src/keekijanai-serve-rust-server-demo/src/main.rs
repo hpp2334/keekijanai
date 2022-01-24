@@ -1,7 +1,7 @@
 extern crate derive_more;
 extern crate keekijanai_serve_core;
 
-use keekijanai_serve_core::modules::get_keekijanai_route;
+use keekijanai_serve_core::modules::{get_keekijanai_endpoint, write_keekijanai_openapi_spec};
 
 use poem::listener::TcpListener;
 
@@ -11,7 +11,11 @@ pub async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
     keekijanai_serve_core::init().await;
 
-    let app = get_keekijanai_route().await;
+    write_keekijanai_openapi_spec("src/keekijanai-frontend-core/src/generated/keekijanai-api.json")
+        .await
+        .unwrap();
+
+    let app = get_keekijanai_endpoint();
 
     poem::Server::new(TcpListener::bind("127.0.0.1:3000"))
         .run(app)
