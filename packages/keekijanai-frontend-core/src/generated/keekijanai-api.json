@@ -7,22 +7,22 @@
   "servers": [],
   "tags": [
     {
-      "name": "Ping"
+      "name": "Comment"
     },
     {
       "name": "Stat"
     },
     {
-      "name": "Comment"
+      "name": "Ping"
     },
     {
       "name": "Auth"
     },
     {
-      "name": "Time"
+      "name": "Star"
     },
     {
-      "name": "Star"
+      "name": "Time"
     }
   ],
   "paths": {
@@ -499,67 +499,6 @@
   },
   "components": {
     "schemas": {
-      "UpdateStarReqPayload": {
-        "type": "object",
-        "required": [
-          "star_type"
-        ],
-        "properties": {
-          "star_type": {
-            "type": "integer",
-            "format": "int16"
-          }
-        }
-      },
-      "GetTimeResponse": {
-        "type": "object",
-        "required": [
-          "time"
-        ],
-        "properties": {
-          "time": {
-            "type": "string"
-          }
-        }
-      },
-      "CreateCommentParams": {
-        "type": "object",
-        "required": [
-          "payload"
-        ],
-        "properties": {
-          "payload": {
-            "$ref": "#/components/schemas/CommentActiveModel"
-          }
-        }
-      },
-      "GetStarResponse": {
-        "type": "object",
-        "required": [
-          "total"
-        ],
-        "properties": {
-          "current": {
-            "type": "integer",
-            "format": "int16"
-          },
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "UpdateCommentParams": {
-        "type": "object",
-        "required": [
-          "payload"
-        ],
-        "properties": {
-          "payload": {
-            "$ref": "#/components/schemas/CommentActiveModel"
-          }
-        }
-      },
       "CursorPagination": {
         "type": "object",
         "required": [
@@ -582,6 +521,28 @@
           },
           "has_more": {
             "type": "boolean"
+          }
+        }
+      },
+      "UpdateCommentRespPayload": {
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "properties": {
+          "payload": {
+            "$ref": "#/components/schemas/Comment"
+          }
+        }
+      },
+      "CreateCommentParams": {
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "properties": {
+          "payload": {
+            "$ref": "#/components/schemas/CommentActiveModel"
           }
         }
       },
@@ -610,116 +571,33 @@
           }
         }
       },
-      "GetCommentTreeRespPayload": {
+      "LoginParams": {
         "type": "object",
         "required": [
-          "comments",
-          "users",
-          "pagination"
+          "username",
+          "password"
         ],
         "properties": {
-          "comments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CommentVO"
-            }
+          "username": {
+            "type": "string"
           },
-          "users": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/UserVO"
-            }
-          },
-          "pagination": {
-            "$ref": "#/components/schemas/CursorPagination"
+          "password": {
+            "type": "string"
           }
         }
       },
-      "Comment": {
+      "LoginRespPayload": {
         "type": "object",
         "required": [
-          "id",
-          "belong",
-          "user_id",
-          "content",
-          "parent_id",
-          "child_count",
-          "created_time",
-          "updated_time"
+          "user",
+          "token"
         ],
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
+          "user": {
+            "$ref": "#/components/schemas/UserVO"
           },
-          "belong": {
+          "token": {
             "type": "string"
-          },
-          "user_id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "content": {
-            "type": "string"
-          },
-          "reference_id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "parent_id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "child_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "created_time": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "updated_time": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "CommentActiveModel": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "belong": {
-            "type": "string"
-          },
-          "user_id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "content": {
-            "type": "string"
-          },
-          "reference_id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "parent_id": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "child_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "created_time": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "updated_time": {
-            "type": "integer",
-            "format": "int64"
           }
         }
       },
@@ -772,48 +650,129 @@
           }
         }
       },
-      "LoginParams": {
+      "GetStarResponse": {
         "type": "object",
         "required": [
-          "username",
-          "password"
+          "total"
         ],
         "properties": {
-          "username": {
-            "type": "string"
+          "current": {
+            "type": "integer",
+            "format": "int16"
           },
-          "password": {
-            "type": "string"
+          "total": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
-      "LoginRespPayload": {
+      "CurrentRespPayload": {
         "type": "object",
         "required": [
-          "user",
-          "token"
+          "user"
         ],
         "properties": {
           "user": {
             "$ref": "#/components/schemas/UserVO"
-          },
-          "token": {
-            "type": "string"
           }
         }
       },
-      "RegisterParams": {
+      "CommentActiveModel": {
         "type": "object",
-        "required": [
-          "username",
-          "password"
-        ],
         "properties": {
-          "username": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "belong": {
             "type": "string"
           },
-          "password": {
+          "user_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "content": {
             "type": "string"
+          },
+          "reference_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "parent_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "child_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_time": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updated_time": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "UpdateCommentParams": {
+        "type": "object",
+        "required": [
+          "payload"
+        ],
+        "properties": {
+          "payload": {
+            "$ref": "#/components/schemas/CommentActiveModel"
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "required": [
+          "id",
+          "belong",
+          "user_id",
+          "content",
+          "parent_id",
+          "child_count",
+          "created_time",
+          "updated_time"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "belong": {
+            "type": "string"
+          },
+          "user_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "content": {
+            "type": "string"
+          },
+          "reference_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "parent_id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "child_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "created_time": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "updated_time": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -848,29 +807,14 @@
           }
         }
       },
-      "CreateCommentRespPayload": {
+      "GetTimeResponse": {
         "type": "object",
         "required": [
-          "payload",
-          "user"
+          "time"
         ],
         "properties": {
-          "payload": {
-            "$ref": "#/components/schemas/CommentVO"
-          },
-          "user": {
-            "$ref": "#/components/schemas/UserVO"
-          }
-        }
-      },
-      "CurrentRespPayload": {
-        "type": "object",
-        "required": [
-          "user"
-        ],
-        "properties": {
-          "user": {
-            "$ref": "#/components/schemas/UserVO"
+          "time": {
+            "type": "string"
           }
         }
       },
@@ -891,14 +835,70 @@
           }
         }
       },
-      "UpdateCommentRespPayload": {
+      "CreateCommentRespPayload": {
         "type": "object",
         "required": [
-          "payload"
+          "payload",
+          "user"
         ],
         "properties": {
           "payload": {
-            "$ref": "#/components/schemas/Comment"
+            "$ref": "#/components/schemas/CommentVO"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserVO"
+          }
+        }
+      },
+      "RegisterParams": {
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "UpdateStarReqPayload": {
+        "type": "object",
+        "required": [
+          "star_type"
+        ],
+        "properties": {
+          "star_type": {
+            "type": "integer",
+            "format": "int16"
+          }
+        }
+      },
+      "GetCommentTreeRespPayload": {
+        "type": "object",
+        "required": [
+          "comments",
+          "users",
+          "pagination"
+        ],
+        "properties": {
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CommentVO"
+            }
+          },
+          "users": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserVO"
+            }
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/CursorPagination"
           }
         }
       }

@@ -15,7 +15,12 @@ import { StateType } from "@/common/state";
 import { ConfirmPopover } from "@/components/ConfirmPopover";
 import { showAuthModal, useAuthService } from "../Auth";
 
-export interface CommentProps {
+interface CommentInnerProps {
+  maxHeight?: number;
+  headerSuffix?: React.ReactNode;
+}
+
+export interface CommentProps extends CommentInnerProps {
   belong: string;
 }
 
@@ -34,6 +39,8 @@ const CommentHeaderCount = styled("div")(({ theme }) => ({
   justifyContent: "center",
   alignItems: "center",
 }));
+
+const CommentBody = styled("div")(({ theme }) => ({}));
 
 const CommentUserText = styled(Typography)({
   fontWeight: 550,
@@ -64,7 +71,7 @@ const CommentEmptyText = styled(Typography)(({ theme }) => ({
 }));
 
 const RemoveCommentContentContainer = styled("div")(({ theme }) => ({
-  padding: theme.spacing(1),
+  padding: [theme.spacing(1), theme.spacing(2)],
 }));
 
 const commentInnerContext = React.createContext<{
@@ -219,7 +226,7 @@ const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
   );
 };
 
-const CommentInner = () => {
+const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   const { t } = useTranslation("Comment");
   const commentService = useCommentService();
   const authService = useAuthService();
@@ -263,6 +270,15 @@ const CommentInner = () => {
     [toReply]
   );
 
+  const commentBodyStyle = useMemo(() => {
+    const style: React.CSSProperties = {};
+    if (maxHeight) {
+      style.maxHeight = maxHeight;
+      style.overflowY = "auto";
+    }
+    return style;
+  }, [maxHeight]);
+
   console.debug("[React][Comment]", {
     commentTree,
   });
@@ -271,12 +287,17 @@ const CommentInner = () => {
     <div>
       <commentInnerContext.Provider value={ctxValue}>
         <Stack direction="column" spacing={2}>
-          <Stack direction="row" spacing={1} alignItems="center">
-            <CommentHeaderText>{t("header", { ns: "Comment" })}</CommentHeaderText>
-            <CommentHeaderCount>{commentTree?.pagination.total ?? "-"}</CommentHeaderCount>
+          <Stack direction="row" justifyContent="space-between">
+            <Stack direction="row" spacing={1} alignItems="center">
+              <CommentHeaderText>{t("header", { ns: "Comment" })}</CommentHeaderText>
+              <CommentHeaderCount>{commentTree?.pagination.total ?? "-"}</CommentHeaderCount>
+            </Stack>
+            {headerSuffix}
           </Stack>
-          {!commentTree && <CommentLoading />}
-          {commentTree && <CommentRoots commentTree={commentTree} />}
+          <CommentBody sx={commentBodyStyle}>
+            {!commentTree && <CommentLoading />}
+            {commentTree && <CommentRoots commentTree={commentTree} />}
+          </CommentBody>
           <CommentPost
             expand={commentPostState.expand}
             onExpandChange={handleCommentPostExpandChange}
@@ -288,10 +309,10 @@ const CommentInner = () => {
   );
 };
 
-export const Comment = ({ belong }: CommentProps) => {
+export const Comment = ({ belong, ...leftProps }: CommentProps) => {
   return (
     <CommentProvider args={[belong]}>
-      <CommentInner />
+      <CommentInner {...leftProps} />
     </CommentProvider>
   );
 };

@@ -81,8 +81,9 @@ module.exports = {
   devServer: {
     hot: true,
     historyApiFallback: true,
+    port: 3000,
     proxy: {
-      "/keekijanai": "http://127.0.0.1:3000",
+      "/api/keekijanai": "http://127.0.0.1:3001",
     },
   },
 };

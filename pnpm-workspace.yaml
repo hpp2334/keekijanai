@@ -2,4 +2,5 @@ packages:
   - "packages/keekijanai-frontend-core"
   - "packages/keekijanai-frontend-toolkit"
   - "packages/keekijanai-react"
+  - "packages/keekijanai-react-dev-demo"
   - "packages/keekijanai-gatsby-vercel-demo"

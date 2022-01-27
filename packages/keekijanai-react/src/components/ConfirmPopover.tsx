@@ -1,6 +1,7 @@
 import { useRemote } from "@/common/hooks/useRemote";
 import { StateType } from "@/common/state";
 import React, { useCallback, useState } from "react";
+import { Stack } from ".";
 import { Button, Popover, PopoverProps } from "./reexport-mui";
 
 export interface ConfirmPopoverProps extends Pick<PopoverProps, "anchorOrigin" | "transformOrigin"> {
@@ -68,14 +69,14 @@ export const ConfirmPopover: React.ComponentType<ConfirmPopoverProps> = ({
         onClose={handleClickCancel}
       >
         {children}
-        <div>
+        <Stack direction="row" justifyContent="flex-end">
           <Button disabled={okState.type === StateType.Loading} color="inherit" onClick={handleClickCancel}>
             {texts?.cancel ?? "Cancel"}
           </Button>
           <Button disabled={okState.type === StateType.Loading} onClick={handleClickOk}>
             {texts?.ok ?? "Ok"}
           </Button>
-        </div>
+        </Stack>
       </Popover>
     </>
   );

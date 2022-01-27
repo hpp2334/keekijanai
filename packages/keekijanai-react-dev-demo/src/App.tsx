@@ -29,8 +29,7 @@ const Main = () => {
         <Star belong={belong} />
         <Stat belong={belong} />
       </div>
-      <AuthAvatar />
-      <Comment belong={belong} />
+      <Comment belong={belong} maxHeight={600} headerSuffix={<AuthAvatar />} />
     </div>
   );
 };
@@ -50,11 +49,11 @@ const Callback = () => {
 
 export const App = () => {
   return (
-    <div style={{ margin: 100 }}>
+    <div style={{ margin: 10 }}>
       <KeekijanaiProvider>
         <Router>
           <Routes>
-            <Route path="/oauth2/callback" element={<Callback />} />
+            <Route path="/callback" element={<Callback />} />
             <Route path="/p/:belong" element={<Main />} />
             <Route path="*" element={<Home />} />
           </Routes>

@@ -11,13 +11,15 @@ pub async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
     keekijanai_serve_core::init().await;
 
-    write_keekijanai_openapi_spec("src/keekijanai-frontend-core/src/generated/keekijanai-api.json")
-        .await
-        .unwrap();
+    write_keekijanai_openapi_spec(
+        "packages/keekijanai-frontend-core/src/generated/keekijanai-api.json",
+    )
+    .await
+    .unwrap();
 
     let app = get_keekijanai_endpoint();
 
-    poem::Server::new(TcpListener::bind("127.0.0.1:3000"))
+    poem::Server::new(TcpListener::bind("127.0.0.1:3001"))
         .run(app)
         .await?;
 
