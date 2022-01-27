@@ -105,10 +105,13 @@ export class CommentService {
           const index = commentTree.data.findIndex((comment) => comment.id === id);
           if (index >= 0) {
             commentTree.data.splice(index, 1);
+            commentTree.pagination.total -= 1;
           }
         } else {
           const index = parent.children.data.findIndex((comment) => comment.id === id);
           parent.children.data.splice(index, 1);
+          parent.child_count -= 1;
+          parent.children.pagination.total -= 1;
         }
         this.commentTree$.next({ ...commentTree });
       })
