@@ -1261,7 +1261,7 @@ dependencies = [
 
 [[package]]
 name = "keekijanai-serve-core"
-version = "0.1.0"
+version = "0.1.0-alpha.0"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1299,7 +1299,7 @@ dependencies = [
 
 [[package]]
 name = "keekijanai-serve-resp-err"
-version = "0.1.0"
+version = "0.1.0-alpha.0"
 dependencies = [
  "poem",
  "serde 1.0.130",
@@ -1307,7 +1307,7 @@ dependencies = [
 
 [[package]]
 name = "keekijanai-serve-resp-err-macro"
-version = "0.1.0"
+version = "0.1.0-alpha.0"
 dependencies = [
  "keekijanai-serve-resp-err",
  "quote 1.0.10",
@@ -1336,7 +1336,7 @@ dependencies = [
 
 [[package]]
 name = "keekijanai-serve-vercel-adapter"
-version = "0.1.0"
+version = "0.1.0-alpha.0"
 dependencies = [
  "http 0.1.21",
  "keekijanai-serve-core",

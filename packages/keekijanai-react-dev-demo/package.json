@@ -3,7 +3,7 @@
   "version": "0.3.0",
   "description": "",
   "main": "index.js",
-  "private": "true",
+  "private": true,
   "scripts": {
     "serve": "webpack serve",
     "build": "NODE_ENV=BUILD webpack build"
