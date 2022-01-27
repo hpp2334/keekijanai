@@ -1,18 +1,12 @@
-[package]
-name = "keekijanai-v3"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
 members = [
-  "src/keekijanai-serve-resp-err",
-  "src/keekijanai-serve-resp-err-macro",
-  "src/keekijanai-serve-core",
-  "src/keekijanai-serve-vercel-adapter",
-  "src/keekijanai-serve-rust-server-demo"
+  "packages/keekijanai-serve-resp-err",
+  "packages/keekijanai-serve-resp-err-macro",
+  "packages/keekijanai-serve-core",
+  "packages/keekijanai-serve-vercel-adapter",
+  "packages/keekijanai-serve-rust-server-demo"
 ]
 exclude = [
-  "src/keekijanai-gatsby-vercel-demo/api"
+  "packages/keekijanai-gatsby-vercel-demo/api"
 ]

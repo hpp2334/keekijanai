@@ -1,5 +1,5 @@
 packages:
-  - "src/keekijanai-frontend-core"
-  - "src/keekijanai-frontend-toolkit"
-  - "src/keekijanai-react"
-  - "src/keekijanai-gatsby-vercel-demo"
+  - "packages/keekijanai-frontend-core"
+  - "packages/keekijanai-frontend-toolkit"
+  - "packages/keekijanai-react"
+  - "packages/keekijanai-gatsby-vercel-demo"
