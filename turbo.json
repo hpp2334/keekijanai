@@ -1,0 +1,7 @@
+{
+  "baseBranch": "origin/feature-v3-dev",
+  "pipeline": {
+    "build:prod": {
+    }
+  }
+}

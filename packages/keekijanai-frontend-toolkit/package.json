@@ -2,7 +2,7 @@
   "name": "@keekijanai/frontend-toolkit",
   "version": "0.3.0-alpha.0",
   "description": "",
-  "private": "true",
+  "private": true,
   "main": "index.js",
   "bin": {
     "kkft": "./dist/cli.js"

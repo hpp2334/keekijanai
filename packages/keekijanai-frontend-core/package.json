@@ -1,7 +1,6 @@
 {
   "name": "@keekijanai/frontend-core",
   "version": "0.3.0-alpha.3",
-  "private": true,
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,7 +8,7 @@
     "prepare": "ts-patch install -s",
     "clean": "rm -rf ./dist",
     "build:dev": "kkft build",
-    "build:prod": "kkft build -e prod",
+    "build:prod": "kkft build -e prod & pnpm run build:types",
     "build:types": "tsc --emitDeclarationOnly",
     "sync:api": "swagger-typescript-api -p ./src/generated/keekijanai-api.json -o ./src/generated -n keekijanai-api.ts --no-client"
   },
