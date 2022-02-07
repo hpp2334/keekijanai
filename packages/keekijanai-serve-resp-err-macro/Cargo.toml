@@ -2,6 +2,8 @@
 name = "keekijanai-serve-resp-err-macro"
 version = "0.1.0-alpha.0"
 edition = "2021"
+description = "No description"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,4 +13,4 @@ proc-macro = true
 [dependencies]
 syn = "1.0"
 quote = "1.0"
-keekijanai-serve-resp-err = { path = "../keekijanai-serve-resp-err" }
+keekijanai-serve-resp-err = { version = "0.1.0-alpha.0", path = "../keekijanai-serve-resp-err" }
