@@ -10,7 +10,8 @@ export const ajax = <T, C>(config: AxiosRequestConfig<C>): Observable<AxiosRespo
   const subject = new Subject<AxiosResponse<T, C>>();
 
   if (keekijanaiConfig.queryRoute) {
-    const params = (config.params ??= {});
+    const params = config.params ?? {};
+    config.params = params;
     params.query_route = config.url;
     config.url = "";
   }

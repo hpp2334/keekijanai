@@ -3,11 +3,7 @@ import React from "react";
 import { KeekijanaiProvider, OAuth2CallbackRedirect } from "@keekijanai/react";
 
 function Callback() {
-  return (
-    <KeekijanaiProvider>
-      <OAuth2CallbackRedirect />
-    </KeekijanaiProvider>
-  );
+  return <OAuth2CallbackRedirect />;
 }
 
 export default Callback;

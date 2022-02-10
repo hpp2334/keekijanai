@@ -7,18 +7,16 @@ function Index() {
   const belong = "/";
 
   return (
-    <KeekijanaiProvider queryRoute={true}>
-      <main>
-        <div>
-          <div style={{ display: "flex" }}>
-            <Star belong={belong} />
-            <Stat belong={belong} />
-          </div>
-          <AuthAvatar />
-          <Comment belong={belong} />
+    <main>
+      <div>
+        <div style={{ display: "flex" }}>
+          <Star belong={belong} />
+          <Stat belong={belong} />
         </div>
-      </main>
-    </KeekijanaiProvider>
+        <AuthAvatar />
+        <Comment belong={belong} />
+      </div>
+    </main>
   );
 }
 
