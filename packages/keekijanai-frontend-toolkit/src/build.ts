@@ -64,7 +64,7 @@ const calcCopyInfo = (sources: string[], destDir: string): Array<FileInfo> => {
   return info;
 };
 
-const build = async (params: { fileInfos: FileInfo[] }) => {
+const build = async (params: { fileInfos: FileInfo[]; isProd: boolean }) => {
   await Promise.all(
     params.fileInfos.map(async (info) => {
       const res = await babel.transformFileAsync(info.absoluteSource, {
@@ -95,6 +95,7 @@ const build = async (params: { fileInfos: FileInfo[] }) => {
           ],
           "babel-plugin-transform-typescript-metadata",
           ["@babel/plugin-proposal-decorators", { legacy: true }],
+          !params.isProd ? [] : ["transform-remove-console", { exclude: ["error", "warn"] }],
         ],
       });
       if (res && res.code !== null && res.code !== undefined) {
@@ -123,6 +124,7 @@ program
     await Promise.all([
       build({
         fileInfos: toCompileFileInfos,
+        isProd: env === "prod",
       }),
       skipCompileFileInfos.map(async (info) => {
         const dir = path.dirname(info.absoluteDest);

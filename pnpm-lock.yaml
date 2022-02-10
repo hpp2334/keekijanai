@@ -78,6 +78,7 @@ importers:
       '@types/babel__core': ^7.1.18
       '@types/node': ^17.0.4
       babel-plugin-module-resolver: ^4.1.0
+      babel-plugin-transform-remove-console: ^6.9.4
       babel-plugin-transform-typescript-metadata: ^0.3.2
       commander: ^8.3.0
       esbuild-plugin-alias: ^0.2.1
@@ -94,6 +95,7 @@ importers:
       '@types/babel__core': 7.1.18
       '@types/node': 17.0.12
       babel-plugin-module-resolver: 4.1.0
+      babel-plugin-transform-remove-console: 6.9.4
       babel-plugin-transform-typescript-metadata: 0.3.2
       commander: 8.3.0
       esbuild-plugin-alias: 0.2.1
@@ -3885,6 +3887,10 @@ packages:
   /babel-plugin-transform-react-remove-prop-types/0.4.24:
     resolution: {integrity: sha512-eqj0hVcJUR57/Ug2zE1Yswsw4LhuqqHhD+8v120T1cl3kjg76QwtyBrdIk4WVwK+lAhBJVYCd/v+4nc4y+8JsA==}
     dev: false
+
+  /babel-plugin-transform-remove-console/6.9.4:
+    resolution: {integrity: sha1-uYA2DAZzhOJLNXpYjYB9PINSd4A=}
+    dev: true
 
   /babel-plugin-transform-typescript-metadata/0.3.2:
     resolution: {integrity: sha512-mWEvCQTgXQf48yDqgN7CH50waTyYBeP2Lpqx4nNWab9sxEpdXVeKgfj1qYI2/TgUPQtNFZ85i3PemRtnXVYYJg==}
