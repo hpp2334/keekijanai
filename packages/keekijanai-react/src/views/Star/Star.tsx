@@ -1,3 +1,4 @@
+import { withNoSSR } from "@/common/hoc/withNoSSR";
 import { useService } from "@/common/service/useService";
 import { IconButton, styled, Statical } from "@/components";
 import { AuthService, StarService, StarType } from "@keekijanai/frontend-core";
@@ -35,7 +36,7 @@ const starConfig = [
   },
 ];
 
-export const Star = ({ belong }: StarProps) => {
+export const Star = withNoSSR(({ belong }: StarProps) => {
   const authService = useService(AuthService);
   const starService = useService(StarService, belong);
 
@@ -70,4 +71,4 @@ export const Star = ({ belong }: StarProps) => {
       </div>
     </StarContainer>
   );
-};
+});

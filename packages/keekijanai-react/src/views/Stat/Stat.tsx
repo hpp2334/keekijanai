@@ -3,6 +3,7 @@ import { useService } from "@/common/service";
 import React from "react";
 import { useObservableEagerState } from "observable-hooks";
 import { Statical, styled, Tooltip } from "@/components";
+import { withNoSSR } from "@/common/hoc/withNoSSR";
 
 export interface StatProps {
   belong: string;
@@ -26,7 +27,7 @@ const StatTitle = styled("div")(({ theme }) => ({
   alignItems: "center",
 }));
 
-export const Stat = ({ belong }: StatProps) => {
+export const Stat = withNoSSR(({ belong }: StatProps) => {
   const service = useService(StatService, belong);
   const visit = useObservableEagerState(service.visit$);
 
@@ -42,4 +43,4 @@ export const Stat = ({ belong }: StatProps) => {
       <StatTitle>VIEWS</StatTitle>
     </StatContainer>
   );
-};
+});

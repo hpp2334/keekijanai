@@ -115,7 +115,7 @@ program
     const inputGlob = opts.input;
     const outputDir = path.resolve(process.cwd(), opts.outputDir);
 
-    const filePaths = await glob.promise(inputGlob);
+    const filePaths = await glob.promise(inputGlob).then((paths) => paths.filter((p) => !p.endsWith(".d.ts")));
     const copyInfo = calcCopyInfo(filePaths, outputDir);
 
     const [toCompileFileInfos, skipCompileFileInfos] = group(copyInfo, (p) => /\.tsx?$/.test(p.source));

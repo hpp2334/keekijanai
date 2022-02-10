@@ -1,4 +1,5 @@
 import { isNil } from "lodash-es";
+import * as localStorageMemory from "localstorage-memory";
 
 interface LocalStoreEntryOptions {
   // ttl in ms
@@ -11,7 +12,7 @@ interface InternalSchema<T> {
 }
 
 const now = () => Date.now();
-const localStorage = typeof window !== "undefined" ? window.localStorage : ({} as Storage);
+const localStorage = typeof window !== "undefined" ? window.localStorage : (localStorageMemory as Storage);
 
 export const LocalStoreEntryKey = (key: string) => "keekijanai-local-store/" + key;
 

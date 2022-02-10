@@ -14,6 +14,7 @@ import { useRemote } from "@/common/hooks/useRemote";
 import { StateType } from "@/common/state";
 import { ConfirmPopover } from "@/components/ConfirmPopover";
 import { showAuthModal, useAuthService } from "../Auth";
+import { withNoSSR } from "@/common/hoc/withNoSSR";
 
 interface CommentInnerProps {
   maxHeight?: number;
@@ -309,10 +310,10 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   );
 };
 
-export const Comment = ({ belong, ...leftProps }: CommentProps) => {
+export const Comment = withNoSSR(({ belong, ...leftProps }: CommentProps) => {
   return (
     <CommentProvider args={[belong]}>
       <CommentInner {...leftProps} />
     </CommentProvider>
   );
-};
+});

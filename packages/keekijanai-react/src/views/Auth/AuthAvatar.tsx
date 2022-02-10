@@ -7,13 +7,14 @@ import { Menu, MenuItem, MenuProps } from "@/components";
 import { showAuthModal } from "./AuthModal";
 import { useAuthService } from "./provider";
 import { useTranslation } from "react-i18next";
+import { withNoSSR } from "@/common/hoc/withNoSSR";
 
 export interface AuthAvatarProps {
   anchorOrigin?: MenuProps["anchorOrigin"];
   transformOrigin?: MenuProps["transformOrigin"];
 }
 
-export const AuthAvatar = ({ anchorOrigin, transformOrigin }: AuthAvatarProps) => {
+export const AuthAvatar = withNoSSR(({ anchorOrigin, transformOrigin }: AuthAvatarProps) => {
   const { t } = useTranslation("Auth");
   const ref = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -60,4 +61,4 @@ export const AuthAvatar = ({ anchorOrigin, transformOrigin }: AuthAvatarProps) =
       </Menu>
     </>
   );
-};
+});
