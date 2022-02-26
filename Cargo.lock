@@ -1264,7 +1264,7 @@ dependencies = [
 
 [[package]]
 name = "keekijanai-serve-core"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1340,7 +1340,7 @@ dependencies = [
 
 [[package]]
 name = "keekijanai-serve-vercel-adapter"
-version = "0.1.0-alpha.1"
+version = "0.1.0-alpha.2"
 dependencies = [
  "http 0.1.21",
  "keekijanai-serve-core",

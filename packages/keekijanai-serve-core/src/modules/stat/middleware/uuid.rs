@@ -1,7 +1,6 @@
 use async_trait::async_trait;
 use poem::{web::cookie::Cookie, Endpoint, Middleware, Request};
 
-
 use std::fmt::Debug;
 
 const UUID_COOKIE_NAME: &'static str = "_keekijanai_uuid";
@@ -36,7 +35,11 @@ impl<E: Endpoint> Endpoint for UuidMiddlewareImpl<E> {
         let cookie = cookiejar.get(UUID_COOKIE_NAME);
         if cookie.is_none() {
             let uuid = uuid::Uuid::new_v4();
-            cookiejar.add(Cookie::new(UUID_COOKIE_NAME, uuid.to_string()));
+            let mut cookie = Cookie::new_with_str(UUID_COOKIE_NAME, uuid.to_string());
+            cookie.make_permanent();
+            cookie.set_path("/");
+            cookie.set_http_only(true);
+            cookiejar.add(cookie);
         }
         tracing::debug!("before call req");
         self.ep.call(req).await
