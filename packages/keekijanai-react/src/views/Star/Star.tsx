@@ -1,5 +1,4 @@
 import { withNoSSR } from "@/common/hoc/withNoSSR";
-import { useService } from "@/common/service/useService";
 import { IconButton, styled, Statical } from "@/components";
 import { AuthService, StarService, StarType } from "@keekijanai/frontend-core";
 import {
@@ -10,6 +9,8 @@ import {
 import { useObservableEagerState } from "observable-hooks";
 import { useCallback } from "react";
 import { showAuthModal } from "..";
+import { useInternalAuthContext } from "../Auth/Context";
+import { useStarService } from "./logic";
 
 export interface StarProps {
   belong: string;
@@ -37,8 +38,8 @@ const starConfig = [
 ];
 
 export const Star = withNoSSR(({ belong }: StarProps) => {
-  const authService = useService(AuthService);
-  const starService = useService(StarService, belong);
+  const { authService } = useInternalAuthContext();
+  const starService = useStarService(belong);
 
   const star = useObservableEagerState(starService.current$);
 

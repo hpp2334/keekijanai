@@ -1,53 +1,33 @@
 import { axiosInstance } from "@/core/request";
-import { OnInit } from "@/core/service";
+import { container } from "@/core/container";
 import { ElementRef } from "@/utils/element-ref";
 import { LocalStoreEntry, LocalStoreEntryKey } from "@/utils/local-store";
 import { switchTap } from "@/utils/rxjs-helper";
-import { isNil } from "lodash-es";
+import { isNil } from "@/utils/common";
 import { BehaviorSubject, catchError, Observable, of, switchMap, throwError } from "rxjs";
-import { singleton } from "tsyringe";
+import { injectable, postConstruct } from "inversify";
 import { AuthApi } from "./api";
 import * as Data from "./data";
+import { Service } from "@/core/service";
+import { GlobalService } from "../global";
 
-const tokenKey = LocalStoreEntryKey("auth-token");
+const TOKEN_KEY = LocalStoreEntryKey("auth-token");
 
-@singleton()
-export class AuthService implements OnInit {
-  private token$: BehaviorSubject<string | null>;
-  private tokenStoreEntry: LocalStoreEntry<string>;
-  public current$: BehaviorSubject<Data.UserVO | null>;
+@injectable()
+export class AuthService implements Service {
+  private token$ = new BehaviorSubject<string | null>(null);
+  private tokenStoreEntry = new LocalStoreEntry<string>(TOKEN_KEY, {
+    ttl: 86400 * 1000,
+  });
+  public current$ = new BehaviorSubject<Data.UserVO | null>(null);
 
   public get token() {
     return this.token$.getValue();
   }
 
-  public constructor(private api: AuthApi) {
-    this.current$ = new BehaviorSubject<Data.UserVO | null>(null);
+  public constructor(private globalService: GlobalService, private api: AuthApi) {}
 
-    this.token$ = new BehaviorSubject<string | null>(null);
-    this.tokenStoreEntry = new LocalStoreEntry(tokenKey, {
-      ttl: 86400 * 1000,
-    });
-    const token = this.tokenStoreEntry.get();
-    console.debug("[auth][constructor]", { token });
-    this.token$.next(token);
-  }
-
-  public initialize() {
-    axiosInstance.interceptors.request.use((reqConfig) => {
-      const token = this.token;
-      console.debug("[auth][axios.interceptors]", { url: reqConfig.url, token });
-      if (!isNil(token)) {
-        reqConfig.headers = {
-          ...(reqConfig.headers ?? {}),
-          Authorization: token,
-        };
-      }
-
-      return reqConfig;
-    });
-    this.updateCurrent().subscribe();
-  }
+  public destroy: (() => void) | undefined = undefined;
 
   public isLogin() {
     return this.current$.value !== null;
@@ -109,6 +89,31 @@ export class AuthService implements OnInit {
     );
   }
 
+  @postConstruct()
+  private postConstruct() {
+    const token = this.tokenStoreEntry.get();
+    console.debug("[auth][constructor]", { token });
+    this.token$.next(token);
+    this.updateCurrent().subscribe();
+
+    this.registerRequestInterceptorToken();
+  }
+
+  private registerRequestInterceptorToken() {
+    axiosInstance.interceptors.request.use((reqConfig) => {
+      const token = this.token;
+      console.debug("[auth][axios.interceptors]", { url: reqConfig.url, token });
+      if (!isNil(token)) {
+        reqConfig.headers = {
+          ...(reqConfig.headers ?? {}),
+          Authorization: token,
+        };
+      }
+
+      return reqConfig;
+    });
+  }
+
   private updateToken(token: string): Observable<unknown> {
     console.debug("[auth][updateToken]", { token });
     this.token$.next(token);
@@ -122,3 +127,5 @@ export class AuthService implements OnInit {
     return of(null);
   }
 }
+
+container.bind(AuthService).toSelf().inSingletonScope();

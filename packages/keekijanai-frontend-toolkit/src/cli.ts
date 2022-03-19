@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import "./build";
+import "./bundle-analyse";
 
 import { program } from "commander";
 

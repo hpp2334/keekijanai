@@ -19,8 +19,8 @@
     "@keekijanai/frontend-toolkit": "workspace:*",
     "@swc/cli": "^0.1.55",
     "@swc/core": "^1.2.124",
-    "@types/lodash-es": "^4.17.5",
     "@types/node": "^17.0.4",
+    "reflect-metadata": "^0.1.13",
     "swagger-typescript-api": "^9.3.1",
     "ts-node": "^10.4.0",
     "ts-patch": "^2.0.1",
@@ -32,9 +32,8 @@
     "@swc/helpers": "^0.3.2",
     "axios": "^0.24.0",
     "date-fns": "^2.28.0",
+    "inversify": "^6.0.1",
     "localstorage-memory": "^1.0.3",
-    "lodash-es": "^4.17.21",
-    "rxjs": "^7.4.0",
-    "tsyringe": "^4.6.0"
+    "rxjs": "^7.4.0"
   }
 }

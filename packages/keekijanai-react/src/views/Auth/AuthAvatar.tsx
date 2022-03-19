@@ -1,11 +1,9 @@
-import { useService } from "@/common/service/useService";
-import { AuthService } from "@keekijanai/frontend-core";
 import { Avatar, IconButton } from "@mui/material";
 import { useObservableEagerState } from "observable-hooks";
 import { useCallback, useRef, useState } from "react";
 import { Menu, MenuItem, MenuProps } from "@/components";
 import { showAuthModal } from "./AuthModal";
-import { useAuthService } from "./provider";
+import { useAuthService } from "./logic";
 import { useTranslation } from "react-i18next";
 import { withNoSSR } from "@/common/hoc/withNoSSR";
 

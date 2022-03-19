@@ -1,7 +1,7 @@
 import { sleep } from "@/utils/common";
 import { switchTap } from "@/utils/rxjs-helper";
 import { BehaviorSubject, Observable, of, switchMap } from "rxjs";
-import { singleton } from "tsyringe";
+import { injectable } from "inversify";
 import { TimeApi } from "./api";
 
 interface LatestGetNow {
@@ -11,7 +11,7 @@ interface LatestGetNow {
     afterReq: number;
   };
 }
-@singleton()
+@injectable()
 export class TimeService {
   public now$: BehaviorSubject<number>;
   private latestGetNow: LatestGetNow | null = null;

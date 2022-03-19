@@ -1,7 +1,9 @@
+/// <reference types="reflect-metadata" />
+
 export * from "./modules";
 export * from "./core/request/type";
 export { keekijanaiConfig } from "./core/config";
+export * from "./utils/common";
 export * from "./utils/rxjs-helper";
 
-export { createService, destoryService } from "./core/service";
-export type { OnInit } from "./core/service";
+export { createService, type Service, type ServiceFactory } from "./core/service";

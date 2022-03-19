@@ -6,7 +6,7 @@ import FormatItalicOutlinedIcon from "@mui/icons-material/FormatItalicOutlined";
 import FormatUnderlinedOutlinedIcon from "@mui/icons-material/FormatUnderlinedOutlined";
 import StrikethroughSOutlinedIcon from "@mui/icons-material/StrikethroughSOutlined";
 import { ToolbarButton } from "./ToolbarButton";
-import { partial } from "lodash-es";
+import { partial } from "@keekijanai/frontend-core";
 
 export type ToolbarStore = GetSetEditorState;
 

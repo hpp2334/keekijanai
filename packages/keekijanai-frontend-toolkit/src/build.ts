@@ -4,6 +4,7 @@ import * as glob from "glob-promise";
 import * as fs from "fs/promises";
 import { existsSync } from "fs";
 import * as babel from "@babel/core";
+import { getBabelConfig } from "./get-babel-config";
 
 interface BuildOptions {
   environment?: "prod" | "dev";
@@ -67,37 +68,13 @@ const calcCopyInfo = (sources: string[], destDir: string): Array<FileInfo> => {
 const build = async (params: { fileInfos: FileInfo[]; isProd: boolean }) => {
   await Promise.all(
     params.fileInfos.map(async (info) => {
-      const res = await babel.transformFileAsync(info.absoluteSource, {
-        presets: [
-          [
-            "@babel/preset-react",
-            {
-              runtime: "automatic",
-            },
-          ],
-          [
-            "@babel/preset-typescript",
-            {
-              isTSX: info.source.endsWith(".tsx"),
-              allExtensions: true,
-            },
-          ],
-        ],
-        plugins: [
-          [
-            require.resolve("babel-plugin-module-resolver"),
-            {
-              root: ["./src"],
-              alias: {
-                "@": "./src",
-              },
-            },
-          ],
-          "babel-plugin-transform-typescript-metadata",
-          ["@babel/plugin-proposal-decorators", { legacy: true }],
-          !params.isProd ? [] : ["transform-remove-console", { exclude: ["error", "warn"] }],
-        ],
-      });
+      const res = await babel.transformFileAsync(
+        info.absoluteSource,
+        getBabelConfig({
+          isTSX: info.source.endsWith(".tsx"),
+          isProd: params.isProd,
+        })
+      );
       if (res && res.code !== null && res.code !== undefined) {
         const dest = info.absoluteDest.replace(/\.ts(x?)$/, ".js$1");
         await smartWriteFile(dest, res.code);

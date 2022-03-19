@@ -1,10 +1,11 @@
-import { singleton } from "tsyringe";
+import { injectable } from "inversify";
 import type * as ApiTypes from "@/generated/keekijanai-api";
 import { ajax } from "@/core/request";
 import { Observable } from "rxjs";
 import { AxiosResponse } from "axios";
+import { container } from "@/core/container";
 
-@singleton()
+@injectable()
 export class TimeApi {
   public now(): Observable<AxiosResponse<ApiTypes.GetTimeResponse>> {
     return ajax({
@@ -12,3 +13,5 @@ export class TimeApi {
     });
   }
 }
+
+container.bind(TimeApi).toSelf().inSingletonScope();

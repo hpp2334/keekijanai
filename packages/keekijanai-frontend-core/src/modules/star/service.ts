@@ -1,27 +1,17 @@
 import { switchTap } from "@/utils/rxjs-helper";
-import { callInit, OnInit } from "@/core/service";
+import { Service, ServiceFactory, serviceFactory } from "@/core/service";
 import { BehaviorSubject, catchError, Observable, of, switchMapTo } from "rxjs";
-import { injectable } from "tsyringe";
+import { injectable, postConstruct } from "inversify";
 import { StarApi } from "./api";
 import { Star, StarType } from "./data";
 import { AuthService } from "../auth";
 
-@injectable()
-export class StarService implements OnInit<[string]> {
-  public belong!: string;
-  public current$: BehaviorSubject<Star | null>;
+export class StarService implements Service {
+  public destroy?: (() => void) | undefined = undefined;
 
-  public constructor(private _authService: AuthService, private api: StarApi) {
-    callInit(_authService);
+  public current$ = new BehaviorSubject<Star | null>(null);
 
-    this.current$ = new BehaviorSubject<Star | null>(null);
-  }
-
-  public initialize(belong: string) {
-    this.belong = belong;
-
-    this.updateCurrent().subscribe();
-  }
+  public constructor(private _authService: AuthService, private api: StarApi, public belong: string) {}
 
   public updateCurrent(): Observable<unknown> {
     return this.api.getCurrent(this.belong).pipe(
@@ -56,6 +46,11 @@ export class StarService implements OnInit<[string]> {
     );
   }
 
+  @postConstruct()
+  private postConstruct() {
+    this.updateCurrent().subscribe();
+  }
+
   private offlineReduceStar(nextStarType: StarType): Observable<unknown> {
     if (this.current$ === null) {
       return of(null);
@@ -85,5 +80,15 @@ export class StarService implements OnInit<[string]> {
       default:
         return 0;
     }
+  }
+}
+
+@injectable()
+@serviceFactory()
+export class StarServiceFactory implements ServiceFactory<[string], StarService> {
+  public constructor(private _authService: AuthService, private api: StarApi) {}
+
+  public factory(belong: string) {
+    return new StarService(this._authService, this.api, belong);
   }
 }

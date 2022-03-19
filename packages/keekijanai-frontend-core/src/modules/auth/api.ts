@@ -1,11 +1,12 @@
-import { singleton } from "tsyringe";
+import { injectable } from "inversify";
 import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable, of, switchMap } from "rxjs";
 import { AxiosResponse } from "axios";
 import { ElementRef } from "@/utils/element-ref";
+import { container } from "@/core/container";
 
-@singleton()
+@injectable()
 export class AuthApi {
   public legacyLogin(params: Data.LoginParams): Observable<AxiosResponse<Data.LoginRespPayload>> {
     return ajax({
@@ -39,3 +40,5 @@ export class AuthApi {
     );
   }
 }
+
+container.bind(AuthApi).toSelf();

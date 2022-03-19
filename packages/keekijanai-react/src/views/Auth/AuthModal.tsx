@@ -4,8 +4,8 @@ import React, { useEffect, useMemo } from "react";
 import NiceModal, { useModal } from "@ebay/nice-modal-react";
 import { sprintf } from "sprintf-js";
 import GitHubIcon from "@mui/icons-material/GitHub";
-import { useService } from "@/common/service/useService";
 import { AuthService, OAuth2 } from "@keekijanai/frontend-core";
+import { useInternalAuthContext } from "./Context";
 
 const OAuth2ButtonRoot = styled("button")(({ theme }) => ({
   cursor: "pointer",
@@ -50,7 +50,7 @@ interface AuthModalProps {
 
 const AuthModalContent = () => {
   const { t } = useTranslation("Auth");
-  const authService = useService(AuthService);
+  const { authService } = useInternalAuthContext();
 
   const githubElRef = useMemo(() => authService.createOAuth2LoginRef(OAuth2.Provider.Github), [authService]);
 

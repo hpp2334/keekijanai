@@ -1,10 +1,10 @@
-import { singleton } from "tsyringe";
+import { injectable } from "inversify";
 import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable } from "rxjs";
 import { AxiosResponse } from "axios";
 
-@singleton()
+@injectable()
 export class StarApi {
   public getCurrent(belong: string): Observable<AxiosResponse<Data.GetStarResponse>> {
     return ajax({

@@ -2,17 +2,16 @@ import type React from "react";
 import NiceModal from "@ebay/nice-modal-react";
 import { I18nProvider } from "../i18n/provider";
 import { ScopedCssBaseline } from "@/components";
-import _ from "lodash-es";
 import { useEffect, useLayoutEffect } from "react";
-import { AuthProvider } from "@/views";
-import { EMPTY_LIST } from "../helper";
+import { AuthContext } from "@/views";
+import { EMPTY_LIST, once } from "../helper";
 import { keekijanaiConfig } from "@keekijanai/frontend-core";
 
 interface KeekijanaiProviderProps {
   queryRoute?: boolean;
 }
 
-const initialize = _.once(() => {
+const initialize = once(() => {
   if (typeof document !== "undefined" && typeof window !== "undefined") {
     const createRobotFontLinkEl = () => {
       const el = document.createElement("link");
@@ -36,9 +35,9 @@ export const KeekijanaiProvider: React.FC<KeekijanaiProviderProps> = ({ queryRou
   return (
     <ScopedCssBaseline>
       <NiceModal.Provider>
-        <AuthProvider args={EMPTY_LIST}>
+        <AuthContext>
           <I18nProvider>{children}</I18nProvider>
-        </AuthProvider>
+        </AuthContext>
       </NiceModal.Provider>
     </ScopedCssBaseline>
   );

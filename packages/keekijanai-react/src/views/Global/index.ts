@@ -1,0 +1,1 @@
+export { useGlobalService } from "./logic";

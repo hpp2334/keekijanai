@@ -1,13 +1,13 @@
-import { singleton } from "tsyringe";
+import { injectable } from "inversify";
 import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable, of, switchMap } from "rxjs";
 import { AxiosResponse } from "axios";
-import { keyBy, omit } from "lodash-es";
+import { keyBy, omit } from "@/utils/common";
 import { UserVO, CommentVO } from "@/generated/keekijanai-api";
 import { StyledCommentVO } from "./data";
 
-@singleton()
+@injectable()
 export class CommentApi {
   public list(query?: Data.ListCommentQuery) {
     return ajax<Data.ListCommentRespPayload, unknown>({

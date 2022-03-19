@@ -1,9 +1,9 @@
 import React from "react";
 import { format, formatDistance } from "date-fns";
-import { useService } from "@/common/service";
 import { TimeService } from "@keekijanai/frontend-core";
 import { useObservableEagerState } from "observable-hooks";
 import { Typography, Tooltip, styled } from "@/components";
+import { useTimeService } from "../Time/logic";
 
 export interface CommentTimeProps {
   timestamp: number;
@@ -15,7 +15,7 @@ const StyledDistanceText = styled(Typography)(({ theme }) => ({
 }));
 
 export const CommentTime = ({ timestamp }: CommentTimeProps) => {
-  const timeService = useService(TimeService);
+  const timeService = useTimeService();
   const nowTimestamp = useObservableEagerState(timeService.now$);
 
   const distanceTimeText = formatDistance(timestamp, nowTimestamp);

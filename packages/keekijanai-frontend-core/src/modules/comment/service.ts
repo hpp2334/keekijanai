@@ -1,12 +1,14 @@
 import { CursorPagination } from "@/generated/keekijanai-api";
 import { assert } from "@/utils/assert";
 import { switchTap } from "@/utils/rxjs-helper";
-import { omit, noop } from "lodash-es";
+import { omit, noop } from "@/utils/common";
 import { BehaviorSubject, catchError, Observable, of, switchMap, switchMapTo } from "rxjs";
-import { injectable } from "tsyringe";
+import { injectable, postConstruct } from "inversify";
 import { AuthService, UserRole } from "../auth";
 import { CommentApi } from "./api";
 import * as Data from "./data";
+import { container } from "@/core/container";
+import { Service, ServiceFactory, serviceFactory } from "@/core/service";
 
 const DEFAULT_PAGINATION = {
   limit: 0,
@@ -15,33 +17,21 @@ const DEFAULT_PAGINATION = {
   has_more: false,
 };
 
-@injectable()
-export class CommentService {
+export class CommentService implements Service {
   private rootsLimit: number;
   private leavesLimit: number;
 
-  public belong!: string;
-  public commentTree$: BehaviorSubject<Data.CommentTree | null>;
-  private idMapComment: Map<number, Data.TreeComment>;
+  public commentTree$: BehaviorSubject<Data.CommentTree | null> = new BehaviorSubject<Data.CommentTree | null>(null);
+  private idMapComment: Map<number, Data.TreeComment> = new Map();
 
-  public constructor(private authService: AuthService, private api: CommentApi) {
-    this.commentTree$ = new BehaviorSubject<Data.CommentTree | null>(null);
-    this.idMapComment = new Map();
-
+  public constructor(private authService: AuthService, private api: CommentApi, public belong: string) {
     this.rootsLimit = 20;
     this.leavesLimit = 15;
   }
 
-  public initialize(belong: string) {
-    this.belong = belong;
-
-    this.updateTree().subscribe(noop);
-    this.authService.current$.subscribe(() => {
-      const ct = this.commentTree$.value;
-      if (ct) {
-        this.commentTree$.next({ ...ct });
-      }
-    });
+  public destroy() {
+    this.commentTree$.next(null);
+    this.idMapComment.clear();
   }
 
   public updateTree(): Observable<unknown> {
@@ -268,4 +258,21 @@ export class CommentService {
       map,
     ];
   }
+
+  @postConstruct()
+  private postConstruct() {
+    this.updateTree().subscribe(noop);
+  }
 }
+
+@injectable()
+@serviceFactory()
+export class CommentServiceFactory implements ServiceFactory<[string], CommentService> {
+  public constructor(private authService: AuthService, private api: CommentApi) {}
+
+  public factory(belong: string) {
+    return new CommentService(this.authService, this.api, belong);
+  }
+}
+
+container.bind(CommentService).toSelf();

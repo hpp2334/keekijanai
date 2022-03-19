@@ -1,4 +1,4 @@
-import { isNil } from "lodash-es";
+import { isNil } from "@/utils/common";
 import * as localStorageMemory from "localstorage-memory";
 
 interface LocalStoreEntryOptions {

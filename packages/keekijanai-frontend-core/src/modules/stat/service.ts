@@ -1,25 +1,17 @@
 import { switchTap } from "@/utils/rxjs-helper";
-import { callInit, OnInit } from "@/core/service";
+import { Service, ServiceFactory } from "@/core/service";
 import { BehaviorSubject, catchError, Observable, of, switchMapTo } from "rxjs";
-import { injectable } from "tsyringe";
+import { injectable, postConstruct } from "inversify";
 import { StatApi } from "./api";
 import * as Data from "./data";
 import { AuthService } from "../auth";
 
-@injectable()
-export class StatService implements OnInit<[string]> {
-  public belong!: string;
-  public visit$: BehaviorSubject<Data.Visit | null>;
+export class StatService implements Service {
+  public destroy = undefined;
 
-  public constructor(private api: StatApi) {
-    this.visit$ = new BehaviorSubject<Data.Visit | null>(null);
-  }
+  public visit$ = new BehaviorSubject<Data.Visit | null>(null);
 
-  public initialize(belong: string) {
-    this.belong = belong;
-
-    this.updateVisit().subscribe();
-  }
+  public constructor(private api: StatApi, public belong: string) {}
 
   public updateVisit(): Observable<unknown> {
     return this.api.update(this.belong).pipe(
@@ -30,5 +22,18 @@ export class StatService implements OnInit<[string]> {
       }),
       switchMapTo(of(null))
     );
+  }
+
+  @postConstruct()
+  private postConstruct() {
+    this.updateVisit().subscribe();
+  }
+}
+
+export class StatServiceFactory implements ServiceFactory<[string], StatService> {
+  public constructor(private api: StatApi) {}
+
+  public factory(belong: string): StatService {
+    return new StatService(this.api, belong);
   }
 }

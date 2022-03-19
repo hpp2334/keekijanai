@@ -1,20 +1,19 @@
-import { CommentService, CommentTree, CommentVO, TreeComment } from "@keekijanai/frontend-core";
-import { useService } from "@/common/service/useService";
+import { CommentService, CommentTree, CommentVO, noop, TreeComment } from "@keekijanai/frontend-core";
 import { Typography, Avatar, Button, Stack, Popover, styled } from "@/components";
 import { useTranslation } from "react-i18next";
 import { CommentPost } from "./CommentPost";
 import { useObservableEagerState } from "observable-hooks";
 import { firstValueFrom } from "rxjs";
-import { CommentProvider, useCommentService } from "./provider";
+import { InternalCommentContext, useInternalCommentContext } from "./provider";
 import { CommentEditor } from "./components/CommentEditor";
 import React, { useCallback, useContext, useImperativeHandle, useMemo, useState } from "react";
-import { noop } from "lodash-es";
 import { CommentTime } from "./CommentTime";
 import { useRemote } from "@/common/hooks/useRemote";
 import { StateType } from "@/common/state";
 import { ConfirmPopover } from "@/components/ConfirmPopover";
-import { showAuthModal, useAuthService } from "../Auth";
+import { showAuthModal } from "../Auth";
 import { withNoSSR } from "@/common/hoc/withNoSSR";
+import { useAuthService } from "../Auth/logic";
 
 interface CommentInnerProps {
   maxHeight?: number;
@@ -98,7 +97,7 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
   const hasLeaves = comment.child_count > 0;
 
   const { toReply } = useContext(commentInnerContext);
-  const service = useCommentService();
+  const { commentService: service } = useInternalCommentContext();
 
   const handleClickReply = useCallback(() => {
     toReply({
@@ -166,7 +165,7 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
 function CommentLeaves({ commentTree, root }: { commentTree: CommentTree; root: TreeComment }) {
   const { t } = useTranslation("Comment");
   const comments = commentTree.data;
-  const service = useCommentService();
+  const { commentService: service } = useInternalCommentContext();
 
   const loadMore = useCallback(() => {
     return firstValueFrom(service.loadMoreLeaves(root));
@@ -203,7 +202,7 @@ function CommentEmpty() {
 
 const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
   const hasComments = commentTree.data.length > 0;
-  const service = useCommentService();
+  const { commentService: service } = useInternalCommentContext();
   const loadMore = useCallback(() => {
     return firstValueFrom(service.loadMoreRoot());
   }, [service]);
@@ -229,7 +228,7 @@ const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
 
 const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   const { t } = useTranslation("Comment");
-  const commentService = useCommentService();
+  const { commentService } = useInternalCommentContext();
   const authService = useAuthService();
 
   const commentTree = useObservableEagerState(commentService.commentTree$);
@@ -312,8 +311,8 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
 
 export const Comment = withNoSSR(({ belong, ...leftProps }: CommentProps) => {
   return (
-    <CommentProvider args={[belong]}>
+    <InternalCommentContext belong={belong}>
       <CommentInner {...leftProps} />
-    </CommentProvider>
+    </InternalCommentContext>
   );
 });

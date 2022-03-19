@@ -1,9 +1,9 @@
 import { StatService } from "@keekijanai/frontend-core";
-import { useService } from "@/common/service";
 import React from "react";
 import { useObservableEagerState } from "observable-hooks";
 import { Statical, styled, Tooltip } from "@/components";
 import { withNoSSR } from "@/common/hoc/withNoSSR";
+import { useStatService } from "./logic";
 
 export interface StatProps {
   belong: string;
@@ -28,7 +28,7 @@ const StatTitle = styled("div")(({ theme }) => ({
 }));
 
 export const Stat = withNoSSR(({ belong }: StatProps) => {
-  const service = useService(StatService, belong);
+  const service = useStatService(belong);
   const visit = useObservableEagerState(service.visit$);
 
   const pvText = `${visit?.pv ?? "-"} page visits`;

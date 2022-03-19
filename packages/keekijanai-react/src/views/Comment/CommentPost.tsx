@@ -4,9 +4,9 @@ import { styled } from "@/components";
 import { useTranslation } from "react-i18next";
 import { useRefreshToken } from "@/common/helper";
 import { switchTap, TreeComment } from "@keekijanai/frontend-core";
-import { useCommentService } from "./provider";
 import { firstValueFrom } from "rxjs";
 import { sprintf } from "sprintf-js";
+import { useInternalCommentContext } from "./provider";
 
 export interface CommentPostProps {
   refComment?: TreeComment;
@@ -25,7 +25,7 @@ const CommentToPostUnfocusContainer = styled("div")(({ theme }) => ({
 export const CommentPost = ({ ...leftProps }: CommentPostProps) => {
   const { t } = useTranslation("Comment");
   const [_token, refreshToken] = useRefreshToken();
-  const service = useCommentService();
+  const { commentService: service } = useInternalCommentContext();
 
   const placeholder = leftProps.refComment
     ? sprintf(t("post.reply.placeholder", { ns: "Comment" }), leftProps.refComment.user?.name)

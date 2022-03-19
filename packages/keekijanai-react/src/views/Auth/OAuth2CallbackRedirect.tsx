@@ -1,8 +1,7 @@
-import { AuthService } from "@keekijanai/frontend-core";
-import { useService } from "@/common/service/useService";
 import { useTranslation } from "react-i18next";
 import { sprintf } from "sprintf-js";
 import { useEffect } from "react";
+import { useInternalAuthContext } from "./Context";
 
 export interface OAuth2CallbackRedirectProps {
   /** default: 3000 */
@@ -11,7 +10,7 @@ export interface OAuth2CallbackRedirectProps {
 
 export const OAuth2CallbackRedirect = ({ timeout = 3000 }: OAuth2CallbackRedirectProps) => {
   const { t } = useTranslation("Auth");
-  const authService = useService(AuthService);
+  const { authService } = useInternalAuthContext();
 
   useEffect(() => {
     if (typeof window !== "undefined") {

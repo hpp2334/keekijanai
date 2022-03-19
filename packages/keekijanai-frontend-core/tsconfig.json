@@ -1,11 +1,13 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "./dist",
     "baseUrl": "./src",
     "paths": {
       "@/*": ["./*"]
     },
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
     "plugins": [
       // Transform paths in output .js files
       { "transform": "typescript-transform-paths" },
