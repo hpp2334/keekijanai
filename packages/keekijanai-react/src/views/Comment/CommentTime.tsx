@@ -1,5 +1,6 @@
 import React from "react";
-import { format, formatDistance } from "date-fns";
+import format from "date-fns/format";
+import formatDistance from "date-fns/formatDistance";
 import { TimeService } from "@keekijanai/frontend-core";
 import { useObservableEagerState } from "observable-hooks";
 import { Typography, Tooltip, styled } from "@/components";

@@ -1,5 +1,5 @@
 import { useSwitch } from "@/common/helper";
-import { Fade, IconButton, Stack, Box, styled, Tooltip, Transitions, Collapse } from "@mui/material";
+import { Fade, IconButton, Stack, Box, styled, Tooltip, Transitions, Collapse } from "@/components";
 import React, { useCallback, useState } from "react";
 import CodeIcon from "@mui/icons-material/Code";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";

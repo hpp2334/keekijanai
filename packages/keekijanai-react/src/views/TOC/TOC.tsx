@@ -1,5 +1,4 @@
-import { Box, makeStyles, Typography } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { Box, makeStyles, Typography, styled } from "@/components";
 import { isNil } from "lodash";
 import React, { useCallback, useContext, useEffect, useRef } from "react";
 import { TOCHeading, useInternalTOCContext } from "./Context";

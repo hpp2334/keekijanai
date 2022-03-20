@@ -1,4 +1,4 @@
-import { Avatar, IconButton } from "@mui/material";
+import { Avatar, IconButton } from "@/components";
 import { useObservableEagerState } from "observable-hooks";
 import { useCallback, useRef, useState } from "react";
 import { Menu, MenuItem, MenuProps } from "@/components";

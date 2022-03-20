@@ -1,6 +1,6 @@
 import { Collapse } from "../Collapse";
-import { blue, grey } from "@mui/material/colors";
-import { Box, styled } from "@mui/system";
+import { blue, grey } from "@/components/colors";
+import { Box, styled } from "@/components";
 import { useObservableState } from "observable-hooks";
 import React, { useEffect } from "react";
 import { isNil, Series as SeriesType } from "@keekijanai/frontend-core";

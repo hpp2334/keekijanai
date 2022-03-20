@@ -1,12 +1,16 @@
 // modify from https://mui.com/components/accordion/ Customization example
 
 import React, { useRef } from "react";
-import { styled } from "@mui/material/styles";
 import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
-import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
-import MuiAccordionSummary, { AccordionSummaryProps } from "@mui/material/AccordionSummary";
-import MuiAccordionDetails from "@mui/material/AccordionDetails";
-import Typography from "@mui/material/Typography";
+import {
+  styled,
+  Accordion as MuiAccordion,
+  AccordionSummary as MuiAccordionSummary,
+  AccordionDetails as MuiAccordionDetails,
+  Typography,
+  type AccordionProps,
+  type AccordionSummaryProps,
+} from "@/components";
 import { CommonStylesProps } from "@/common/react";
 import { useSwitch } from "@/common/helper";
 

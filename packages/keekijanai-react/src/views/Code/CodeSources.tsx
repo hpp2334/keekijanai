@@ -1,10 +1,9 @@
-import { Chip, Stack, styled } from "@mui/material";
+import { Chip, Stack, styled } from "@/components";
 import { useObservableState } from "observable-hooks";
 import React, { useEffect } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { materialLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { isNil, SourceNameMap } from "@keekijanai/frontend-core";
 import { useInternalCodeContext } from "./InternalCodeContext";
+import { SyntaxHighlighter } from "@/components/SyntaxHighlighter";
 
 export interface CodeSourcesProps {
   /** 获取文件自身内容（即源码），如使用 webpack，可以使用 require.context API 与 raw-loader */
@@ -59,11 +58,7 @@ export const CodeSources = ({ getSource, sourceKeyMap, sourceKeyList }: CodeSour
         ))}
       </SourceChipContainer>
       {!isNil(currentSourceCode) && (
-        <SyntaxHighlighter
-          customStyle={customSyntaxHighlighterStyle}
-          language={currentSourceCodeLang}
-          style={materialLight}
-        >
+        <SyntaxHighlighter customStyle={customSyntaxHighlighterStyle} language={currentSourceCodeLang}>
           {currentSourceCode}
         </SyntaxHighlighter>
       )}

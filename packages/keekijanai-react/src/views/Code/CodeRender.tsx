@@ -1,6 +1,6 @@
 /* eslint-disable no-inner-declarations */
 
-import { Paper, Typography, styled, Alert, AlertTitle } from "@mui/material";
+import { Paper, Typography, styled, Alert, AlertTitle } from "@/components";
 import React, { useEffect, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { GetRenderHandler, GetRenderResult, RenderType, switchAllCaseCheck } from "@keekijanai/frontend-core";

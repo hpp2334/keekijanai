@@ -1,5 +1,5 @@
 import React from "react";
-import { ButtonUnstyled, CircularProgress, IconButton, useTheme, styled, Paper, Typography } from "@mui/material";
+import { styled, Paper, Typography } from "@/components";
 
 export interface ReferenceProps {
   entries: Array<[string, string | undefined]>;

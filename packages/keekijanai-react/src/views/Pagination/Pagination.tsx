@@ -1,3 +1,3 @@
 import React, { useCallback } from "react";
 
-export { Pagination } from '@mui/material'
+export { Pagination } from "@/components";

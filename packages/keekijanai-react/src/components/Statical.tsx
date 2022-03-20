@@ -1,4 +1,4 @@
-import { styled } from "@mui/material";
+import { styled } from "./reexport-mui";
 import React from "react";
 import { animated, useTransition } from "react-spring";
 
