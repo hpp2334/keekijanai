@@ -14,6 +14,15 @@ export interface CodeSourcesProps {
   sourceKeyList: string[];
 }
 
+export interface CodeSourceContentProps {
+  code: string;
+  lang?: string;
+}
+export interface CodeSourceProps {
+  getSource: (key: string) => string | { default: string };
+  sourceKey: string;
+}
+
 const SourceChipContainer = styled("div")({
   display: "flex",
   flexWrap: "wrap",
@@ -22,6 +31,27 @@ const SourceChipContainer = styled("div")({
 
 const customSyntaxHighlighterStyle: React.CSSProperties = {
   fontSize: 12,
+};
+
+export const CodeSourceContent = ({ code, lang }: CodeSourceContentProps) => {
+  return (
+    <SyntaxHighlighter customStyle={customSyntaxHighlighterStyle} language={lang}>
+      {code}
+    </SyntaxHighlighter>
+  );
+};
+
+export const CodeSource = ({ getSource, sourceKey }: CodeSourceProps) => {
+  const { codeService } = useInternalCodeContext();
+  codeService.setGetSource(getSource);
+  const currentSourceCode = useObservableState(codeService.currentSourceCode$, null);
+  const currentSourceCodeLang = useObservableState(codeService.currentSourceCodeLanguage$, null) ?? "javascript";
+
+  useEffect(() => {
+    codeService.sourceKeys$.next([sourceKey]);
+  }, []);
+
+  return isNil(currentSourceCode) ? null : <CodeSourceContent code={currentSourceCode} lang={currentSourceCodeLang} />;
 };
 
 export const CodeSources = ({ getSource, sourceKeyMap, sourceKeyList }: CodeSourcesProps) => {
@@ -57,11 +87,7 @@ export const CodeSources = ({ getSource, sourceKeyMap, sourceKeyList }: CodeSour
           />
         ))}
       </SourceChipContainer>
-      {!isNil(currentSourceCode) && (
-        <SyntaxHighlighter customStyle={customSyntaxHighlighterStyle} language={currentSourceCodeLang}>
-          {currentSourceCode}
-        </SyntaxHighlighter>
-      )}
+      {!isNil(currentSourceCode) && <CodeSourceContent code={currentSourceCode} lang={currentSourceCodeLang} />}
     </div>
   );
 };

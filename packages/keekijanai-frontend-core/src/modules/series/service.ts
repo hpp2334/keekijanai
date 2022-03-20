@@ -8,7 +8,7 @@ export interface SeriesItem {
   title?: string;
   path?: string;
   children?: Array<SeriesItem>;
-  wip?: boolean;
+  disable?: boolean;
 }
 
 export interface Series {
@@ -22,7 +22,7 @@ export interface NormalizedSeriesItem {
   path?: string;
   level: number;
   match: boolean;
-  wip: boolean;
+  disable: boolean;
 }
 
 export interface NormalizedSeries {
@@ -86,7 +86,7 @@ export class SeriesService implements Service {
           path: normalizedItemPath,
           level,
           match: this.isSlugEqual(currentPath, normalizedItemPath),
-          wip: Boolean(item.wip),
+          disable: Boolean(item.disable),
         });
         if (item.children && item.children.length > 0) {
           handleSeriesItems(item.children, level + 1);

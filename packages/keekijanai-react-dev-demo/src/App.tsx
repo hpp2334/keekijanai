@@ -11,8 +11,14 @@ import {
   TOC,
   CircularReadingProgress,
   Reference,
+  Series,
+  Collapse,
+  Code,
+  CodeSource,
 } from "@keekijanai/react";
 import { BrowserRouter as Router, Routes, Route, Link, useParams } from "react-router-dom";
+
+import { Demo, requireRaw } from "./code/controller";
 
 import "./global.css";
 
@@ -45,7 +51,23 @@ const Main = () => {
 
         <article>
           <TOCHeadings.H1>{belong}</TOCHeadings.H1>
-          <Reference entries={[["npmjs", "https://www.npmjs.com/"]]} />
+          <Series
+            series={{
+              name: "Cheat Sheet",
+              data: [
+                {
+                  path: "/css",
+                  title: "CSS common properties",
+                },
+              ],
+            }}
+          />
+          <Reference
+            entries={[
+              ["npmjs", "https://www.npmjs.com/"],
+              ["CSS Tricks", "https://css-tricks.com/"],
+            ]}
+          />
           <TOCHeadings.H2>Introduction</TOCHeadings.H2>
           <p>This article includes common css styles and javascript libraries.</p>
           <TOCHeadings.H2>Style</TOCHeadings.H2>
@@ -83,6 +105,19 @@ const Main = () => {
             </li>
           </ul>
           <TOCHeadings.H3>Demo</TOCHeadings.H3>
+          <Demo
+            source={{
+              sourceKeyList: ["./css-prop/main.html", "./css-prop/main.css", "./css-prop/main.js"],
+            }}
+            render={{
+              entryKey: "./css-prop/index.js",
+            }}
+          />
+          <Collapse title="Click to show driven code">
+            <Code>
+              <CodeSource getSource={requireRaw} sourceKey="./css-prop/index.js" />
+            </Code>
+          </Collapse>
         </article>
       </TOCContext>
       <div style={{ display: "flex" }}>

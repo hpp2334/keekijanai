@@ -5,6 +5,7 @@
     "baseUrl": "./",
     "paths": {
       "@keekijanai/react": ["../keekijanai-react/src/index.ts"]
-    }
+    },
+    "allowJs": true
   }
 }

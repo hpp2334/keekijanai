@@ -6,4 +6,5 @@ li {
   position: fixed;
   right: 20%;
   top: 100px;
+  z-index: 50;
 }

@@ -1,27 +1,11 @@
 import React from "react";
-import { styled, Paper, Typography } from "@/components";
+import { styled, Paper, Typography, Link } from "@/components";
 import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
 
 export interface ReferenceProps {
   entries: Array<[string, string | undefined]>;
   noHeader?: boolean;
 }
-
-const ReferenceLink = styled("a")(({ theme }) => ({
-  textDecoration: "underline",
-  "&:link": {
-    color: "inherit",
-  },
-  "&:visited": {
-    color: "inherit",
-  },
-  "&:hover": {
-    color: theme.palette.primary.main,
-  },
-  "&:activated": {
-    color: "inherit",
-  },
-}));
 
 const ReferenceHeaderTitle = styled(Typography)(({ theme }) => ({
   fontSize: 24,
@@ -61,9 +45,9 @@ export const Reference = withCSSBaseline(({ entries, noHeader = false }: Referen
               {href && (
                 <>
                   :{" "}
-                  <ReferenceLink target="_blank" href={href}>
+                  <Link target="_blank" href={href}>
                     {href}
-                  </ReferenceLink>
+                  </Link>
                 </>
               )}
             </ReferenceItem>
