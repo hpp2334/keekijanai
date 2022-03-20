@@ -14,4 +14,6 @@ export const Link = styled("a")(({ theme }) => ({
   "&:activated": {
     color: "inherit",
   },
-}));
+})) as any as React.ComponentType<
+  React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>
+>;

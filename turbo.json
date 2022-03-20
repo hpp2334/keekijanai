@@ -1,7 +1,9 @@
 {
   "baseBranch": "origin/feature-v3-dev",
   "pipeline": {
+    "clean": {},
     "build:prod": {
+      "dependsOn": ["clean"]
     }
   }
 }
