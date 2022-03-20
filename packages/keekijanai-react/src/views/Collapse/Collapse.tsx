@@ -13,6 +13,7 @@ import {
 } from "@/components";
 import { CommonStylesProps } from "@/common/react";
 import { useSwitch } from "@/common/helper";
+import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
 
 export interface CollapseProps extends CommonStylesProps {
   title: string;
@@ -48,17 +49,19 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: "1px solid rgba(0, 0, 0, .125)",
 }));
 
-export function Collapse({ title, defaultExpanded = false, children, className, style }: CollapseProps) {
-  const { isOpen, toggle } = useSwitch(defaultExpanded);
-  const haveOpenedRef = React.useRef(isOpen);
-  haveOpenedRef.current ||= isOpen;
+export const Collapse = withCSSBaseline(
+  ({ title, defaultExpanded = false, children, className, style }: CollapseProps) => {
+    const { isOpen, toggle } = useSwitch(defaultExpanded);
+    const haveOpenedRef = React.useRef(isOpen);
+    haveOpenedRef.current ||= isOpen;
 
-  return (
-    <Accordion expanded={isOpen} onChange={toggle} className={className} style={style}>
-      <AccordionSummary>
-        <Typography>{title}</Typography>
-      </AccordionSummary>
-      <AccordionDetails>{haveOpenedRef.current && children}</AccordionDetails>
-    </Accordion>
-  );
-}
+    return (
+      <Accordion expanded={isOpen} onChange={toggle} className={className} style={style}>
+        <AccordionSummary>
+          <Typography>{title}</Typography>
+        </AccordionSummary>
+        <AccordionDetails>{haveOpenedRef.current && children}</AccordionDetails>
+      </Accordion>
+    );
+  }
+);

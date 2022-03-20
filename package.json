@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
-    "build:fe": "turbo run build:prod --scope=\"@keekijanai/frontend-core\" --scope\"=@keekijanai/react\""
+    "build:fe": "turbo run build:prod --scope=@keekijanai/frontend-core --scope=@keekijanai/react --no-deps"
   },
   "repository": {
     "type": "git",

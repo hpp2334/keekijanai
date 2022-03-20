@@ -14,6 +14,8 @@ import { ConfirmPopover } from "@/components/ConfirmPopover";
 import { showAuthModal } from "../Auth";
 import { withNoSSR } from "@/common/hoc/withNoSSR";
 import { useAuthService } from "../Auth/logic";
+import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
+import { composeHOC } from "@/common/hoc/composeHOC";
 
 interface CommentInnerProps {
   maxHeight?: number;
@@ -309,7 +311,9 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   );
 };
 
-export const Comment = withNoSSR(({ belong, ...leftProps }: CommentProps) => {
+const withFeature = composeHOC(withNoSSR, withCSSBaseline);
+
+export const Comment = withFeature(({ belong, ...leftProps }: CommentProps) => {
   return (
     <InternalCommentContext belong={belong}>
       <CommentInner {...leftProps} />

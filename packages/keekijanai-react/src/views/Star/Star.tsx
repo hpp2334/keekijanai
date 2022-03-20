@@ -1,3 +1,5 @@
+import { composeHOC } from "@/common/hoc/composeHOC";
+import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
 import { withNoSSR } from "@/common/hoc/withNoSSR";
 import { IconButton, styled, Statical } from "@/components";
 import { AuthService, StarService, StarType } from "@keekijanai/frontend-core";
@@ -37,7 +39,9 @@ const starConfig = [
   },
 ];
 
-export const Star = withNoSSR(({ belong }: StarProps) => {
+const withFeature = composeHOC(withNoSSR, withCSSBaseline);
+
+export const Star = withFeature(({ belong }: StarProps) => {
   const { authService } = useInternalAuthContext();
   const starService = useStarService(belong);
 

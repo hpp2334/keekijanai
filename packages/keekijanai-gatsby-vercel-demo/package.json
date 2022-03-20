@@ -2,14 +2,15 @@
   "private": true,
   "scripts": {
     "develop": "gatsby develop",
-    "start": "gatsby develop",
     "build": "gatsby build",
-    "serve": "gatsby serve",
+    "serve": "gatsby develop",
+    "gatsby:serve": "gatsby serve",
     "clean": "gatsby clean",
     "vercel:dev": "vercel dev"
   },
   "dependencies": {
     "@keekijanai/react": "workspace:*",
+    "@keekijanai/frontend-core": "workspace:*",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
     "reflect-metadata": "^0.1.13",

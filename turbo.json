@@ -1,9 +1,12 @@
 {
   "baseBranch": "origin/feature-v3-dev",
   "pipeline": {
+    "@keekijanai/frontend-toolkit#build": {
+      "dependsOn": ["^build"]
+    },
     "clean": {},
     "build:prod": {
-      "dependsOn": ["clean"]
+      "dependsOn": ["clean", "@keekijanai/frontend-toolkit#build"]
     }
   }
 }

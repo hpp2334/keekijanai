@@ -1,3 +1,6 @@
 import React, { useCallback } from "react";
 
-export { Pagination } from "@/components";
+import { Pagination as NativePagination } from "@/components";
+import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
+
+export const Pagination = withCSSBaseline(NativePagination);

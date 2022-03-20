@@ -4,7 +4,8 @@
     "jsx": "react-jsx",
     "baseUrl": "./",
     "paths": {
-      "@keekijanai/react": ["../keekijanai-react/src/index.ts"]
+      "@keekijanai/react": ["../keekijanai-react/src/index.ts"],
+      "@keekijanai/frontend-core": ["../keekijanai-frontend-core/src/index.ts"]
     },
     "allowJs": true
   }

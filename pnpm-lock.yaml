@@ -121,6 +121,7 @@ importers:
 
   packages/keekijanai-gatsby-vercel-demo:
     specifiers:
+      '@keekijanai/frontend-core': workspace:*
       '@keekijanai/react': workspace:*
       gatsby: ^4.7.0
       gatsby-plugin-pnpm: ^1.2.10
@@ -130,6 +131,7 @@ importers:
       reflect-metadata: ^0.1.13
       vercel: ^23.1.2
     dependencies:
+      '@keekijanai/frontend-core': link:../keekijanai-frontend-core
       '@keekijanai/react': link:../keekijanai-react
       gatsby: 4.7.0_3e110919350e0ee2e64d1a654bd03c09
       react: 17.0.2
@@ -4822,7 +4824,7 @@ packages:
       postcss-modules-values: 4.0.0_postcss@8.4.5
       postcss-value-parser: 4.2.0
       semver: 7.3.5
-      webpack: 5.67.0_be5619487e259e90d92caa053d09da5f
+      webpack: 5.67.0
     dev: true
 
   /css-minimizer-webpack-plugin/2.0.0_webpack@5.67.0:
@@ -12058,7 +12060,7 @@ packages:
     peerDependencies:
       typescript: '>=3.6.5'
     dependencies:
-      minimatch: 3.0.4
+      minimatch: 3.1.2
       typescript: 4.5.5
     dev: true
 

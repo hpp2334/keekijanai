@@ -56,7 +56,6 @@ export const CircularReadingProgress = ({ className }: ReadingProgressProps) => 
   const readingProgressService = useReadingProgressService();
   const globalService = useGlobalService();
   const containerRef = useRef<HTMLDivElement>(null);
-  const theme = useTheme();
 
   const progress = useObservableState(readingProgressService.progress$, 0);
 

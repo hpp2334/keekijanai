@@ -3,16 +3,15 @@ import { isNil } from "lodash";
 import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { TOCHeading, useInternalTOCContext } from "./Context";
 import { useObservable, useObservableState, useSubscription } from "observable-hooks";
+import { CommonStylesProps } from "@/common/react";
 
-export interface TOCProps {
-  className?: string;
+export interface TOCProps extends CommonStylesProps {
   // depend how to calculate active heading
   offsetY?: number;
 }
 
-export interface TOCStaticProps {
-  className?: string;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface TOCStaticProps extends CommonStylesProps {}
 
 const TOCItemText = styled(Typography)({
   fontSize: 14,
@@ -60,7 +59,7 @@ function TOCItem({
   );
 }
 
-export const TOC = ({ className, offsetY = 0 }: TOCProps) => {
+export const TOC = ({ className, style, offsetY = 0 }: TOCProps) => {
   const { tocService } = useInternalTOCContext();
   const headings = useObservableState(tocService.headings$);
   const activeHeading = useObservableState(tocService.activeHeading$);
@@ -76,7 +75,7 @@ export const TOC = ({ className, offsetY = 0 }: TOCProps) => {
 
   return (
     <aside>
-      <TOCItemList className={className}>
+      <TOCItemList className={className} style={style}>
         {headings.map((heading, index) => {
           const isActive = activeHeading === heading;
           return (
@@ -98,13 +97,13 @@ export const TOC = ({ className, offsetY = 0 }: TOCProps) => {
   );
 };
 
-export const TOCStatic = ({ className }: TOCProps) => {
+export const TOCStatic = ({ className, style }: TOCStaticProps) => {
   const { tocService } = useInternalTOCContext();
   const headings = useObservableState(tocService.headings$);
 
   return (
     <aside>
-      <TOCStaticItemList className={className}>
+      <TOCStaticItemList className={className} style={style}>
         {headings.map((heading, index) => {
           return (
             <TOCItemContainer

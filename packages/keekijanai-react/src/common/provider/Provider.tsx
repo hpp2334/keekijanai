@@ -33,12 +33,10 @@ export const KeekijanaiProvider: React.FC<KeekijanaiProviderProps> = ({ queryRou
   }, []);
 
   return (
-    <ScopedCssBaseline>
+    <AuthContext>
       <NiceModal.Provider>
-        <AuthContext>
-          <I18nProvider>{children}</I18nProvider>
-        </AuthContext>
+        <I18nProvider>{children}</I18nProvider>
       </NiceModal.Provider>
-    </ScopedCssBaseline>
+    </AuthContext>
   );
 };

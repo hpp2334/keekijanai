@@ -14,6 +14,8 @@ export { useInternalAuthContext };
 export const AuthContext = ({ children }: { children: React.ReactNode }) => {
   const authService = useAuthService();
 
+  console.debug("[AuthContext]", { authService });
+
   const ctxValue: AuthContextValue = useMemo(
     () => ({
       authService,

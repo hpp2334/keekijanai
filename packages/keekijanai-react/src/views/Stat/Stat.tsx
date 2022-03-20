@@ -4,6 +4,8 @@ import { useObservableEagerState } from "observable-hooks";
 import { Statical, styled, Tooltip } from "@/components";
 import { withNoSSR } from "@/common/hoc/withNoSSR";
 import { useStatService } from "./logic";
+import { composeHOC } from "@/common/hoc/composeHOC";
+import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
 
 export interface StatProps {
   belong: string;
@@ -27,7 +29,9 @@ const StatTitle = styled("div")(({ theme }) => ({
   alignItems: "center",
 }));
 
-export const Stat = withNoSSR(({ belong }: StatProps) => {
+const withFeature = composeHOC(withNoSSR, withCSSBaseline);
+
+export const Stat = withFeature(({ belong }: StatProps) => {
   const service = useStatService(belong);
   const visit = useObservableEagerState(service.visit$);
 
