@@ -44,11 +44,6 @@ module.exports = {
         },
       },
       {
-        test: /\.js$/,
-        enforce: "pre",
-        use: ["source-map-loader"],
-      },
-      {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
       },
@@ -76,7 +71,6 @@ module.exports = {
         resource.request = resource.request.replace("@/", () => path.join(workspaceRoot, pkgDirName, "src") + "/");
       }
     }),
-    process.env.NODE_ENV === "BUILD" && new BundleAnalyzerPlugin(),
   ].filter(Boolean),
   devServer: {
     hot: true,

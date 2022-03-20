@@ -17,8 +17,8 @@ export const keyBy = <T, P extends keyof T>(list: T[], key: P): Record<string, T
   const res = {} as any;
   for (const item of list) {
     const value = item[key];
-    if (typeof value === "number" && typeof value === "string") {
-      res[key] = item;
+    if (typeof value === "number" || typeof value === "string") {
+      res[value] = item;
     }
   }
   return res;

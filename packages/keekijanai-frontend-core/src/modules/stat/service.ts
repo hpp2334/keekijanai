@@ -1,5 +1,5 @@
 import { switchTap } from "@/utils/rxjs-helper";
-import { Service, ServiceFactory } from "@/core/service";
+import { Service, serviceFactory, ServiceFactory } from "@/core/service";
 import { BehaviorSubject, catchError, Observable, of, switchMapTo } from "rxjs";
 import { injectable, postConstruct } from "inversify";
 import { StatApi } from "./api";
@@ -30,6 +30,8 @@ export class StatService implements Service {
   }
 }
 
+@injectable()
+@serviceFactory()
 export class StatServiceFactory implements ServiceFactory<[string], StatService> {
   public constructor(private api: StatApi) {}
 

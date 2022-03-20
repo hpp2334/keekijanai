@@ -7,3 +7,5 @@ export * from "./Collapse";
 export * from "./Pagination";
 export * from "./TOC";
 export * from "./Series";
+export * from "./ReadingProgress";
+export * from "./Reference";

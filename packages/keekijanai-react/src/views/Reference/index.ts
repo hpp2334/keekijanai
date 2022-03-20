@@ -1,2 +1,1 @@
-export { Reference } from './Reference'
-export type { ReferenceProps } from './Reference'
+export { Reference, type ReferenceProps } from "./Reference";

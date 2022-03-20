@@ -3,6 +3,7 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { TOCLevel } from "./Headings";
 import { useTOCService } from "./logic";
 import { TOCService } from "@keekijanai/frontend-core";
+import { TOCClearMarker } from "./Marker";
 
 export type TOCHeading = {
   id: string;
@@ -31,5 +32,10 @@ export const TOCContext = ({ children }: { children: React.ReactNode }) => {
     [tocService]
   );
 
-  return <internalTOCContext.Provider value={ctxValue}>{children}</internalTOCContext.Provider>;
+  return (
+    <internalTOCContext.Provider value={ctxValue}>
+      <TOCClearMarker />
+      {children}
+    </internalTOCContext.Provider>
+  );
 };

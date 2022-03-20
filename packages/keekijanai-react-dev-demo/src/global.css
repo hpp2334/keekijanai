@@ -1,0 +1,9 @@
+li {
+  margin: 10px 0;
+}
+
+.toc-container {
+  position: fixed;
+  right: 20%;
+  top: 100px;
+}

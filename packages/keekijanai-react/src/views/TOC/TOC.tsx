@@ -1,6 +1,6 @@
 import { Box, makeStyles, Typography, styled } from "@/components";
 import { isNil } from "lodash";
-import React, { useCallback, useContext, useEffect, useRef } from "react";
+import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
 import { TOCHeading, useInternalTOCContext } from "./Context";
 import { useObservable, useObservableState, useSubscription } from "observable-hooks";
 
@@ -65,7 +65,10 @@ export const TOC = ({ className, offsetY = 0 }: TOCProps) => {
   const headings = useObservableState(tocService.headings$);
   const activeHeading = useObservableState(tocService.activeHeading$);
 
-  console.debug("[TOC]", { headings });
+  const minLevel = useMemo(
+    () => headings.reduce((pre, cur) => Math.min(pre, cur.level), Number.MAX_SAFE_INTEGER),
+    [headings]
+  );
 
   useEffect(() => {
     tocService.offsetY$.next(offsetY);
@@ -81,7 +84,7 @@ export const TOC = ({ className, offsetY = 0 }: TOCProps) => {
               key={index}
               component="li"
               sx={{
-                paddingLeft: (heading.level - 1) * 2,
+                paddingLeft: (heading.level - minLevel + 1) * 2,
                 borderLeft: `3px solid transparent`,
                 borderLeftColor: isActive ? "primary.main" : undefined,
               }}

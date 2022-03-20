@@ -29,8 +29,9 @@ export class TOCService implements Service {
   private headingMap$ = this.headings$.pipe(
     switchMap((headings) => {
       const headingEntries: [string, TOCHeading][] = Object.entries(keyBy(headings, "id"));
-
       const headingMap = new Map(headingEntries);
+
+      console.debug("[toc.service] pipe heading$ to headingMap$", { headings, headingEntries, headingMap });
       return of(headingMap);
     })
   );
@@ -49,7 +50,7 @@ export class TOCService implements Service {
       const hash = this.globalService.global.location.hash;
       const id = hash.match(/^#toc-(.+)$/)?.[1];
 
-      console.debug("[toc.service]", { id, hash });
+      console.debug("[toc.service] scroll to matched heading", { id, hash });
 
       if (!isNil(id)) {
         const heading = headingMap.get(id);
@@ -57,7 +58,7 @@ export class TOCService implements Service {
         const rect = headingEl?.getBoundingClientRect();
         const container = this.globalService.getContainerEl()!;
 
-        console.debug("[toc.service]", { heading, headingEl, rect });
+        console.debug("[toc.service] scroll to matched heading", { heading, headingEl, rect });
 
         if (!isNil(rect)) {
           const Epsilon = 5;
@@ -120,7 +121,10 @@ export class TOCService implements Service {
   }
 
   public collectHeading(heading: Omit<TOCHeading, "id">) {
-    this.headings$.next([...this.headings$.value, { ...heading, id: String(this.allocHeadingId) }]);
+    const collectedHeading = { ...heading, id: String(this.allocHeadingId) };
+
+    console.debug("[toc.service] collectHeading", { collectedHeading });
+    this.headings$.next([...this.headings$.value, collectedHeading]);
     this.allocHeadingId += 1;
   }
 

@@ -1,4 +1,3 @@
-import React, { useEffect } from "react";
 import { isNil, isObjectLike, shouldOverride } from "@/utils/common";
 import { BehaviorSubject, combineLatest, filter, of, Subject, switchMap } from "rxjs";
 import { first } from "rxjs/operators";
@@ -35,7 +34,8 @@ export type GetRenderResult = {
     }
   | {
       type: RenderType.React;
-      Component: React.ComponentType<{}>;
+      // TODO react type
+      Component: any;
     }
 );
 

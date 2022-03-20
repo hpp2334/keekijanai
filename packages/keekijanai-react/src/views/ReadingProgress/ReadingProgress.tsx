@@ -1,13 +1,12 @@
-import { ButtonUnstyled, CircularProgress, IconButton, useTheme } from "@/components";
-import { styled } from "@mui/system";
+import { ButtonUnstyled, CircularProgress, IconButton, useTheme, styled } from "@/components";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import React, { useEffect, useMemo, useRef } from "react";
 import { useObservableState } from "observable-hooks";
-import { isNil } from "lodash";
 import Color from "color";
 import clsx from "clsx";
 import { useReadingProgressService } from "./logic";
 import { useGlobalService } from "../Global";
+import { isNil } from "@keekijanai/frontend-core";
 
 export interface ReadingProgressProps {
   className?: string;
@@ -37,19 +36,23 @@ const ToTopButton = styled(ButtonUnstyled)(({ theme }) => {
 
   return {
     position: "relative",
-    backgroundColor: mainColor.darken(0.4).hex(),
+    backgroundColor: mainColor.darken(0.3).hex(),
     color: theme.palette.primary.contrastText,
     zIndex: 1,
     borderRadius: "50%",
     width: size,
     height: size,
+    outline: "none",
+    border: "none",
+    transition: "background-color 0.2s",
+    cursor: "pointer",
     "&:hover": {
-      backgroundColor: mainColor.darken(0.2).hex(),
+      backgroundColor: mainColor.darken(0.1).hex(),
     },
   };
 });
 
-export const ReadingProgress = ({ className }: ReadingProgressProps) => {
+export const CircularReadingProgress = ({ className }: ReadingProgressProps) => {
   const readingProgressService = useReadingProgressService();
   const globalService = useGlobalService();
   const containerRef = useRef<HTMLDivElement>(null);

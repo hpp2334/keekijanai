@@ -35,7 +35,7 @@ export function createService(Service: any, ...args: any[]): any {
 
 export const serviceFactory = () => {
   const decorator: ClassDecorator = function (target) {
-    Reflect.defineMetadata("service:isFactory", target, true);
+    Reflect.defineMetadata("service:isFactory", true, target);
   };
   return decorator;
 };

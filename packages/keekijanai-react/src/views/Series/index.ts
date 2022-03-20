@@ -1,1 +1,1 @@
-export * from './Series'
+export * from "./Series";
