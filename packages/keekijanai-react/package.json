@@ -1,10 +1,11 @@
 {
   "name": "@keekijanai/react",
-  "version": "0.3.0-alpha.5",
+  "version": "0.3.0-alpha.6",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
+    "prepare": "ts-patch install -s",
     "test": "echo \"Error: no test specified\" && exit 1",
     "clean": "rm -rf ./dist",
     "build:dev": "kkft build",
