@@ -2,6 +2,14 @@ export function getBabelConfig({ isProd, isTSX }: { isProd: boolean; isTSX: bool
   return {
     presets: [
       [
+        "@babel/preset-env",
+        {
+          targets: {
+            node: "12",
+          },
+        },
+      ],
+      [
         "@babel/preset-react",
         {
           runtime: "automatic",
