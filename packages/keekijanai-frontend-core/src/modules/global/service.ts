@@ -13,11 +13,11 @@ export class GlobalService {
   }
 
   public get valid() {
-    return typeof this.global !== "undefined";
+    return typeof window !== "undefined";
   }
 
   private scroll$ = (() => {
-    if (typeof this.global === "undefined") {
+    if (!this.valid) {
       return of(null as any as Event);
     }
     return fromEvent(this.global, "scroll");
