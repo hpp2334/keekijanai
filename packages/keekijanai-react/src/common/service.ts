@@ -15,6 +15,8 @@ export function createServiceHook(Service: any): any {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     const service = useMemo(() => createService(Service, ...args), [...args]);
 
+    console.debug("[useCustomService]", { service });
+
     useLayoutEffect(() => {
       return () => {
         if (service.destory) {

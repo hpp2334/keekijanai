@@ -22,7 +22,7 @@ const Navs = () => {
         gridTemplateColumns: "repeat(4, 1fr)",
       }}
     >
-      <Link to="/article/css-trick">CSS Trick</Link>
+      <Link to="/css-trick">CSS Trick</Link>
     </div>
   );
 };
@@ -33,7 +33,7 @@ const Main = () => {
   const params = useParams();
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const belong = params.belong!;
-  const path = `/article/${belong}`;
+  const path = `/${belong}`;
 
   return (
     <div>

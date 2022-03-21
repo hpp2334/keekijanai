@@ -258,11 +258,6 @@ export class CommentService implements Service {
       map,
     ];
   }
-
-  @postConstruct()
-  private postConstruct() {
-    this.updateTree().subscribe(noop);
-  }
 }
 
 @injectable()
@@ -271,7 +266,9 @@ export class CommentServiceFactory implements ServiceFactory<[string], CommentSe
   public constructor(private authService: AuthService, private api: CommentApi) {}
 
   public factory(belong: string) {
-    return new CommentService(this.authService, this.api, belong);
+    const service = new CommentService(this.authService, this.api, belong);
+    service.updateTree().subscribe(noop);
+    return service;
   }
 }
 

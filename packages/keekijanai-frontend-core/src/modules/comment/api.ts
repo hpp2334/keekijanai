@@ -6,6 +6,7 @@ import { AxiosResponse } from "axios";
 import { keyBy, omit } from "@/utils/common";
 import { UserVO, CommentVO } from "@/generated/keekijanai-api";
 import { StyledCommentVO } from "./data";
+import { container } from "@/core/container";
 
 @injectable()
 export class CommentApi {
@@ -82,3 +83,5 @@ export class CommentApi {
     return styledComments;
   }
 }
+
+container.bind(CommentApi).toSelf();

@@ -3,13 +3,24 @@ import { container } from "@/core/container";
 import { ElementRef } from "@/utils/element-ref";
 import { LocalStoreEntry, LocalStoreEntryKey } from "@/utils/local-store";
 import { switchTap } from "@/utils/rxjs-helper";
-import { isNil } from "@/utils/common";
-import { BehaviorSubject, catchError, Observable, of, switchMap, throwError } from "rxjs";
+import { isNil, noop } from "@/utils/common";
+import {
+  BehaviorSubject,
+  catchError,
+  filter,
+  firstValueFrom,
+  Observable,
+  of,
+  switchMap,
+  takeWhile,
+  throwError,
+} from "rxjs";
 import { injectable, postConstruct } from "inversify";
 import { AuthApi } from "./api";
 import * as Data from "./data";
 import { Service } from "@/core/service";
 import { GlobalService } from "../global";
+import { AxiosResponse } from "axios";
 
 const TOKEN_KEY = LocalStoreEntryKey("auth-token");
 
@@ -24,6 +35,10 @@ export class AuthService implements Service {
   public get token() {
     return this.token$.getValue();
   }
+
+  private _firstUpdateCurrent$ = new BehaviorSubject<boolean>(false);
+
+  private firstUpdateCurrentSignal$ = this._firstUpdateCurrent$.pipe(filter((x) => x));
 
   public constructor(private globalService: GlobalService, private api: AuthApi) {}
 
@@ -48,11 +63,9 @@ export class AuthService implements Service {
 
   public handleOAuth2Token(token: string): Observable<unknown> {
     console.debug("[auth][handleOAuth2Token]");
-    return this.updateToken(token).pipe(
-      switchMap(() => this.updateCurrent()),
-      switchTap(() => {
-        return this.updateToken(token);
-      })
+    return this.firstUpdateCurrentSignal$.pipe(
+      switchTap(() => this.updateToken(token)),
+      switchMap(() => this.updateCurrent())
     );
   }
 
@@ -74,7 +87,8 @@ export class AuthService implements Service {
         const { user } = resp.data;
         this.current$.next(user);
       }),
-      catchError(() => {
+      catchError((resp: AxiosResponse) => {
+        console.debug("[auth][updateCurrent] error", { resp });
         return this.clearToken();
       })
     );
@@ -91,18 +105,21 @@ export class AuthService implements Service {
 
   @postConstruct()
   private postConstruct() {
-    const token = this.tokenStoreEntry.get();
-    console.debug("[auth][constructor]", { token });
-    this.token$.next(token);
-    this.updateCurrent().subscribe();
-
     this.registerRequestInterceptorToken();
+    const token = this.tokenStoreEntry.get();
+    console.debug("[auth][postConstruct]", { token });
+    this.token$.next(token);
+
+    this.updateCurrent().subscribe(() => {
+      this._firstUpdateCurrent$.next(true);
+    });
   }
 
   private registerRequestInterceptorToken() {
     axiosInstance.interceptors.request.use((reqConfig) => {
       const token = this.token;
       console.debug("[auth][axios.interceptors]", { url: reqConfig.url, token });
+
       if (!isNil(token)) {
         reqConfig.headers = {
           ...(reqConfig.headers ?? {}),

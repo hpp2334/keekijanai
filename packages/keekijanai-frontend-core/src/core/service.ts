@@ -23,7 +23,7 @@ export function createService<
 >(ServiceFactory: S, ...args: A): ReturnType<InstanceType<S>["factory"]>;
 export function createService(Service: any, ...args: any[]): any {
   if (isServiceFactory(Service)) {
-    const serviceFactory = new Service();
+    const serviceFactory = container.resolve(Service);
     const service = serviceFactory.factory(...args);
     return service;
   } else {

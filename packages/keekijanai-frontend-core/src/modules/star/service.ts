@@ -5,6 +5,7 @@ import { injectable, postConstruct } from "inversify";
 import { StarApi } from "./api";
 import { Star, StarType } from "./data";
 import { AuthService } from "../auth";
+import { container } from "@/core/container";
 
 export class StarService implements Service {
   public destroy?: (() => void) | undefined = undefined;
@@ -46,11 +47,6 @@ export class StarService implements Service {
     );
   }
 
-  @postConstruct()
-  private postConstruct() {
-    this.updateCurrent().subscribe();
-  }
-
   private offlineReduceStar(nextStarType: StarType): Observable<unknown> {
     if (this.current$ === null) {
       return of(null);
@@ -89,6 +85,11 @@ export class StarServiceFactory implements ServiceFactory<[string], StarService>
   public constructor(private _authService: AuthService, private api: StarApi) {}
 
   public factory(belong: string) {
-    return new StarService(this._authService, this.api, belong);
+    const service = new StarService(this._authService, this.api, belong);
+
+    service.updateCurrent().subscribe();
+    return service;
   }
 }
+
+container.bind(StarServiceFactory).toSelf();

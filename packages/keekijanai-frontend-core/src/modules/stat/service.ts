@@ -23,11 +23,6 @@ export class StatService implements Service {
       switchMapTo(of(null))
     );
   }
-
-  @postConstruct()
-  private postConstruct() {
-    this.updateVisit().subscribe();
-  }
 }
 
 @injectable()
@@ -36,6 +31,8 @@ export class StatServiceFactory implements ServiceFactory<[string], StatService>
   public constructor(private api: StatApi) {}
 
   public factory(belong: string): StatService {
-    return new StatService(this.api, belong);
+    const service = new StatService(this.api, belong);
+    service.updateVisit().subscribe();
+    return service;
   }
 }

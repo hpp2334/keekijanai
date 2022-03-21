@@ -3,6 +3,7 @@ import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable } from "rxjs";
 import { AxiosResponse } from "axios";
+import { container } from "@/core/container";
 
 @injectable()
 export class StarApi {
@@ -26,3 +27,5 @@ export class StarApi {
     });
   }
 }
+
+container.bind(StarApi).toSelf();

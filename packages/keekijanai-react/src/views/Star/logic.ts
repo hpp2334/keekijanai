@@ -1,7 +1,4 @@
+import { createServiceHook } from "@/common/service";
 import { createService, StarServiceFactory } from "@keekijanai/frontend-core";
 
-export const useStarService = (belong: string) => {
-  const service = createService(StarServiceFactory, belong);
-
-  return service;
-};
+export const useStarService = createServiceHook(StarServiceFactory);
