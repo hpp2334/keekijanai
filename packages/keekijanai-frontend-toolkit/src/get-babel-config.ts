@@ -5,8 +5,9 @@ export function getBabelConfig({ isProd, isTSX }: { isProd: boolean; isTSX: bool
         "@babel/preset-env",
         {
           targets: {
-            node: "12",
+            node: "14",
           },
+          modules: false,
         },
       ],
       [
