@@ -1,6 +1,3 @@
+pub(crate) mod error_handler;
 pub mod request;
 pub mod response;
-mod tags;
-pub mod resp_error_middleware;
-
-pub use tags::{ApiTags};

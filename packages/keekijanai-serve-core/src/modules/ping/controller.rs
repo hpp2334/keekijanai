@@ -1,12 +1,9 @@
-use poem_openapi::{payload::PlainText, OpenApi};
-use crate::core::ApiTags;
+use axum::{routing, Router};
 
-pub struct PingController;
+async fn ping() -> &'static str {
+    "pong"
+}
 
-#[OpenApi(prefix_path = "/keekijanai/ping", tag = "ApiTags::Ping")]
-impl PingController {
-    #[oai(path = "/", method = "get")]
-    async fn ping(&self) -> poem::Result<PlainText<&'static str>> {
-        return Ok(PlainText("pong"));
-    }
+pub fn get_router() -> Router {
+    Router::new().route("/", routing::get(ping))
 }

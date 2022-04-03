@@ -1,37 +1,18 @@
-use poem::web;
-use poem_openapi::{
-    param,
-    payload::{Json, PlainText},
-    Object, OpenApi,
+use axum::{
+    extract::{Path, Query},
+    response::{IntoResponse, Redirect},
+    routing, Extension, Json, Router,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{setting::SETTING, ApiTags, Service},
+    core::{setting::SETTING, ServeError, Service},
     modules::user::model::{User, UserVO},
 };
 
 use super::{oauth2::core::OAuth2Service, service::AuthService, UserInfo};
 
-#[derive(Debug, Object)]
-struct LoginParams {
-    username: String,
-    password: String,
-}
-
-#[derive(Debug, Object)]
-struct LoginRespPayload {
-    user: UserVO,
-    token: String,
-}
-
-#[derive(Debug, Object)]
-struct RegisterParams {
-    username: String,
-    password: String,
-}
-
-#[derive(Debug, Object)]
+#[derive(Debug, Serialize)]
 struct CurrentRespPayload {
     user: UserVO,
 }
@@ -44,81 +25,29 @@ pub struct Outh2LoginQuery {
 #[derive(Debug)]
 pub struct AuthController;
 
-#[OpenApi(prefix_path = "/keekijanai/auth", tag = "ApiTags::Auth")]
-impl AuthController {
-    #[oai(path = "/oauth2/:provider", method = "get")]
-    async fn outh2_login_url(
-        &self,
-        provider: param::Path<String>,
-    ) -> poem::Result<PlainText<String>> {
-        let provider = (*provider).clone();
-        let url = AuthService::serve()
-            .oauth2_mgr
-            .get(provider.as_str())?
-            .get_auth_url();
-
-        Ok(PlainText(url))
-    }
-
-    #[oai(path = "/login", method = "post")]
-    async fn legacy_login(
-        &self,
-        user_info: web::Data<&UserInfo>,
-        params: Json<LoginParams>,
-    ) -> poem::Result<Json<LoginRespPayload>> {
-        tracing::debug!("in legacy_login");
-        if !user_info.is_anonymous() {
-            return Err(super::error::HasLogin(user_info.id))?;
-        }
-
-        let auth_service = AuthService::serve();
-
-        tracing::debug!("before call legacy_login (id = {})", user_info.id);
-        let mut auth_login_res = auth_service
-            .legacy_login(params.username.as_str(), params.password.as_str())
-            .await?;
-        auth_login_res.user.password = None;
-        let resp = LoginRespPayload {
-            user: auth_login_res.user.into(),
-            token: auth_login_res.token,
-        };
-        Ok(Json(resp))
-    }
-
-    #[oai(path = "/register", method = "post")]
-    async fn legacy_register(
-        &self,
-        params: Json<RegisterParams>,
-    ) -> poem::Result<PlainText<&'static str>> {
-        let auth_service = AuthService::serve();
-
-        let _res = auth_service
-            .legacy_register(params.username.as_str(), params.password.as_str())
-            .await?;
-        Ok(PlainText(""))
-    }
-
-    #[oai(path = "/current", method = "get")]
-    async fn current(
-        &self,
-        user_info: web::Data<&UserInfo>,
-    ) -> poem::Result<Json<CurrentRespPayload>> {
-        if user_info.is_anonymous() {
-            return Err(super::error::NotLogin)?;
-        }
-        let user = User::clone(*user_info);
-        let resp = CurrentRespPayload { user: user.into() };
-        Ok(Json(resp))
-    }
+async fn outh2_login_url(Path(provider): Path<String>) -> Result<String, ServeError> {
+    let url = AuthService::serve()
+        .oauth2_mgr
+        .get(&provider)?
+        .get_auth_url();
+    Ok(url)
 }
 
-#[poem::handler]
-pub async fn outh2_login(
-    poem::web::Path((provider,)): poem::web::Path<(String,)>,
-    query: poem::web::Query<Outh2LoginQuery>,
-) -> poem::Result<poem::web::Redirect> {
-    let code = &query.code;
+async fn current(
+    Extension(user_info): Extension<&UserInfo>,
+) -> Result<Json<CurrentRespPayload>, ServeError> {
+    if user_info.is_anonymous() {
+        return Err(super::error::NotLogin)?;
+    }
+    let user = User::clone(user_info);
+    let resp = CurrentRespPayload { user: user.into() };
+    Ok(Json(resp))
+}
 
+async fn outh2_login(
+    Path(provider): Path<String>,
+    Query(Outh2LoginQuery { code }): Query<Outh2LoginQuery>,
+) -> Result<Redirect, ServeError> {
     let res = AuthService::serve()
         .login_oauth2(provider.as_str(), code.as_str())
         .await?;
@@ -126,6 +55,13 @@ pub async fn outh2_login(
     let setting = SETTING.get().unwrap();
     let redirect_url = setting.auth.redirect_url.as_ref().clone().unwrap();
     let redirect_url = format!("{}?token={}", redirect_url, res.token);
-    let redirect_url = redirect_url.parse::<poem::http::Uri>().unwrap();
-    Ok(poem::web::Redirect::moved_permanent(redirect_url))
+    let redirect_url = redirect_url.parse::<axum::http::Uri>().unwrap();
+    Ok(Redirect::permanent(&redirect_url.to_string()))
+}
+
+pub fn get_router() -> Router {
+    Router::new()
+        .route("/oauth2/:provider", routing::get(outh2_login_url))
+        .route("/oauth2/:provider/callback", routing::get(outh2_login))
+        .route("/current", routing::get(current))
 }

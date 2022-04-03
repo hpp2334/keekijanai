@@ -1,6 +1,5 @@
-use poem_openapi::Object;
 use sea_query::{Iden, Value};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 // id INTEGER PRIMARY KEY AUTOINCREMENT,
 // scope varchar(150) NOT NULL,
@@ -12,7 +11,7 @@ use serde::Serialize;
 // parent_id bigint,
 // child_counts int DEFAULT 0
 
-use crate::{core::db::ActiveColumn};
+use crate::core::db::ActiveColumn;
 
 #[derive(Iden)]
 pub enum KeekijanaiComment {
@@ -45,7 +44,7 @@ pub struct CommentModel {
     pub updated_time: i64,
 }
 
-#[derive(Default, Debug, Clone, Object)]
+#[derive(Default, Debug, Clone, Serialize, Deserialize)]
 pub struct CommentActiveModel {
     pub id: ActiveColumn<i64>,
     pub belong: ActiveColumn<String>,
@@ -59,7 +58,7 @@ pub struct CommentActiveModel {
     pub updated_time: ActiveColumn<i64>,
 }
 
-#[derive(Debug, Object)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Comment {
     pub id: i64,
     pub belong: String,
@@ -73,7 +72,7 @@ pub struct Comment {
     pub updated_time: i64,
 }
 
-#[derive(Debug, Object)]
+#[derive(Debug, Serialize)]
 pub struct CommentVO {
     pub id: i64,
     pub belong: String,

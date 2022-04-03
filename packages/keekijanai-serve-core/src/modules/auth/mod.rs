@@ -1,8 +1,7 @@
-pub mod error;
 pub mod controller;
-pub mod service;
-pub mod oauth2;
+pub mod error;
 pub mod middleware;
+pub mod oauth2;
+pub mod service;
 
 pub(crate) use middleware::*;
-pub(crate) use error::convert_error_middleware::ConvertErrorMiddleware;

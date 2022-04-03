@@ -34,10 +34,8 @@ num-derive = "0.3"
 jsonwebtoken = "7"
 config = "0.11.0"
 once_cell = "1.9.0"
-poem = { version = "=1.2.7", features = ["compression", "anyhow", "cookie"] }
-poem-openapi = { version = "=1.2.7", features = ["swagger-ui"] }
-poem-openapi-derive = { version = "=1.2.7" }
-proc-macro2 = "1.0"
+axum = { version = "0.5", features = ["headers"] }
+tower = { version = "0.4", features = ["util", "tokio-util", "tokio"] }
+tower-cookies = "0.6.0"
 rust-argon2 = "0.8"
-keekijanai-serve-resp-err-macro = { version = "0.1.0-alpha.0", path = "../keekijanai-serve-resp-err-macro" }
-keekijanai-serve-resp-err = { version = "0.1.0-alpha.0", path = "../keekijanai-serve-resp-err" }
+keekijanai-serve-macro = { version = "0.1.0-alpha.0", path = "../keekijanai-serve-macro" }

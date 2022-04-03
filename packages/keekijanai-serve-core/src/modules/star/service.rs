@@ -6,11 +6,14 @@ use sea_query::PostgresQueryBuilder;
 
 use crate::{
     core::{db::get_pool, Service},
-    modules::{auth::UserInfo, star::model::StarModelColumns, user::error::OpType},
+    modules::{
+        auth::error::{InsufficientPrivilege, OpType},
+        auth::UserInfo,
+        star::model::StarModelColumns,
+    },
 };
 
 use super::model::{StarActiveModel, StarType};
-use crate::modules::user::error as user_error;
 
 #[derive(sqlx::FromRow)]
 struct GroupedDetailSQLResultItem {
@@ -227,7 +230,7 @@ impl StarService {
     pub async fn check_priv_read(&self, user_info: &UserInfo) -> anyhow::Result<()> {
         let ok = self.has_priv_read(user_info).await?;
         if !ok {
-            return Err(user_error::InsufficientPrivilege(
+            return Err(InsufficientPrivilege(
                 user_info.id,
                 "star",
                 OpType::READ,
@@ -239,7 +242,7 @@ impl StarService {
     pub async fn check_priv_update(&self, user_info: &UserInfo) -> anyhow::Result<()> {
         let ok = self.has_priv_update(user_info).await?;
         if !ok {
-            return Err(user_error::InsufficientPrivilege(
+            return Err(InsufficientPrivilege(
                 user_info.id,
                 "star",
                 OpType::UPDATE,

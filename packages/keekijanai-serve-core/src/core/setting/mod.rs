@@ -10,9 +10,7 @@ pub struct Github {
 #[derive(Debug, Deserialize)]
 pub struct Auth {
     pub secret: String,
-    pub legacy_auth_salt: String,
     pub redirect_url: Option<String>,
-
     pub github: Option<Github>,
 }
 
@@ -30,10 +28,9 @@ pub struct Setting {
 #[derive(Debug, Deserialize)]
 pub struct EnvSetting {
     pub database: String,
+    pub auth_secret: String,
     pub github_id: Option<String>,
     pub github_secret: Option<String>,
-    pub auth_secret: String,
-    pub legacy_auth_salt: String,
     pub redirect: Option<String>,
 }
 
@@ -60,7 +57,6 @@ impl Setting {
         let setting: Setting = Setting {
             auth: Auth {
                 secret: setting.auth_secret,
-                legacy_auth_salt: setting.legacy_auth_salt,
                 redirect_url: setting.redirect,
                 github: if setting.github_id.is_none() {
                     None

@@ -1,10 +1,8 @@
 
 [workspace]
 members = [
-  "packages/keekijanai-serve-resp-err",
-  "packages/keekijanai-serve-resp-err-macro",
+  "packages/keekijanai-serve-macro",
   "packages/keekijanai-serve-core",
-  "packages/keekijanai-serve-vercel-adapter",
   "packages/keekijanai-serve-rust-server-demo"
 ]
 exclude = [

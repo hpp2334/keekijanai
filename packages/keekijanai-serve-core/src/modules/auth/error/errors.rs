@@ -1,80 +1,62 @@
-use keekijanai_serve_resp_err_macro::KeekijanaiRespErr;
-use poem::http::StatusCode;
+use axum::http::StatusCode;
+use keekijanai_serve_macro::KeekijanaiRespErr;
 
-/// OAuth2(error_msg)
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
 #[error("Not Login")]
-#[resp_err = "Auth/OAuth2"]
+#[resp_err(code = "Auth/OAuth2", status = "StatusCode::UNAUTHORIZED")]
 pub struct OAuth2(pub String);
 
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
 #[error("Not Login")]
-#[resp_err = "Auth/NotLogin"]
+#[resp_err(code = "Auth/NotLogin", status = "StatusCode::UNAUTHORIZED")]
 pub struct NotLogin;
 
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
 #[error("User Not Found ({0})")]
-#[resp_err = "Auth/UserNotFound"]
+#[resp_err(code = "Auth/UserNotFound", status = "StatusCode::UNAUTHORIZED")]
 pub struct UserNotFound(pub String);
 
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
 #[error("User exists")]
-#[resp_err = "Auth/UserExists"]
+#[resp_err(code = "Auth/UserExists", status = "StatusCode::UNAUTHORIZED")]
 pub struct UserExists(pub String);
 
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
 #[error("Expired Token")]
-#[resp_err = "Auth/ExpiredToken"]
+#[resp_err(code = "Auth/ExpiredToken", status = "StatusCode::UNAUTHORIZED")]
 pub struct ExpiredToken;
 
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
 #[error("Has login (user = {0})")]
-#[resp_err = "Auth/HasLogin"]
+#[resp_err(code = "Auth/HasLogin", status = "StatusCode::FORBIDDEN")]
 pub struct HasLogin(pub i64);
 
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
 #[error("Password not match ({0})")]
-#[resp_err = "Auth/PasswordNotMatch"]
+#[resp_err(code = "Auth/PasswordNotMatch", status = "StatusCode::UNAUTHORIZED")]
 pub struct PasswordNotMatch(pub String);
 
-impl poem::error::ResponseError for OAuth2 {
-    fn status(&self) -> StatusCode {
-        StatusCode::BAD_REQUEST
+#[derive(Debug)]
+pub enum OpType {
+    CREATE,
+    READ,
+    UPDATE,
+    DELETE,
+}
+
+impl ToString for OpType {
+    fn to_string(&self) -> String {
+        match self {
+            &OpType::CREATE => "CREATE".to_owned(),
+            &OpType::READ => "READ".to_owned(),
+            &OpType::UPDATE => "UPDATE".to_owned(),
+            &OpType::DELETE => "DELETE".to_owned(),
+        }
     }
 }
 
-impl poem::error::ResponseError for NotLogin {
-    fn status(&self) -> StatusCode {
-        StatusCode::UNAUTHORIZED
-    }
-}
-
-impl poem::error::ResponseError for UserExists {
-    fn status(&self) -> StatusCode {
-        StatusCode::BAD_REQUEST
-    }
-}
-
-impl poem::error::ResponseError for UserNotFound {
-    fn status(&self) -> StatusCode {
-        StatusCode::UNAUTHORIZED
-    }
-}
-
-impl poem::error::ResponseError for ExpiredToken {
-    fn status(&self) -> StatusCode {
-        StatusCode::UNAUTHORIZED
-    }
-}
-
-impl poem::error::ResponseError for HasLogin {
-    fn status(&self) -> StatusCode {
-        StatusCode::FORBIDDEN
-    }
-}
-
-impl poem::error::ResponseError for PasswordNotMatch {
-    fn status(&self) -> StatusCode {
-        StatusCode::UNAUTHORIZED
-    }
-}
+/// InsufficientPrivilege(user_id, resource_key, operation, extra_msg)
+#[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
+#[error("Insufficient Privilege")]
+#[resp_err(code = "User/InsufficientPrivilege", status = "StatusCode::FORBIDDEN")]
+pub struct InsufficientPrivilege(pub i64, pub &'static str, pub OpType, pub String);

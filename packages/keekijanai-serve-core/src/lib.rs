@@ -13,21 +13,39 @@ mod helpers;
 
 pub mod modules;
 
+use std::sync::atomic::{AtomicBool, Ordering};
+
+use axum::response::IntoResponse;
 use once_cell::sync::Lazy;
-pub use poem;
+use tower::ServiceExt;
 
-pub use modules::{get_keekijanai_endpoint, write_keekijanai_openapi_spec};
-use tokio::sync::Mutex;
-
-static INIT_MUTEX: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
+static INIT_MUTEX: Lazy<AtomicBool> = Lazy::new(Default::default);
 
 pub async fn init() {
-    let mut mutex = INIT_MUTEX.lock().await;
-    if *mutex == true {
+    let result = INIT_MUTEX.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst);
+    if result != Ok(true) {
         return;
     }
 
     crate::core::setting::Setting::init();
     crate::core::db::init_pool().await.unwrap();
-    *mutex = true;
+}
+
+/// `init` method should be called before
+pub async fn process_entire_request(
+    req: axum::http::Request<axum::body::Body>,
+) -> impl IntoResponse {
+    let router = modules::get_router();
+    let resp = router.oneshot(req).await.unwrap();
+
+    resp
+}
+
+/// `init` method should be called before
+pub async fn run_server(addr: &str) {
+    let app = modules::get_router();
+    axum::Server::bind(&addr.parse().unwrap())
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
 }

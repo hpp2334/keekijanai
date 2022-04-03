@@ -1,5 +1,5 @@
 [package]
-name = "keekijanai-serve-resp-err-macro"
+name = "keekijanai-serve-macro"
 version = "0.1.0-alpha.0"
 edition = "2021"
 description = "No description"
@@ -11,6 +11,6 @@ license = "MIT"
 proc-macro = true
 
 [dependencies]
-syn = "1.0"
+syn = { version = "1.0", features = ["parsing"] }
 quote = "1.0"
-keekijanai-serve-resp-err = { version = "0.1.0-alpha.0", path = "../keekijanai-serve-resp-err" }
+darling = "0.13.2"

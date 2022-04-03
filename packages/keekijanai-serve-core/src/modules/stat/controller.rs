@@ -1,34 +1,34 @@
+use axum::{extract::Query, response::IntoResponse, routing, Extension, Json, Router, TypedHeader};
+use serde::{Deserialize, Serialize};
 
+use crate::core::{ServeError, Service};
 
-use poem_openapi::{param, payload::Json, Object, OpenApi};
+use super::{middleware::attch_uuid_middleware, middleware::AttchedUuid, service::StatService};
 
+#[derive(Debug, Deserialize)]
+struct VisitQuery {
+    belong: String,
+}
 
-use crate::{core::ApiTags, core::Service};
-
-use super::service::StatService;
-
-#[derive(Debug, Object)]
+#[derive(Debug, Serialize)]
 pub struct VisitRespPayload {
     pv: i64,
     uv: i64,
 }
 
-#[derive(Debug)]
-pub struct StatController;
+async fn visit(
+    Extension(AttchedUuid(uuid)): Extension<AttchedUuid>,
+    Query(VisitQuery { belong }): Query<VisitQuery>,
+) -> Result<impl IntoResponse, ServeError> {
+    let stat_service = StatService::serve();
+    let belong = belong.as_str();
+    let (pv, uv) = stat_service.visit(belong, &uuid).await?;
 
-#[OpenApi(prefix_path = "/keekijanai/stat", tag = "ApiTags::Stat")]
-impl StatController {
-    #[oai(path = "/", method = "put")]
-    async fn visit(
-        &self,
-        _keekijanai_uuid: param::Cookie<String>,
-        belong: param::Query<String>,
-    ) -> poem::Result<Json<VisitRespPayload>> {
-        let stat_service = StatService::serve();
-        let belong = belong.as_str();
-        let uuid = _keekijanai_uuid.as_str();
-        let (pv, uv) = stat_service.visit(belong, uuid).await?;
+    Ok(Json(VisitRespPayload { pv, uv }))
+}
 
-        Ok(Json(VisitRespPayload { pv, uv }))
-    }
+pub fn get_router() -> Router {
+    Router::new()
+        .route("/", routing::put(visit))
+        .route_layer(axum::middleware::from_fn(attch_uuid_middleware))
 }

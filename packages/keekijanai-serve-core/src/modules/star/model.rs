@@ -1,11 +1,10 @@
 use num_derive::FromPrimitive;
 use num_traits::{FromPrimitive, ToPrimitive};
-use poem_openapi::{Enum, Object};
 use sea_query::{Iden, Value};
 
 use crate::core::db::ActiveColumn;
 
-#[derive(FromPrimitive, ToPrimitive, PartialEq, Eq, Hash, Enum, Debug)]
+#[derive(FromPrimitive, ToPrimitive, PartialEq, Eq, Hash, Debug)]
 pub enum StarType {
     UnStar = 0,
     Bad,
@@ -32,7 +31,7 @@ pub struct StarModel {
     pub belong: String,
 }
 
-#[derive(Default, Debug, Clone, Object)]
+#[derive(Default, Debug, Clone)]
 pub struct StarActiveModel {
     pub id: ActiveColumn<i64>,
     pub user_id: ActiveColumn<i64>,

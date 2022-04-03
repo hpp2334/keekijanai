@@ -1,24 +1,25 @@
-use crate::core::{ApiTags, Service};
-use poem_openapi::{payload::Json, Object, OpenApi};
+use crate::core::{ServeError, Service};
+use axum::{response::IntoResponse, routing, Json, Router};
+use serde::Serialize;
 
 use super::service::TimeService;
 
 pub struct TimeController;
 
-#[derive(Object)]
+#[derive(Serialize)]
 struct GetTimeResponse {
     time: String,
 }
 
-#[OpenApi(prefix_path = "/keekijanai/time", tag = "ApiTags::Time")]
-impl TimeController {
-    #[oai(path = "/", method = "get")]
-    async fn time(&self) -> poem::Result<Json<GetTimeResponse>> {
-        let time_service = TimeService::serve();
-        let timestamp = time_service.now().await?;
-        let time = timestamp.as_millis();
-        return Ok(Json(GetTimeResponse {
-            time: time.to_string(),
-        }));
-    }
+async fn time() -> Result<impl IntoResponse, ServeError> {
+    let time_service = TimeService::serve();
+    let timestamp = time_service.now().await?;
+    let time = timestamp.as_millis();
+    return Ok(Json(GetTimeResponse {
+        time: time.to_string(),
+    }));
+}
+
+pub fn get_router() -> Router {
+    Router::new().route("/", routing::get(time))
 }

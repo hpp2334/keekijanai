@@ -6,11 +6,13 @@ use serde::Deserialize;
 use crate::{
     core::{db::get_pool, Service},
     modules::{
-        auth::UserInfo,
+        auth::{
+            error::{InsufficientPrivilege, OpType},
+            UserInfo,
+        },
         comment::model::{CommentModel, CommentModelColumns},
         time::service::TimeService,
         user::{
-            error::OpType,
             model::{User, UserRole},
             service::UserService,
         },
@@ -21,7 +23,6 @@ use super::{
     data::CommentData,
     model::{Comment, CommentActiveModel},
 };
-use crate::modules::user::error as user_error;
 
 #[derive(Deserialize, Clone)]
 pub struct ListCommentParams {
@@ -352,7 +353,7 @@ impl CommentService {
     pub async fn check_priv_create(&self, user_info: &UserInfo) -> anyhow::Result<()> {
         let ok = self.has_priv_create(user_info).await?;
         if !ok {
-            return Err(user_error::InsufficientPrivilege(
+            return Err(InsufficientPrivilege(
                 user_info.id,
                 "comment",
                 OpType::CREATE,
@@ -364,7 +365,7 @@ impl CommentService {
     pub async fn check_priv_remove(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<()> {
         let ok = self.has_priv_remove(user_info, id).await?;
         if !ok {
-            return Err(user_error::InsufficientPrivilege(
+            return Err(InsufficientPrivilege(
                 user_info.id,
                 "comment",
                 OpType::DELETE,
@@ -376,7 +377,7 @@ impl CommentService {
     pub async fn check_priv_update(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<()> {
         let ok = self.has_priv_update(user_info, id).await?;
         if !ok {
-            return Err(user_error::InsufficientPrivilege(
+            return Err(InsufficientPrivilege(
                 user_info.id,
                 "comment",
                 OpType::UPDATE,

@@ -1,13 +1,9 @@
-use poem_openapi::{
-    types::{ParseFromJSON, ToJSON, Type},
-    Object,
-};
 use serde::Serialize;
 
-#[derive(Debug, Object)]
+#[derive(Debug, Serialize)]
 pub struct CursorPagination<C>
 where
-    C: Sync + Send + Type + ParseFromJSON + ToJSON,
+    C: Sync + Send,
 {
     pub cursor: Option<C>,
     pub limit: i32,

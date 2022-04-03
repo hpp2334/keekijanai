@@ -2,12 +2,12 @@ use std::sync::Arc;
 
 use num_traits::{FromPrimitive, ToPrimitive};
 use once_cell::sync::Lazy;
-use poem_openapi::{Enum, Object};
 use sea_query::{Iden, Value};
+use serde::{Deserialize, Serialize};
 
 use crate::core::db::ActiveColumn;
 
-#[derive(Clone, Debug, PartialEq, Enum, FromPrimitive, ToPrimitive)]
+#[derive(Clone, Debug, PartialEq, FromPrimitive, ToPrimitive)]
 pub enum UserRole {
     Anonymous = 0,
     Public,
@@ -56,7 +56,7 @@ pub struct UserActiveModel {
     pub email: ActiveColumn<String>,
 }
 
-#[derive(Clone, Debug, Object)]
+#[derive(Clone, Debug)]
 pub struct User {
     pub id: i64,
     pub name: String,
@@ -69,7 +69,7 @@ pub struct User {
     pub email: Option<String>,
 }
 
-#[derive(Debug, Object)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct UserVO {
     pub id: i64,
     pub name: String,
