@@ -397,6 +397,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "cslice"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "697c714f50560202b1f4e2e09cd50a421881c83e9025db75d15f276616f04f40"
+
+[[package]]
 name = "darling"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -961,6 +967,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "keekijanai-serve-node-wrapper"
+version = "0.1.0"
+dependencies = [
+ "keekijanai-serve-core",
+ "neon",
+ "tokio",
+]
+
+[[package]]
 name = "keekijanai-serve-rust-server-demo"
 version = "0.1.0"
 dependencies = [
@@ -1002,6 +1017,16 @@ name = "libc"
 version = "0.2.121"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "efaa7b300f3b5fe8eb6bf21ce3895e1751d9665086af2d64b42f19701015ff4f"
+
+[[package]]
+name = "libloading"
+version = "0.6.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "351a32417a12d5f7e82c368a66781e307834dae04c6ce0cd4456d52989229883"
+dependencies = [
+ "cfg-if",
+ "winapi",
+]
 
 [[package]]
 name = "linked-hash-map"
@@ -1126,6 +1151,47 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "tempfile",
+]
+
+[[package]]
+name = "neon"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e85820b585bf3360bf158ac87a75764c48e361c91bbeb69873e6613cc78c023"
+dependencies = [
+ "cslice",
+ "neon-build",
+ "neon-macros",
+ "neon-runtime",
+ "semver 0.9.0",
+ "smallvec",
+]
+
+[[package]]
+name = "neon-build"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ad9febc63f515156d4311a0c43899d3ace46352ecdd591c21b98ca3974f2a0d0"
+
+[[package]]
+name = "neon-macros"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "987f12c91eb6ce0b67819f7c5fb4d391de64cf411c605ed027f03507a33943b2"
+dependencies = [
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "neon-runtime"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "02662cd2e62b131937bdef85d0918b05bc3c204daf4c64af62845403eccb60f3"
+dependencies = [
+ "cfg-if",
+ "libloading",
+ "smallvec",
 ]
 
 [[package]]

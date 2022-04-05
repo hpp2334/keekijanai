@@ -9,12 +9,13 @@
     "vercel:dev": "vercel dev"
   },
   "dependencies": {
-    "@keekijanai/react": "workspace:*",
     "@keekijanai/frontend-core": "workspace:*",
+    "@keekijanai/react": "workspace:*",
+    "@keekijanai/vercel-adapter": "workspace:*",
+    "gatsby": "^4.7.0",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "reflect-metadata": "^0.1.13",
-    "gatsby": "^4.7.0"
+    "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "gatsby-plugin-pnpm": "^1.2.10",

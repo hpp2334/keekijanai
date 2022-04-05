@@ -1,0 +1,20 @@
+[package]
+name = "keekijanai-serve-node-wrapper"
+version = "0.1.0"
+edition = "2018"
+exclude = ["index.node"]
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+keekijanai-serve-core = { path = "../keekijanai-serve-core" }
+tokio = { version = "1", features = ["full"] }
+
+[dependencies.neon]
+version = "0.9"
+default-features = false
+features = ["napi-6"]

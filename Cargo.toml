@@ -3,7 +3,8 @@
 members = [
   "packages/keekijanai-serve-macro",
   "packages/keekijanai-serve-core",
-  "packages/keekijanai-serve-rust-server-demo"
+  "packages/keekijanai-serve-rust-server-demo",
+  "packages/keekijanai-serve-node-wrapper"
 ]
 exclude = [
   "packages/keekijanai-gatsby-vercel-demo/api"

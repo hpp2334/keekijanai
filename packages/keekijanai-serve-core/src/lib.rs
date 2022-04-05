@@ -15,9 +15,13 @@ pub mod modules;
 
 use std::sync::atomic::{AtomicBool, Ordering};
 
-use axum::response::IntoResponse;
 use once_cell::sync::Lazy;
-use tower::ServiceExt;
+
+pub use self::core::controller::manual_call::{EntireRequest, EntireResponse};
+pub use axum::{
+    body::HttpBody,
+    response::{IntoResponse, Response},
+};
 
 static INIT_MUTEX: Lazy<AtomicBool> = Lazy::new(Default::default);
 
@@ -32,20 +36,16 @@ pub async fn init() {
 }
 
 /// `init` method should be called before
-pub async fn process_entire_request(
-    req: axum::http::Request<axum::body::Body>,
-) -> impl IntoResponse {
-    let router = modules::get_router();
-    let resp = router.oneshot(req).await.unwrap();
-
-    resp
-}
-
-/// `init` method should be called before
 pub async fn run_server(addr: &str) {
     let app = modules::get_router();
     axum::Server::bind(&addr.parse().unwrap())
         .serve(app.into_make_service())
         .await
         .unwrap();
+}
+
+/// `init` method should be called before
+pub async fn process_entire_request(req: EntireRequest) -> EntireResponse {
+    let router = crate::modules::get_router();
+    crate::core::controller::manual_call::manual_call_with_entire_request(router, req).await
 }
