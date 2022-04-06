@@ -1,4 +1,4 @@
-use axum::{http::StatusCode, response::IntoResponse, BoxError};
+use axum::{http::StatusCode, response::IntoResponse};
 
 use crate::core::ServeError;
 

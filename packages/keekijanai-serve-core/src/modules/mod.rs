@@ -5,9 +5,9 @@ pub mod star;
 pub mod stat;
 pub mod time;
 pub mod user;
-use std::hash::Hasher;
 
-use axum::{error_handling::HandleErrorLayer, Router};
+
+use axum::{Router};
 
 pub(crate) fn get_router() -> Router {
     Router::new().nest(

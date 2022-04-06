@@ -1,4 +1,4 @@
-use axum::{extract::Query, response::IntoResponse, routing, Extension, Json, Router, TypedHeader};
+use axum::{extract::Query, response::IntoResponse, routing, Extension, Json, Router};
 use serde::{Deserialize, Serialize};
 
 use crate::core::{ServeError, Service};

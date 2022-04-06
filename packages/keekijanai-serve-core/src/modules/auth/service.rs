@@ -8,14 +8,14 @@ use crate::{
         },
     },
 };
-use argon2::{self};
+
 use jsonwebtoken::TokenData;
 
 use serde::{Deserialize, Serialize};
 
 use super::oauth2::{core::OAuth2Service, OAuth2Manager};
 
-use super::error as auth_error;
+
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {

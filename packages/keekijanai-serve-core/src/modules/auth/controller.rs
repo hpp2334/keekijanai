@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, Query},
-    response::{IntoResponse, Redirect},
+    response::{Redirect},
     routing, Extension, Json, Router,
 };
 use serde::{Deserialize, Serialize};

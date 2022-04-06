@@ -5,8 +5,8 @@ use darling::FromMeta;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parenthesized, parse::Parse, parse_macro_input, parse_quote, punctuated::Punctuated, token,
-    DeriveInput, Lit, LitStr, MetaNameValue, NestedMeta, Path, Stmt, Token, Type,
+    parenthesized, parse::Parse, parse_macro_input, punctuated::Punctuated, token,
+    DeriveInput, Lit, NestedMeta, Path, Token,
 };
 
 #[derive(Debug, FromMeta)]
