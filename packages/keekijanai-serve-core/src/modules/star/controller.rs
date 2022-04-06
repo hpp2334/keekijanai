@@ -31,7 +31,7 @@ struct UpdateStarQuery {
 }
 
 async fn get_star(
-    Extension(user_info): Extension<&UserInfo>,
+    Extension(user_info): Extension<UserInfo>,
     Query(GetStarQuery { belong }): Query<GetStarQuery>,
 ) -> Result<impl IntoResponse, ServeError> {
     tracing::debug!("before get_current");
@@ -53,12 +53,12 @@ async fn get_star(
 }
 
 async fn update_star(
-    Extension(user_info): Extension<&UserInfo>,
+    Extension(user_info): Extension<UserInfo>,
     Query(UpdateStarQuery { belong }): Query<UpdateStarQuery>,
     Json(req_body): Json<UpdateStarReqPayload>,
 ) -> Result<impl IntoResponse, ServeError> {
     StarService::serve()
-        .update_star_by_belong_and_star_type(user_info, belong.as_str(), &req_body.star_type)
+        .update_star_by_belong_and_star_type(&user_info, belong.as_str(), &req_body.star_type)
         .await?;
 
     Ok(())
@@ -67,5 +67,5 @@ async fn update_star(
 pub fn get_router() -> Router {
     Router::new()
         .route("/", routing::get(get_star))
-        .route("/", routing::post(update_star))
+        .route("/", routing::put(update_star))
 }

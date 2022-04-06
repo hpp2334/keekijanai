@@ -1,9 +1,7 @@
 /target
-.env
+
 node_modules
 dist
-
-keekijanai_config.yml
 
 *.log
 

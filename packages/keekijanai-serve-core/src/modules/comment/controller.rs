@@ -140,28 +140,28 @@ async fn get_comment_tree(
 }
 
 async fn create_comment(
-    Extension(user_info): Extension<&UserInfo>,
+    Extension(user_info): Extension<UserInfo>,
     Json(params): Json<CreateCommentParams>,
 ) -> Result<impl IntoResponse, ServeError> {
     let created = CommentService::serve()
-        .create(user_info, params.payload)
+        .create(&user_info, params.payload)
         .await?;
 
     let resp_payload = CreateCommentRespPayload {
         payload: created.into(),
-        user: User::clone(user_info).into(),
+        user: User::clone(&user_info).into(),
     };
 
     Ok(Json(resp_payload))
 }
 
 async fn update_comment(
-    Extension(user_info): Extension<&UserInfo>,
+    Extension(user_info): Extension<UserInfo>,
     Path(id): Path<i64>,
     Json(params): Json<UpdateCommentParams>,
 ) -> Result<impl IntoResponse, ServeError> {
     let updated = CommentService::serve()
-        .update(user_info, id, params.payload)
+        .update(&user_info, id, params.payload)
         .await?;
 
     let resp_payload = UpdateCommentRespPayload {
@@ -172,10 +172,10 @@ async fn update_comment(
 }
 
 async fn delete_comment(
-    Extension(user_info): Extension<&UserInfo>,
+    Extension(user_info): Extension<UserInfo>,
     Path(id): Path<i64>,
 ) -> Result<impl IntoResponse, ServeError> {
-    let _res = CommentService::serve().remove(user_info, id).await?;
+    let _res = CommentService::serve().remove(&user_info, id).await?;
 
     Ok(())
 }

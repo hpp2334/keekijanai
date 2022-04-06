@@ -6,18 +6,30 @@ pub mod stat;
 pub mod time;
 pub mod user;
 
+use std::time::Duration;
 
-use axum::{Router};
+use axum::Router;
+use tower_http::classify::ServerErrorsFailureClass;
+use tracing::Span;
 
 pub(crate) fn get_router() -> Router {
-    Router::new().nest(
-        "/keekijanai/api",
-        Router::new()
-            .nest("/ping", ping::controller::get_router())
-            .nest("/star", star::controller::get_router())
-            .nest("/stat", stat::controller::get_router())
-            .nest("/time", time::controller::get_router())
-            .nest("/auth", auth::controller::get_router())
-            .nest("/comment", comment::controller::get_router()),
-    )
+    Router::new()
+        .nest(
+            "/api/keekijanai",
+            Router::new()
+                .nest("/ping", ping::controller::get_router())
+                .nest("/star", star::controller::get_router())
+                .nest("/stat", stat::controller::get_router())
+                .nest("/time", time::controller::get_router())
+                .nest("/auth", auth::controller::get_router())
+                .nest("/comment", comment::controller::get_router())
+                .route_layer(axum::middleware::from_fn(
+                    auth::middleware::user_info_middleware,
+                )),
+        )
+        .layer(tower_cookies::CookieManagerLayer::new())
+        .layer(tower_http::trace::TraceLayer::new_for_http())
+        .route_layer(axum::middleware::from_fn(
+            crate::core::error::middleware::conver_resp_error_middleware,
+        ))
 }

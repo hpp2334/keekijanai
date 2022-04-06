@@ -37,5 +37,6 @@ once_cell = "1.9.0"
 axum = { version = "0.5", features = ["headers"] }
 tower = { version = "0.4", features = ["util", "tokio-util", "tokio"] }
 tower-cookies = "0.6.0"
+tower-http = { version = "0.2", features = ["full"] }
 rust-argon2 = "0.8"
 keekijanai-serve-macro = { version = "0.1.0-alpha.0", path = "../keekijanai-serve-macro" }

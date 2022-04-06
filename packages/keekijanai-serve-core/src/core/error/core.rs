@@ -31,8 +31,12 @@ impl Default for ServeError {
 }
 
 impl From<anyhow::Error> for ServeError {
-    fn from(_: anyhow::Error) -> Self {
-        todo!()
+    fn from(err: anyhow::Error) -> Self {
+        // when convert `anyhow::Error` to `ServeError`, error was converted into a response
+        // so log error detail here
+        tracing::error!("{}", err);
+
+        Default::default()
     }
 }
 

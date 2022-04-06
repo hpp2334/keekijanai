@@ -1,8 +1,6 @@
+use std::{default::Default, marker::PhantomData};
 
-use std::default::Default;
-
-
-use serde::{Deserialize, Serialize};
+use serde::{de::Visitor, Deserialize, Serialize};
 
 macro_rules! impl_column {
     ($($x:ty),+) => {
@@ -16,10 +14,10 @@ macro_rules! impl_column {
     };
 }
 
-#[derive(PartialEq, Eq, Clone, Debug, Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Debug, Serialize)]
 pub enum ActiveColumn<T> {
     Set(T),
-    Unset
+    Unset,
 }
 
 impl<T> Default for ActiveColumn<T> {
@@ -52,15 +50,71 @@ impl<T: Clone> ActiveColumn<T> {
         std::mem::take(self);
     }
     pub fn set(&mut self, value: T) {
-        std::mem::replace(self, ActiveColumn::Set(value));
+        *self = ActiveColumn::Set(value);
     }
 }
-
 
 impl<T> From<Option<T>> for ActiveColumn<T> {
     fn from(value: Option<T>) -> Self {
-        return if value.is_none() { ActiveColumn::Unset } else { ActiveColumn::Set(value.unwrap()) }
+        return if value.is_none() {
+            ActiveColumn::Unset
+        } else {
+            ActiveColumn::Set(value.unwrap())
+        };
     }
 }
 
-impl_column!{i32, i64, u32, u64, String}
+impl_column! {i32, i64, u32, u64, String}
+
+// modify from serde source code
+// https://github.com/serde-rs/serde/blob/master/serde/src/de/impls.rs
+
+struct ActiveColumnVisitor<T> {
+    marker: PhantomData<T>,
+}
+
+impl<'de, T> Visitor<'de> for ActiveColumnVisitor<T>
+where
+    T: Deserialize<'de>,
+{
+    type Value = ActiveColumn<T>;
+
+    fn expecting(&self, formatter: &mut std::fmt::Formatter) -> std::fmt::Result {
+        formatter.write_str("option")
+    }
+
+    fn visit_unit<E>(self) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(ActiveColumn::Unset)
+    }
+
+    fn visit_none<E>(self) -> Result<Self::Value, E>
+    where
+        E: serde::de::Error,
+    {
+        Ok(ActiveColumn::Unset)
+    }
+
+    fn visit_some<D>(self, deserializer: D) -> Result<Self::Value, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        T::deserialize(deserializer).map(ActiveColumn::Set)
+    }
+}
+
+impl<'de, T> Deserialize<'de> for ActiveColumn<T>
+where
+    T: Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        deserializer.deserialize_option(ActiveColumnVisitor {
+            marker: PhantomData,
+        })
+    }
+}

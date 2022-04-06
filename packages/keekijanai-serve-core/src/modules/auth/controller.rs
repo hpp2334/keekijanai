@@ -1,6 +1,6 @@
 use axum::{
     extract::{Path, Query},
-    response::{Redirect},
+    response::Redirect,
     routing, Extension, Json, Router,
 };
 use serde::{Deserialize, Serialize};
@@ -34,12 +34,12 @@ async fn outh2_login_url(Path(provider): Path<String>) -> Result<String, ServeEr
 }
 
 async fn current(
-    Extension(user_info): Extension<&UserInfo>,
+    Extension(user_info): Extension<UserInfo>,
 ) -> Result<Json<CurrentRespPayload>, ServeError> {
     if user_info.is_anonymous() {
         return Err(super::error::NotLogin)?;
     }
-    let user = User::clone(user_info);
+    let user = User::clone(&user_info);
     let resp = CurrentRespPayload { user: user.into() };
     Ok(Json(resp))
 }

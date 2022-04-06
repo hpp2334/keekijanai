@@ -79,10 +79,14 @@ impl Setting {
         if setting.is_ok() {
             return setting;
         }
+        let err = setting.unwrap_err();
+        tracing::debug!("try from config file error: {}", err);
         let setting = Setting::try_from_env();
         if setting.is_ok() {
             return setting;
         }
+        let err = setting.unwrap_err();
+        tracing::debug!("try from env error: {}", err);
         anyhow::bail!("No config found in config file and env");
     }
 }

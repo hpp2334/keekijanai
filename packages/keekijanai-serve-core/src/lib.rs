@@ -27,7 +27,7 @@ static INIT_MUTEX: Lazy<AtomicBool> = Lazy::new(Default::default);
 
 pub async fn init() {
     let result = INIT_MUTEX.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst);
-    if result != Ok(true) {
+    if result != Ok(false) {
         return;
     }
 
@@ -38,6 +38,7 @@ pub async fn init() {
 /// `init` method should be called before
 pub async fn run_server(addr: &str) {
     let app = modules::get_router();
+    tracing::info!("before start server");
     axum::Server::bind(&addr.parse().unwrap())
         .serve(app.into_make_service())
         .await
