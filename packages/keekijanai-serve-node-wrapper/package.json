@@ -4,9 +4,9 @@
   "main": "index.node",
   "scripts": {
     "build": "cargo-cp-artifact -nc index.node -- cargo build --message-format=json-render-diagnostics",
-    "build-debug": "npm run build --",
-    "build-release": "npm run build -- --release",
-    "install": "npm run build-release",
+    "build:debug": "npm run build --",
+    "build:prod": "npm run build -- --release",
+    "install": "npm run build:prod",
     "test": "cargo test"
   },
   "devDependencies": {
