@@ -5,7 +5,7 @@ use num_traits::{FromPrimitive, ToPrimitive};
 use sea_query::PostgresQueryBuilder;
 
 use crate::{
-    core::{db::get_pool, Service},
+    core::{db::get_pool, ServeResult, Service},
     modules::{
         auth::error::{InsufficientPrivilege, OpType},
         auth::UserInfo,
@@ -53,7 +53,7 @@ impl StarService {
         user_info: &UserInfo,
         belong: &str,
         star_type: &i16,
-    ) -> anyhow::Result<()> {
+    ) -> ServeResult<()> {
         let mut payload = StarActiveModel::default();
         payload.user_id = user_info.id.into();
         payload.belong = belong.to_owned().into();
@@ -67,7 +67,7 @@ impl StarService {
         &mut self,
         user_info: &UserInfo,
         payload: &StarActiveModel,
-    ) -> anyhow::Result<()> {
+    ) -> ServeResult<()> {
         let _chk_priv = self.check_priv_update(user_info).await?;
 
         let conn = get_pool();
@@ -100,11 +100,7 @@ impl StarService {
         return Ok(());
     }
 
-    pub async fn get_current(
-        &self,
-        user_info: &UserInfo,
-        belong: String,
-    ) -> anyhow::Result<StarType> {
+    pub async fn get_current(&self, user_info: &UserInfo, belong: String) -> ServeResult<StarType> {
         let _chk_priv = self.check_priv_read(user_info).await?;
         let conn = get_pool();
         let mut result_current = sqlx::query_as!(
@@ -134,7 +130,7 @@ WHERE belong = $1
         Ok(current)
     }
 
-    pub async fn get_total(&self, belong: &str) -> anyhow::Result<i64> {
+    pub async fn get_total(&self, belong: &str) -> ServeResult<i64> {
         let conn = get_pool();
         let result_current: Vec<GetStarStatInfo> = sqlx::query_as!(
             GetStarStatInfo,
@@ -158,7 +154,7 @@ GROUP BY star_type
     pub async fn get_grouped_detail(
         &self,
         belongs: Vec<String>,
-    ) -> anyhow::Result<Vec<StarGroupedDetail>> {
+    ) -> ServeResult<Vec<StarGroupedDetail>> {
         let belong_str = belongs.join(",");
         let pool = get_pool();
         let query_result: Vec<GroupedDetailSQLResultItem> = sqlx::query_as!(
@@ -227,7 +223,7 @@ GROUP BY belong, star_type
 }
 
 impl StarService {
-    pub async fn check_priv_read(&self, user_info: &UserInfo) -> anyhow::Result<()> {
+    pub async fn check_priv_read(&self, user_info: &UserInfo) -> ServeResult<()> {
         let ok = self.has_priv_read(user_info).await?;
         if !ok {
             return Err(InsufficientPrivilege(
@@ -239,7 +235,7 @@ impl StarService {
         }
         Ok(())
     }
-    pub async fn check_priv_update(&self, user_info: &UserInfo) -> anyhow::Result<()> {
+    pub async fn check_priv_update(&self, user_info: &UserInfo) -> ServeResult<()> {
         let ok = self.has_priv_update(user_info).await?;
         if !ok {
             return Err(InsufficientPrivilege(
@@ -251,13 +247,13 @@ impl StarService {
         }
         Ok(())
     }
-    pub async fn has_priv_read(&self, user_info: &UserInfo) -> anyhow::Result<bool> {
+    pub async fn has_priv_read(&self, user_info: &UserInfo) -> ServeResult<bool> {
         if user_info.is_anonymous() {
             return Ok(false);
         }
         Ok(true)
     }
-    pub async fn has_priv_update(&self, user_info: &UserInfo) -> anyhow::Result<bool> {
+    pub async fn has_priv_update(&self, user_info: &UserInfo) -> ServeResult<bool> {
         if user_info.is_anonymous() {
             return Ok(false);
         }

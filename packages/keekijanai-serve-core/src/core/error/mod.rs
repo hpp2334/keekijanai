@@ -2,4 +2,4 @@ pub mod comm_error;
 pub mod core;
 pub(crate) mod middleware;
 
-pub use self::core::ServeError;
+pub use self::core::{ServeError, ServeResult};

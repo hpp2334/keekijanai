@@ -1,9 +1,8 @@
-
 use sea_query::{Expr, PostgresQueryBuilder, Query};
 
 use super::model::{User, UserActiveModel, UserModel, UserModelColumns};
 use crate::{
-    core::{db::get_pool, Service},
+    core::{db::get_pool, ServeResult, Service},
     modules::user::model::UserRole,
 };
 
@@ -19,7 +18,7 @@ impl Service for UserService {
 }
 
 impl UserService {
-    pub async fn batch_get(&self, user_ids: Vec<i64>) -> anyhow::Result<Vec<User>> {
+    pub async fn batch_get(&self, user_ids: Vec<i64>) -> ServeResult<Vec<User>> {
         let conn = get_pool();
         let users = sqlx::query_as!(
             UserModel,
@@ -40,7 +39,7 @@ ORDER BY id DESC
         return Ok(users);
     }
 
-    pub async fn get(&self, user_id: i64) -> anyhow::Result<Option<User>> {
+    pub async fn get(&self, user_id: i64) -> ServeResult<Option<User>> {
         let conn = get_pool();
         let mut user = sqlx::query_as!(
             UserModel,
@@ -70,7 +69,7 @@ WHERE id = $1
         &self,
         provider: &str,
         in_provider_id: &str,
-    ) -> anyhow::Result<Option<User>> {
+    ) -> ServeResult<Option<User>> {
         tracing::debug!(
             "provider = {}, in_provider_id = {}",
             provider,
@@ -104,7 +103,7 @@ WHERE provider = $1 AND in_provider_id = $2
         &self,
         user_id: Option<i64>,
         mut payload: UserActiveModel,
-    ) -> anyhow::Result<User> {
+    ) -> ServeResult<User> {
         tracing::debug!("[upsert] to update {:?}", user_id);
 
         let conn = get_pool();

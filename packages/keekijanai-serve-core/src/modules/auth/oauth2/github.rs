@@ -1,11 +1,10 @@
-use std::env;
 use async_trait::async_trait;
-use reqwest::{Method, Client};
-use serde::{Deserialize};
-
+use reqwest::{Client, Method};
+use serde::Deserialize;
+use std::env;
 
 use super::core::{OAuth2Config, OAuth2Service, UserProfile};
-use crate::modules::auth::error as auth_error;
+use crate::{core::ServeResult, modules::auth::error as auth_error};
 
 const AUTH_URL: &'static str = "https://github.com/login/oauth/authorize";
 const TOKEN_URL: &'static str = "https://github.com/login/oauth/access_token";
@@ -15,7 +14,7 @@ struct GithubUserProfile {
     pub avatar_url: Option<String>,
     pub id: i64,
     pub login: String,
-    pub email: Option<String>
+    pub email: Option<String>,
 }
 pub struct Github {
     config: OAuth2Config,
@@ -27,7 +26,7 @@ impl Github {
     }
 }
 
-fn build_client() -> anyhow::Result<Client> {
+fn build_client() -> ServeResult<Client> {
     let proxy = env::var("PROXY");
     let client = if proxy.is_err() {
         reqwest::Client::new()
@@ -38,7 +37,7 @@ fn build_client() -> anyhow::Result<Client> {
             .proxy(reqwest::Proxy::https(proxy.as_str())?)
             .build()?
     };
-    return Ok(client)
+    return Ok(client);
 }
 
 #[async_trait]
@@ -47,7 +46,7 @@ impl OAuth2Service for Github {
         return format!("{}?client_id={}", AUTH_URL, self.config.client_id);
     }
 
-    async fn get_access_token(&self, code: &str) -> anyhow::Result<String> {
+    async fn get_access_token(&self, code: &str) -> ServeResult<String> {
         tracing::debug!("[get_access_token] code is {}", code);
         let client = build_client()?;
         let resp = client
@@ -83,7 +82,7 @@ impl OAuth2Service for Github {
         return Ok(access_token.to_owned());
     }
 
-    async fn get_user_profile(&self, access_token: &str) -> anyhow::Result<UserProfile> {
+    async fn get_user_profile(&self, access_token: &str) -> ServeResult<UserProfile> {
         tracing::debug!("use access_token {}", access_token);
 
         let client = build_client()?;
@@ -99,7 +98,7 @@ impl OAuth2Service for Github {
 
         if resp.status().is_client_error() || resp.status().is_server_error() {
             tracing::debug!("error status {:?}", resp.status());
-            return Err(anyhow::anyhow!(resp.text().await?));
+            return Err(anyhow::anyhow!(resp.text().await?))?;
         }
 
         let user_profile = resp.json::<GithubUserProfile>().await?;
@@ -115,6 +114,4 @@ impl OAuth2Service for Github {
 
         return Ok(user_profile);
     }
-
-    
 }

@@ -1,19 +1,9 @@
-
-
-
-
-
-
 use sqlx::Executor;
 
 use crate::{
-    core::{db::get_pool, Service},
-    modules::{
-        time::service::TimeService,
-    },
+    core::{db::get_pool, ServeResult, Service},
+    modules::time::service::TimeService,
 };
-
-
 
 pub struct StatService;
 
@@ -26,7 +16,7 @@ impl Service for StatService {
 }
 
 impl StatService {
-    pub async fn visit(&self, belong: &str, uuid: &str) -> anyhow::Result<(i64, i64)> {
+    pub async fn visit(&self, belong: &str, uuid: &str) -> ServeResult<(i64, i64)> {
         let pool = get_pool();
         let time_service = TimeService::serve();
         let now = time_service.now().await?.as_millis() as i64;

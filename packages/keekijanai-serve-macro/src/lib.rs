@@ -5,8 +5,8 @@ use darling::FromMeta;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parenthesized, parse::Parse, parse_macro_input, punctuated::Punctuated, token,
-    DeriveInput, Lit, NestedMeta, Path, Token,
+    parenthesized, parse::Parse, parse_macro_input, punctuated::Punctuated, token, DeriveInput,
+    Lit, NestedMeta, Path, Token,
 };
 
 #[derive(Debug, FromMeta)]
@@ -67,6 +67,7 @@ pub fn derive_keekijanai_resp_err(input: TokenStream) -> TokenStream {
                     code: #code,
                     status: #status,
                     params: v,
+                    source: None
                 }
             }
         }

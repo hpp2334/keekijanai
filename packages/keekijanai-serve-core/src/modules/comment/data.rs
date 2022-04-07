@@ -1,4 +1,8 @@
-use crate::{core::db::get_pool, helpers, modules::comment::model::CommentModel};
+use crate::{
+    core::{db::get_pool, ServeResult},
+    helpers,
+    modules::comment::model::CommentModel,
+};
 
 use super::model::Comment;
 
@@ -9,7 +13,7 @@ impl CommentData {
         Self
     }
 
-    pub async fn get(&self, id: i64) -> anyhow::Result<Option<Comment>> {
+    pub async fn get(&self, id: i64) -> ServeResult<Option<Comment>> {
         let pool = get_pool();
         let comments = sqlx::query_as!(
             CommentModel,

@@ -4,7 +4,7 @@ use sea_query::{Alias, Expr, PostgresQueryBuilder};
 use serde::Deserialize;
 
 use crate::{
-    core::{db::get_pool, Service},
+    core::{db::get_pool, ServeResult, Service},
     modules::{
         auth::{
             error::{InsufficientPrivilege, OpType},
@@ -50,7 +50,7 @@ impl CommentService {
         roots_limit: i32,
         leaves_limit: i32,
         cursor: Option<i64>,
-    ) -> anyhow::Result<(Vec<Comment>, Vec<User>, i64, bool)> {
+    ) -> ServeResult<(Vec<Comment>, Vec<User>, i64, bool)> {
         let pool = get_pool();
 
         let (total,): (i64,) = sqlx::query_as(
@@ -154,7 +154,7 @@ ORDER BY id DESC
     pub async fn list(
         &self,
         params: ListCommentParams,
-    ) -> anyhow::Result<(Vec<Comment>, Vec<User>, i64, bool)> {
+    ) -> ServeResult<(Vec<Comment>, Vec<User>, i64, bool)> {
         let conn = get_pool();
 
         fn build_sql<'a>(params: &ListCommentParams, is_count: bool) -> String {
@@ -228,7 +228,7 @@ ORDER BY id DESC
         &mut self,
         user_info: &UserInfo,
         mut payload: CommentActiveModel,
-    ) -> anyhow::Result<Comment> {
+    ) -> ServeResult<Comment> {
         let _chk_priv = self.check_priv_create(user_info).await?;
 
         let time_service = TimeService::serve();
@@ -275,7 +275,7 @@ WHERE id = $1;
         user_info: &UserInfo,
         id: i64,
         mut payload: CommentActiveModel,
-    ) -> anyhow::Result<Comment> {
+    ) -> ServeResult<Comment> {
         let _chk_priv = self.check_priv_update(user_info, id).await?;
 
         payload.id = id.into();
@@ -304,7 +304,7 @@ WHERE id = $1;
         Ok(comment)
     }
 
-    pub async fn remove(&mut self, user_info: &UserInfo, id: i64) -> anyhow::Result<()> {
+    pub async fn remove(&mut self, user_info: &UserInfo, id: i64) -> ServeResult<()> {
         let _chk_priv = self.check_priv_remove(user_info, id).await?;
 
         let pool = get_pool();
@@ -350,7 +350,7 @@ WHERE
 }
 
 impl CommentService {
-    pub async fn check_priv_create(&self, user_info: &UserInfo) -> anyhow::Result<()> {
+    pub async fn check_priv_create(&self, user_info: &UserInfo) -> ServeResult<()> {
         let ok = self.has_priv_create(user_info).await?;
         if !ok {
             return Err(InsufficientPrivilege(
@@ -362,7 +362,7 @@ impl CommentService {
         }
         Ok(())
     }
-    pub async fn check_priv_remove(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<()> {
+    pub async fn check_priv_remove(&self, user_info: &UserInfo, id: i64) -> ServeResult<()> {
         let ok = self.has_priv_remove(user_info, id).await?;
         if !ok {
             return Err(InsufficientPrivilege(
@@ -374,7 +374,7 @@ impl CommentService {
         }
         Ok(())
     }
-    pub async fn check_priv_update(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<()> {
+    pub async fn check_priv_update(&self, user_info: &UserInfo, id: i64) -> ServeResult<()> {
         let ok = self.has_priv_update(user_info, id).await?;
         if !ok {
             return Err(InsufficientPrivilege(
@@ -387,18 +387,18 @@ impl CommentService {
         Ok(())
     }
 
-    pub async fn has_priv_create(&self, user_info: &UserInfo) -> anyhow::Result<bool> {
+    pub async fn has_priv_create(&self, user_info: &UserInfo) -> ServeResult<bool> {
         if user_info.is_anonymous() {
             return Ok(false);
         }
         Ok(true)
     }
 
-    pub async fn has_priv_remove(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<bool> {
+    pub async fn has_priv_remove(&self, user_info: &UserInfo, id: i64) -> ServeResult<bool> {
         self.has_priv_update(user_info, id).await
     }
 
-    pub async fn has_priv_update(&self, user_info: &UserInfo, id: i64) -> anyhow::Result<bool> {
+    pub async fn has_priv_update(&self, user_info: &UserInfo, id: i64) -> ServeResult<bool> {
         if user_info.role == UserRole::Admin {
             return Ok(true);
         }

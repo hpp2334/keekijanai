@@ -6,5 +6,5 @@ pub mod db;
 pub mod setting;
 
 pub use controller::{request, response};
-pub use error::ServeError;
+pub use error::*;
 pub use service::Service;

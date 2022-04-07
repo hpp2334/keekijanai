@@ -1,5 +1,5 @@
 use crate::{
-    core::{setting::SETTING, Service},
+    core::{setting::SETTING, ServeResult, Service},
     modules::{
         time::service::TimeService,
         user::{
@@ -51,7 +51,7 @@ impl AuthService {
         &self,
         service: &str,
         code: &str,
-    ) -> anyhow::Result<LoginOauth2RespPayload> {
+    ) -> ServeResult<LoginOauth2RespPayload> {
         let oauth2 = self.oauth2_mgr.get(service)?;
         tracing::debug!("got prepare oauth2 service {}", service);
 
@@ -92,7 +92,7 @@ impl AuthService {
         return Ok(res);
     }
 
-    pub fn decode_token(&self, token: String) -> anyhow::Result<TokenData<Claims>> {
+    pub fn decode_token(&self, token: String) -> ServeResult<TokenData<Claims>> {
         let secret = &SETTING.get().unwrap().auth.secret;
         let token = jsonwebtoken::decode::<Claims>(
             &token,
@@ -103,7 +103,7 @@ impl AuthService {
         Ok(token)
     }
 
-    pub async fn encode_to_token(&self, user_id: i64) -> anyhow::Result<String> {
+    pub async fn encode_to_token(&self, user_id: i64) -> ServeResult<String> {
         let time_service = TimeService::serve();
         let secret = &SETTING.get().unwrap().auth.secret;
         let claims = Claims {
