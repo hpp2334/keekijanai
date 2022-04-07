@@ -1,12 +1,11 @@
 {
   "name": "keekijanai-serve-node-wrapper",
-  "version": "0.3.0-alpha.0",
+  "version": "0.3.0-alpha.1",
   "main": "index.node",
   "scripts": {
     "build": "cargo-cp-artifact -nc index.node -- cargo build --message-format=json-render-diagnostics",
     "build:debug": "npm run build --",
     "build:prod": "npm run build -- --release",
-    "install": "npm run build:prod",
     "test": "cargo test"
   },
   "devDependencies": {
