@@ -8,6 +8,8 @@ pub struct ServeError {
     pub params: Vec<String>,
 }
 
+pub(crate) static SERVE_ERROR_HEADER_KEY: &'static str = "X-Keekijanai-Error";
+
 #[derive(Debug, Serialize)]
 struct ErrResp {
     code: String,
@@ -34,7 +36,7 @@ impl From<anyhow::Error> for ServeError {
     fn from(err: anyhow::Error) -> Self {
         // when convert `anyhow::Error` to `ServeError`, error was converted into a response
         // so log error detail here
-        tracing::error!("{}", err);
+        tracing::error!("from anyhow::Error: {}", err);
 
         Default::default()
     }
@@ -52,7 +54,12 @@ impl From<ServeError> for ErrResp {
 impl IntoResponse for ServeError {
     fn into_response(self) -> axum::response::Response {
         let status = self.status.clone();
+        let code = self.code.clone();
         let payload: ErrResp = self.into();
-        IntoResponse::into_response((status, Json(payload)))
+
+        let mut resp = IntoResponse::into_response((status, Json(payload)));
+        let headers = resp.headers_mut();
+        headers.insert(SERVE_ERROR_HEADER_KEY, code.parse().unwrap());
+        resp
     }
 }

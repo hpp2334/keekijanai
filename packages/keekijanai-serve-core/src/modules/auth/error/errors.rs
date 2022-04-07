@@ -2,7 +2,7 @@ use axum::http::StatusCode;
 use keekijanai_serve_macro::KeekijanaiRespErr;
 
 #[derive(Debug, thiserror::Error, KeekijanaiRespErr)]
-#[error("Not Login")]
+#[error("OAuth2 Login Fail")]
 #[resp_err(code = "Auth/OAuth2", status = "StatusCode::UNAUTHORIZED")]
 pub struct OAuth2(pub String);
 

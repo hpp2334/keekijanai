@@ -15,8 +15,6 @@ use serde::{Deserialize, Serialize};
 
 use super::oauth2::{core::OAuth2Service, OAuth2Manager};
 
-
-
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Claims {
     pub exp: usize,
@@ -55,8 +53,13 @@ impl AuthService {
         code: &str,
     ) -> anyhow::Result<LoginOauth2RespPayload> {
         let oauth2 = self.oauth2_mgr.get(service)?;
+        tracing::debug!("got prepare oauth2 service {}", service);
+
         let access_token = oauth2.get_access_token(code).await?;
+        tracing::debug!("got access_token {}, (code = {})", access_token, code);
+
         let user_profile = oauth2.get_user_profile(access_token.as_str()).await?;
+        tracing::debug!("got user profile (access_token = {})", access_token);
 
         let user = UserService::serve()
             .get_by_provider(service, user_profile.id.to_string().as_str())

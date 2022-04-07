@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@vercel/node": "^1.14.0",
     "keekijanai-serve-node-wrapper": "workspace:*",
-    "@vercel/node": "^1.14.0"
+    "qs": "^6.10.3"
   }
 }

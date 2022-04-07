@@ -1,5 +1,8 @@
 import { VercelRequest, VercelResponse } from "@vercel/node";
 import { EntireRequest, processEntireRequest as _processEntireRequest } from "keekijanai-serve-node-wrapper";
+import qs from "qs";
+
+const API_PREFIX = "/api/keekijanai";
 
 const chunk = <T>(list: T[], size: number): T[][] => {
   const res: T[][] = [];
@@ -13,12 +16,32 @@ const chunk = <T>(list: T[], size: number): T[][] => {
   return res;
 };
 
+function createUri(req: VercelRequest) {
+  const query = { ...req.query };
+  const path = query.query_route as string;
+  delete query.query_route;
+
+  let ret = API_PREFIX + path;
+  if (Object.keys(query).length > 0) {
+    ret += "?" + qs.stringify(query);
+  }
+  return ret;
+}
+
+const payloadStringify = (payload: any) => {
+  if (payload && typeof payload === "object") {
+    return JSON.stringify(payload);
+  }
+  return String(payload);
+};
+
 export function processEntireRequest(req: VercelRequest, res: VercelResponse) {
   const headers = chunk(req.rawHeaders, 2) as Array<[string, string]>;
   const entireRequest: EntireRequest = {
-    uri: req.query.query_route as string,
+    uri: createUri(req),
+    method: req.method ?? "GET",
     headers,
-    body: req.body,
+    body: req.body ? payloadStringify(req.body) : null,
   };
   const rawRes = _processEntireRequest(entireRequest);
   res.status(rawRes.statusCode);

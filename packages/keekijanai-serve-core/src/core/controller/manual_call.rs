@@ -1,16 +1,15 @@
-
-
 use axum::{
     body::{Body, Bytes},
-    response::{Response},
+    response::Response,
     Router,
 };
 use tower::ServiceExt;
 
 pub struct EntireRequest {
     pub uri: String,
+    pub method: String,
     pub headers: Vec<(String, String)>,
-    pub body: String,
+    pub body: Option<String>,
 }
 
 pub struct EntireResponse {
@@ -21,15 +20,18 @@ pub struct EntireResponse {
 
 impl From<EntireRequest> for axum::http::Request<Body> {
     fn from(entire_req: EntireRequest) -> Self {
-        let body = Body::from(entire_req.body);
+        let body = entire_req.body.map(Body::from);
         let mut builder = axum::http::Request::builder().uri(&entire_req.uri);
+
+        builder = builder.method(entire_req.method.as_str());
+
         let mut headers_iter = entire_req.headers.into_iter();
 
         while let Some((key, value)) = headers_iter.next() {
             builder = builder.header(key, value);
         }
 
-        let req = builder.body(body).unwrap();
+        let req = builder.body(body.unwrap_or(Body::empty())).unwrap();
         req
     }
 }

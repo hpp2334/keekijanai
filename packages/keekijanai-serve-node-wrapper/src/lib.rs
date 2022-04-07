@@ -1,11 +1,30 @@
-
+use std::sync::atomic::{AtomicBool, Ordering};
 
 use keekijanai_serve_core::EntireRequest;
 use neon::prelude::*;
+use tracing_subscriber::prelude::*;
+
+static INIT_TAG: AtomicBool = AtomicBool::new(false);
+
+fn init() {
+    let prev = INIT_TAG.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst);
+    if let Ok(x) = prev {
+        if x == false {
+            tracing_subscriber::registry()
+                .with(tracing_subscriber::fmt::layer())
+                .init();
+        }
+    }
+}
 
 fn parse_to_trans_req<'a>(cx: &mut FunctionContext, obj: &JsObject) -> NeonResult<EntireRequest> {
     let uri: Handle<JsString> = obj.get(cx, "uri")?.downcast_or_throw(cx)?;
     let uri = uri.value(cx);
+
+    let method = obj
+        .get(cx, "method")?
+        .downcast_or_throw::<JsString, _>(cx)?
+        .value(cx);
 
     let headers: Handle<JsArray> = obj.get(cx, "headers")?.downcast_or_throw(cx)?;
     let headers = headers
@@ -25,13 +44,20 @@ fn parse_to_trans_req<'a>(cx: &mut FunctionContext, obj: &JsObject) -> NeonResul
         Err(err) => return Err(err),
     };
 
-    let body: Handle<JsString> = obj.get(cx, "body")?.downcast_or_throw(cx)?;
-    let body = body.value(cx);
+    let body = obj.get(cx, "body")?.downcast::<JsString, _>(cx);
+    let body = body.map_or(None, |v| Some(v.value(cx)));
 
-    Ok(EntireRequest { uri, headers, body })
+    Ok(EntireRequest {
+        uri,
+        method,
+        headers,
+        body,
+    })
 }
 
 fn process_entire_request(mut cx: FunctionContext) -> JsResult<JsObject> {
+    init();
+
     let req = cx.argument::<JsObject>(0)?;
 
     let trans_req = parse_to_trans_req(&mut cx, &req)?;

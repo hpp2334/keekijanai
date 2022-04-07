@@ -302,9 +302,11 @@ importers:
     specifiers:
       '@vercel/node': ^1.14.0
       keekijanai-serve-node-wrapper: workspace:*
+      qs: ^6.10.3
     dependencies:
       '@vercel/node': 1.14.0
       keekijanai-serve-node-wrapper: link:../keekijanai-serve-node-wrapper
+      qs: 6.10.3
 
 packages:
 

@@ -30,6 +30,6 @@ pub(crate) fn get_router() -> Router {
         .layer(tower_cookies::CookieManagerLayer::new())
         .layer(tower_http::trace::TraceLayer::new_for_http())
         .route_layer(axum::middleware::from_fn(
-            crate::core::error::middleware::conver_resp_error_middleware,
+            crate::core::error::middleware::convert_resp_error_middleware,
         ))
 }
