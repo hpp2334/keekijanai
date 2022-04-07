@@ -1,7 +1,7 @@
 use axum::{
-    http::{Request, StatusCode},
+    http::{Request},
     middleware::Next,
-    response::{IntoResponse, Response},
+    response::{IntoResponse},
 };
 use hyper::body::to_bytes;
 

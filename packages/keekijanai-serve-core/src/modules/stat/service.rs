@@ -1,5 +1,3 @@
-use sqlx::Executor;
-
 use crate::{
     core::{db::get_pool, ServeResult, Service},
     modules::time::service::TimeService,

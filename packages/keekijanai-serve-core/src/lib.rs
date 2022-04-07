@@ -1,7 +1,6 @@
 extern crate dotenv;
 extern crate proc_macro;
 
-#[macro_use]
 extern crate lazy_static;
 
 #[macro_use]
