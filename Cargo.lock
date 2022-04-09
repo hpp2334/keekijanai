@@ -948,6 +948,7 @@ version = "0.1.0"
 dependencies = [
  "keekijanai-serve-core",
  "neon",
+ "openssl",
  "tokio",
  "tracing-subscriber 0.2.25",
 ]
@@ -1313,6 +1314,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "28988d872ab76095a6e6ac88d99b54fd267702734fd7ffe610ca27f533ddb95a"
 
 [[package]]
+name = "openssl-src"
+version = "300.0.5+3.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9bd053af511ee4439768d9b839a1cdb32eee00f52fe5f748d64c0e8f73194ba1"
+dependencies = [
+ "cc",
+]
+
+[[package]]
 name = "openssl-sys"
 version = "0.9.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1321,6 +1331,7 @@ dependencies = [
  "autocfg",
  "cc",
  "libc",
+ "openssl-src",
  "pkg-config",
  "vcpkg",
 ]

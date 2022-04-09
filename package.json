@@ -6,7 +6,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepare": "husky install",
-    "build:prod": "turbo run build:prod"
+    "build:fe": "turbo run build:prod",
+    "build:node-wrapper": "sh ./scripts/build-node-wrapper/run.sh",
+    "run:node-server": "node ./packages/keekijanai-serve-node-server-demo/src/index.js",
+    "start:db": "docker compose -f ./db-service.yml up -d",
+    "stop:db": "docker compose -f ./db-service.yml down"
   },
   "repository": {
     "type": "git",
