@@ -42,7 +42,7 @@ const app = express();
 
 const router = express.Router();
 
-router.all("/api/keekijanai/*", processEntireRequest);
+router.all("/api/keekijanai/*", express.json(), processEntireRequest);
 
 app.use(router);
 

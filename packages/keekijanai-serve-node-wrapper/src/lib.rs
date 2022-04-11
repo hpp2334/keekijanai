@@ -2,9 +2,18 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use keekijanai_serve_core::EntireRequest;
 use neon::prelude::*;
+use once_cell::sync::Lazy;
+use tokio::runtime::Runtime;
 use tracing_subscriber::prelude::*;
 
 static INIT_TAG: AtomicBool = AtomicBool::new(false);
+
+static RUNTIME: Lazy<Runtime> = Lazy::new(|| {
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+});
 
 fn init() {
     let prev = INIT_TAG.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst);
@@ -62,16 +71,12 @@ fn process_entire_request(mut cx: FunctionContext) -> JsResult<JsObject> {
 
     let trans_req = parse_to_trans_req(&mut cx, &req)?;
 
-    let res = tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .build()
-        .unwrap()
-        .block_on(async move {
-            keekijanai_serve_core::init().await;
+    let res = RUNTIME.block_on(async move {
+        keekijanai_serve_core::init().await;
 
-            let res = keekijanai_serve_core::process_entire_request(trans_req).await;
-            res
-        });
+        let res = keekijanai_serve_core::process_entire_request(trans_req).await;
+        res
+    });
 
     let data = match std::string::String::from_utf8(res.data.to_vec()) {
         Ok(data) => data,
