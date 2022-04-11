@@ -35,7 +35,7 @@ const payloadStringify = (payload: any) => {
   return String(payload);
 };
 
-export function processEntireRequest(req: VercelRequest, res: VercelResponse) {
+export async function processEntireRequest(req: VercelRequest, res: VercelResponse) {
   const headers = chunk(req.rawHeaders, 2) as Array<[string, string]>;
   const entireRequest: EntireRequest = {
     uri: createUri(req),
@@ -43,11 +43,17 @@ export function processEntireRequest(req: VercelRequest, res: VercelResponse) {
     headers,
     body: req.body ? payloadStringify(req.body) : null,
   };
-  const rawRes = _processEntireRequest(entireRequest);
-  res.status(rawRes.statusCode);
-  rawRes.headers.forEach(([key, value]) => {
-    res.setHeader(key, value);
-  });
-  res.send(rawRes.body);
-  res.end();
+  await _processEntireRequest(entireRequest)
+    .then((rawRes) => {
+      res = res.status(rawRes.statusCode);
+      rawRes.headers.forEach(([key, value]) => {
+        res = res.setHeader(key, value);
+      });
+      res = res.send(rawRes.body);
+      res.end();
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send("Internal Server Error");
+    });
 }

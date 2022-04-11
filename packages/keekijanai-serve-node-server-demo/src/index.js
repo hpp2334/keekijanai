@@ -22,7 +22,7 @@ const payloadStringify = (payload) => {
   return String(payload);
 };
 
-function processEntireRequest(req, res, next) {
+async function processEntireRequest(req, res, next) {
   const headers = chunk(req.rawHeaders, 2);
   const entireRequest = {
     uri: req.url,
@@ -30,12 +30,18 @@ function processEntireRequest(req, res, next) {
     headers,
     body: req.body ? payloadStringify(req.body) : null,
   };
-  const rawRes = _processEntireRequest(entireRequest);
-  res = res.status(rawRes.statusCode);
-  rawRes.headers.forEach(([key, value]) => {
-    res = res.set(key, value);
-  });
-  res = res.send(rawRes.body);
+  await _processEntireRequest(entireRequest)
+    .then((rawRes) => {
+      res = res.status(rawRes.statusCode);
+      rawRes.headers.forEach(([key, value]) => {
+        res = res.set(key, value);
+      });
+      res = res.send(rawRes.body);
+      res.end();
+    })
+    .catch((err) => {
+      res.status(500).send("Internal Server Error");
+    });
 }
 
 const app = express();

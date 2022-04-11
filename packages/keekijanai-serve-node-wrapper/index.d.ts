@@ -11,4 +11,4 @@ export interface EntireResponse {
   body: string;
 }
 
-export function processEntireRequest(req: EntireRequest): EntireResponse;
+export function processEntireRequest(req: EntireRequest): Promise<EntireResponse>;
