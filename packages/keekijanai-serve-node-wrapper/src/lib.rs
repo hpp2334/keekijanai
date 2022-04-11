@@ -4,7 +4,6 @@ use keekijanai_serve_core::EntireRequest;
 use neon::prelude::*;
 use once_cell::sync::Lazy;
 use tokio::runtime::Runtime;
-use tracing_subscriber::prelude::*;
 
 static INIT_TAG: AtomicBool = AtomicBool::new(false);
 
@@ -19,9 +18,7 @@ fn init() {
     let prev = INIT_TAG.compare_exchange(false, true, Ordering::SeqCst, Ordering::SeqCst);
     if let Ok(x) = prev {
         if x == false {
-            tracing_subscriber::registry()
-                .with(tracing_subscriber::fmt::layer())
-                .init();
+            tracing_subscriber::fmt::init();
         }
     }
 }
