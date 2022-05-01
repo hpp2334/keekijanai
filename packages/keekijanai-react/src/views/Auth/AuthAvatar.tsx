@@ -4,7 +4,7 @@ import { useCallback, useRef, useState } from "react";
 import { Menu, MenuItem, MenuProps } from "@/components";
 import { showAuthModal } from "./AuthModal";
 import { useAuthService } from "./logic";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/common/i18n";
 import { withNoSSR } from "@/common/hoc/withNoSSR";
 
 export interface AuthAvatarProps {

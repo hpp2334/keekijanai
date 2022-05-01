@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useRef } from "react";
 import { CommentEditor } from "./components/CommentEditor";
 import { styled } from "@/components";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/common/i18n";
 import { useRefreshToken } from "@/common/helper";
 import { switchTap, TreeComment } from "@keekijanai/frontend-core";
 import { firstValueFrom } from "rxjs";
@@ -28,8 +28,8 @@ export const CommentPost = ({ ...leftProps }: CommentPostProps) => {
   const { commentService: service } = useInternalCommentContext();
 
   const placeholder = leftProps.refComment
-    ? sprintf(t("post.reply.placeholder", { ns: "Comment" }), leftProps.refComment.user?.name)
-    : t("post.create.placeholder", { ns: "Comment" });
+    ? sprintf(t("post.reply.placeholder"), leftProps.refComment.user?.name)
+    : t("post.create.placeholder");
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const isControlled = useMemo(() => leftProps.expand !== undefined, []);

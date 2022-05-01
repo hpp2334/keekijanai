@@ -5,6 +5,23 @@ const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPl
 const path = require("path");
 const webpack = require("webpack");
 
+const buildKKPackageModuleReplacementPluginEntry = (pkgName, pkgDir) => {
+  const REG = new RegExp(pkgName);
+
+  return new webpack.NormalModuleReplacementPlugin(REG, function (resource) {
+    const workspaceRoot = path.resolve(__dirname, "../");
+    const context = path.relative(workspaceRoot, resource.context);
+    console.log({
+      req: resource.request,
+      context: resource.contextInfo.issuer,
+    });
+
+    if (resource.request === pkgName) {
+      resource.request = path.join(workspaceRoot, pkgDir, "./src/index.ts");
+    }
+  });
+};
+
 module.exports = {
   mode: "development",
   entry: "./src/index.tsx",
@@ -53,6 +70,10 @@ module.exports = {
     extensions: [".tsx", ".ts", ".jsx", ".js", ".json"],
     alias: {
       "@keekijanai/react": path.resolve(__dirname, "../keekijanai-react/src/index.ts"),
+      "@keekijanai/frontend-core/libs/i18n": path.resolve(
+        __dirname,
+        "../keekijanai-frontend-core/src/libs/keekijanai-i18n/index.ts"
+      ),
       "@keekijanai/frontend-core": path.resolve(__dirname, "../keekijanai-frontend-core/src/index.ts"),
     },
   },

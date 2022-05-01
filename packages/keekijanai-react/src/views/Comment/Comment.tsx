@@ -1,6 +1,6 @@
 import { CommentService, CommentTree, CommentVO, noop, TreeComment } from "@keekijanai/frontend-core";
 import { Typography, Avatar, Button, Stack, Popover, styled } from "@/components";
-import { useTranslation } from "react-i18next";
+import { useAutoUpdateResource, useTranslation } from "@/common/i18n";
 import { CommentPost } from "./CommentPost";
 import { useObservableEagerState } from "observable-hooks";
 import { firstValueFrom } from "rxjs";
@@ -88,7 +88,7 @@ const CommentLoadMoreButton = ({ handler }: { handler: () => Promise<unknown> })
 
   return (
     <Button disabled={remoteState.type === StateType.Loading} onClick={loadMore}>
-      {t("loadmore", { ns: "Comment" })}
+      {t("loadmore")}
     </Button>
   );
 };
@@ -165,7 +165,6 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
 };
 
 function CommentLeaves({ commentTree, root }: { commentTree: CommentTree; root: TreeComment }) {
-  const { t } = useTranslation("Comment");
   const comments = commentTree.data;
   const { commentService: service } = useInternalCommentContext();
 
@@ -291,7 +290,7 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
         <Stack direction="column" spacing={2}>
           <Stack direction="row" justifyContent="space-between">
             <Stack direction="row" spacing={1} alignItems="center">
-              <CommentHeaderText>{t("header", { ns: "Comment" })}</CommentHeaderText>
+              <CommentHeaderText>{t("header")}</CommentHeaderText>
               <CommentHeaderCount>{commentTree?.pagination.total ?? "-"}</CommentHeaderCount>
             </Stack>
             {headerSuffix}
@@ -314,6 +313,8 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
 const withFeature = composeHOC(withNoSSR, withCSSBaseline);
 
 export const Comment = withFeature(({ belong, ...leftProps }: CommentProps) => {
+  useAutoUpdateResource("Comment", (lang) => import(`./locales/${lang}.json`));
+
   return (
     <InternalCommentContext belong={belong}>
       <CommentInner {...leftProps} />

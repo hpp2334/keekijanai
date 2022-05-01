@@ -1,4 +1,4 @@
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/common/i18n";
 import { sprintf } from "sprintf-js";
 import { useEffect } from "react";
 import { useInternalAuthContext } from "./Context";

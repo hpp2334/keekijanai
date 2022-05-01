@@ -1,8 +1,7 @@
 import type React from "react";
 import NiceModal from "@ebay/nice-modal-react";
-import { I18nProvider } from "../i18n/provider";
-import { ScopedCssBaseline } from "@/components";
-import { useEffect, useLayoutEffect } from "react";
+import { i18n, I18nContext } from "../i18n";
+import { useLayoutEffect } from "react";
 import { AuthContext } from "@/views";
 import { EMPTY_LIST, once } from "../helper";
 import { keekijanaiConfig } from "@keekijanai/frontend-core";
@@ -28,15 +27,17 @@ const initialize = once(() => {
 export const KeekijanaiProvider: React.FC<KeekijanaiProviderProps> = ({ queryRoute, children }) => {
   keekijanaiConfig.queryRoute = queryRoute ?? false;
 
+  console.debug("[KeekijanaiProvider]", { i18n });
+
   useLayoutEffect(() => {
     initialize();
   }, []);
 
   return (
-    <AuthContext>
-      <NiceModal.Provider>
-        <I18nProvider>{children}</I18nProvider>
-      </NiceModal.Provider>
-    </AuthContext>
+    <I18nContext instance={i18n}>
+      <AuthContext>
+        <NiceModal.Provider>{children}</NiceModal.Provider>
+      </AuthContext>
+    </I18nContext>
   );
 };

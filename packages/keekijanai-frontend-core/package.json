@@ -4,6 +4,24 @@
   "description": "",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./libs/i18n": {
+      "import": "./dist/libs/keekijanai-i18n/index.js",
+      "require": "./dist/libs/keekijanai-i18n/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "libs/i18n": [
+        "src/libs/keekijanai-i18n/index.d.ts",
+        "dist/libs/keekijanai-i18n/index.d.ts"
+      ]
+    }
+  },
   "scripts": {
     "prepare": "ts-patch install -s",
     "clean": "rm -rf ./dist",

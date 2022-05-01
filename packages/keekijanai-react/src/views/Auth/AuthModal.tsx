@@ -1,5 +1,5 @@
 import { Modal, ButtonUnstyled, styled, Typography, Stack, ButtonUnstyledProps } from "@/components";
-import { useTranslation } from "react-i18next";
+import { useTranslation } from "@/common/i18n";
 import React, { useEffect, useMemo } from "react";
 import NiceModal, { useModal } from "@ebay/nice-modal-react";
 import { sprintf } from "sprintf-js";
