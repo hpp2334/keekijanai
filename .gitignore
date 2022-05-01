@@ -11,3 +11,5 @@ dist
 /packages/keekijanai-gatsby-vercel-demo/public
 /packages/keekijanai-gatsby-vercel-demo/.cache
 /packages/keekijanai-gatsby-vercel-demo/.vercel
+
+.docusaurus
