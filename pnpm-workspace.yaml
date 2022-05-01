@@ -7,3 +7,4 @@ packages:
   - "packages/keekijanai-react-dev-demo"
   - "packages/keekijanai-gatsby-vercel-demo"
   - "packages/keekijanai-serve-node-server-demo"
+  - "packages/keekijanai-doc"
