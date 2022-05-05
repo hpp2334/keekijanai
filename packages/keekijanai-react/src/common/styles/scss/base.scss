@@ -1,0 +1,20 @@
+
+$base-spacing: 4px;
+$grey-300: rgb(216, 216, 216);
+
+$primary: var(--root-primary);
+$primary-paper: var(--root-primary-paper);
+$typography-h4-fontSize: var(--root-typography-h4-fontSize);
+$typography-h5-fontSize: var(--root-typography-h5-fontSize);
+
+@function spacing($size) {
+  $result: $base-spacing * $size;
+  @return $result;
+}
+
+:root {
+  --root-primary: #3498db;
+  --root-primary-paper: white;
+  --root-typography-h4-fontSize: 20px;
+  --root-typography-h5-fontSize: 16px;
+}

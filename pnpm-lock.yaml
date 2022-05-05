@@ -151,6 +151,7 @@ importers:
       '@babel/core': ^7.16.7
       '@draft-js-plugins/editor': ^4.1.0
       '@ebay/nice-modal-react': ^1.2.1
+      '@emotion/css': ^11.9.0
       '@emotion/react': ^11.8.2
       '@emotion/styled': ^11.8.1
       '@keekijanai/frontend-core': workspace:*
@@ -178,6 +179,7 @@ importers:
       react: ^17.0.2
       react-dom: ^17.0.2
       react-error-boundary: ^3.1.4
+      react-icons: ^4.3.1
       react-spring: ^9.4.1
       react-syntax-highlighter: ^15.5.0
       react-transition-group: ^4.4.2
@@ -189,6 +191,7 @@ importers:
     dependencies:
       '@draft-js-plugins/editor': 4.1.1_draft-js@0.11.7+react@17.0.2
       '@ebay/nice-modal-react': 1.2.1_react-dom@17.0.2+react@17.0.2
+      '@emotion/css': 11.9.0_@babel+core@7.16.12
       '@emotion/react': 11.8.2_91de5bc04873a2ecfed8879f8166219d
       '@emotion/styled': 11.8.1_ea0638a8d22f25ccc04bf6448d676b1a
       '@mui/base': 5.0.0-alpha.72_b3482aaf5744fc7c2aeb7941b0e0a78f
@@ -202,6 +205,7 @@ importers:
       draft-js: 0.11.7_react-dom@17.0.2+react@17.0.2
       observable-hooks: 4.2.0_56970e162054b6dcaa91cebfe2a5c4ef
       react-error-boundary: 3.1.4_react@17.0.2
+      react-icons: 4.3.1_react@17.0.2
       react-spring: 9.4.2_react-dom@17.0.2+react@17.0.2
       react-syntax-highlighter: 15.5.0_react@17.0.2
       react-transition-group: 4.4.2_react-dom@17.0.2+react@17.0.2
@@ -246,6 +250,8 @@ importers:
       react-router: ^6.2.1
       react-router-dom: ^6.2.1
       reflect-metadata: ^0.1.13
+      sass: ^1.51.0
+      sass-loader: ^12.6.0
       source-map-loader: ^3.0.0
       style-loader: ^3.3.1
       swc-loader: ^0.1.15
@@ -274,6 +280,8 @@ importers:
       html-webpack-plugin: 5.5.0_webpack@5.67.0
       raw-loader: 4.0.2_webpack@5.67.0
       react-refresh: 0.11.0
+      sass: 1.51.0
+      sass-loader: 12.6.0_sass@1.51.0+webpack@5.67.0
       source-map-loader: 3.0.1_webpack@5.67.0
       style-loader: 3.3.1_webpack@5.67.0
       swc-loader: 0.1.15_@swc+core@1.2.135+webpack@5.67.0
@@ -1631,6 +1639,22 @@ packages:
       stylis: 4.0.13
     dev: false
 
+  /@emotion/css/11.9.0_@babel+core@7.16.12:
+    resolution: {integrity: sha512-S9UjCxSrxEHawOLnWw4upTwfYKb0gVQdatHejn3W9kPyXxmKv3HmjVfJ84kDLmdX8jR20OuDQwaJ4Um24qD9vA==}
+    peerDependencies:
+      '@babel/core': ^7.0.0
+    peerDependenciesMeta:
+      '@babel/core':
+        optional: true
+    dependencies:
+      '@babel/core': 7.16.12
+      '@emotion/babel-plugin': 11.7.2_@babel+core@7.16.12
+      '@emotion/cache': 11.7.1
+      '@emotion/serialize': 1.0.3
+      '@emotion/sheet': 1.1.0
+      '@emotion/utils': 1.1.0
+    dev: false
+
   /@emotion/hash/0.8.0:
     resolution: {integrity: sha512-kBJtf7PH6aWwZ6fka3zQ0p6SBYzx4fl1LoZXE2RrnYST9Xljm7WfKJrU4g/Xr3Beg72MLrp1AWNUmuYJTL7Cow==}
     dev: false
@@ -1671,6 +1695,16 @@ packages:
 
   /@emotion/serialize/1.0.2:
     resolution: {integrity: sha512-95MgNJ9+/ajxU7QIAruiOAdYNjxZX7G2mhgrtDWswA21VviYIRP1R5QilZ/bDY42xiKsaktP4egJb3QdYQZi1A==}
+    dependencies:
+      '@emotion/hash': 0.8.0
+      '@emotion/memoize': 0.7.5
+      '@emotion/unitless': 0.7.5
+      '@emotion/utils': 1.1.0
+      csstype: 3.0.11
+    dev: false
+
+  /@emotion/serialize/1.0.3:
+    resolution: {integrity: sha512-2mSSvgLfyV3q+iVh3YWgNlUc2a9ZlDU7DjuP5MjK3AXRR0dYigCrP99aeFtaB2L/hjfEZdSThn5dsZ0ufqbvsA==}
     dependencies:
       '@emotion/hash': 0.8.0
       '@emotion/memoize': 0.7.5
@@ -4815,7 +4849,7 @@ packages:
       postcss-modules-values: 4.0.0_postcss@8.4.5
       postcss-value-parser: 4.2.0
       semver: 7.3.5
-      webpack: 5.67.0
+      webpack: 5.67.0_be5619487e259e90d92caa053d09da5f
     dev: true
 
   /css-minimizer-webpack-plugin/2.0.0_webpack@5.67.0:
@@ -7543,6 +7577,10 @@ packages:
     resolution: {integrity: sha1-E7TTyxK++hVIKib+Gy665kAHHks=}
     engines: {node: '>=0.8.0'}
 
+  /immutable/4.0.0:
+    resolution: {integrity: sha512-zIE9hX70qew5qTUjSS7wi1iwj/l7+m54KWU247nhM3v806UdGj1yDndXj+IOYxxtW9zyLI+xqFNZjTuDaLUqFw==}
+    dev: true
+
   /import-fresh/3.3.0:
     resolution: {integrity: sha512-veYYhQa+D1QBKznvhUHxb8faxlrwUnxseDAbAp457E0wLNio2bOSKnjYDhMj+YiAq61xrMGhQk9iXVk5FzgQMw==}
     engines: {node: '>=6'}
@@ -8215,7 +8253,6 @@ packages:
   /klona/2.0.5:
     resolution: {integrity: sha512-pJiBpiXMbt7dkzXe8Ghj/u4FfXOOa98fPW+bihOJ4SjnoijweJrNThJfd3ifXpXhREjpoF2mZVH1GfS9LV3kHQ==}
     engines: {node: '>= 8'}
-    dev: false
 
   /language-subtag-registry/0.3.21:
     resolution: {integrity: sha512-L0IqwlIXjilBVVYKFT37X9Ih11Um5NEl9cbJIuU/SwP/zEEAbBPOnEeeuxVMf45ydWQRDQN3Nqc96OgbH1K+Pg==}
@@ -10111,6 +10148,14 @@ packages:
     resolution: {integrity: sha512-mKR90fX7Pm5seCOfz8q9F+66VCc1PGsWSBxKbITjfKVQHMNF2zudxHnMdJiB1fRCb+XsbQV9sO9DCkgsMQgBIA==}
     dev: false
 
+  /react-icons/4.3.1_react@17.0.2:
+    resolution: {integrity: sha512-cB10MXLTs3gVuXimblAdI71jrJx8njrJZmNMEMC+sQu5B/BIOmlsAjskdqpn81y8UBVEGuHODd7/ci5DvoSzTQ==}
+    peerDependencies:
+      react: '*'
+    dependencies:
+      react: 17.0.2
+    dev: false
+
   /react-is/16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
 
@@ -10566,6 +10611,41 @@ packages:
 
   /safer-buffer/2.1.2:
     resolution: {integrity: sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==}
+
+  /sass-loader/12.6.0_sass@1.51.0+webpack@5.67.0:
+    resolution: {integrity: sha512-oLTaH0YCtX4cfnJZxKSLAyglED0naiYfNG1iXfU5w1LNZ+ukoA5DtyDIN5zmKVZwYNJP4KRc5Y3hkWga+7tYfA==}
+    engines: {node: '>= 12.13.0'}
+    peerDependencies:
+      fibers: '>= 3.1.0'
+      node-sass: ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0
+      sass: ^1.3.0
+      sass-embedded: '*'
+      webpack: ^5.0.0
+    peerDependenciesMeta:
+      fibers:
+        optional: true
+      node-sass:
+        optional: true
+      sass:
+        optional: true
+      sass-embedded:
+        optional: true
+    dependencies:
+      klona: 2.0.5
+      neo-async: 2.6.2
+      sass: 1.51.0
+      webpack: 5.67.0_be5619487e259e90d92caa053d09da5f
+    dev: true
+
+  /sass/1.51.0:
+    resolution: {integrity: sha512-haGdpTgywJTvHC2b91GSq+clTKGbtkkZmVAb82jZQN/wTy6qs8DdFm2lhEQbEwrY0QDRgSQ3xDurqM977C3noA==}
+    engines: {node: '>=12.0.0'}
+    hasBin: true
+    dependencies:
+      chokidar: 3.5.3
+      immutable: 4.0.0
+      source-map-js: 1.0.2
+    dev: true
 
   /scheduler/0.20.2:
     resolution: {integrity: sha512-2eWfGgAqqWFGqtdMmcL5zCMK1U8KlXv8SQFGglL3CEtd0aDVDWgeF/YoCmvln55m5zSk3J/20hTaSBeSObsQDQ==}

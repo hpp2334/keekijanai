@@ -1,48 +1,18 @@
-import { Modal, ButtonUnstyled, styled, Typography, Stack, ButtonUnstyledProps } from "@/components";
+import { Modal, Typography, Stack } from "@/components";
 import { useTranslation } from "@/common/i18n";
 import React, { useEffect, useMemo } from "react";
 import NiceModal, { useModal } from "@ebay/nice-modal-react";
 import { sprintf } from "sprintf-js";
-import GitHubIcon from "@mui/icons-material/GitHub";
-import { AuthService, OAuth2 } from "@keekijanai/frontend-core";
+import { GoMarkGithub } from "react-icons/go";
+import { OAuth2 } from "@keekijanai/frontend-core";
 import { useInternalAuthContext } from "./Context";
+import { injectCSS } from "@/common/styles";
 
-const OAuth2ButtonRoot = styled("button")(({ theme }) => ({
-  cursor: "pointer",
-  padding: `${theme.spacing(1)} ${theme.spacing(2)}`,
-  background: theme.palette.background.paper,
-  border: `1px solid ${theme.palette.grey[300]}`,
-  borderRadius: 4,
-  transition: "border-color 0.2s",
-  "&:hover:enabled": {
-    borderColor: theme.palette.primary.main,
-  },
-  "&:disabled": {
-    cursor: "not-allowed",
-  },
-}));
+import styles from "./auth.module.scss";
 
-const AuthModalTitle = styled(Typography)(({ theme }) => ({
-  margin: `${theme.spacing(1)} 0`,
-  fontSize: theme.typography.h5.fontSize,
-  display: "flex",
-  justifyContent: "center",
-}));
-
-const ModalContent = styled("div")(({ theme }) => ({
-  width: 400,
-  padding: theme.spacing(4),
-  background: theme.palette.background.paper,
-  position: "absolute" as const,
-  top: "40%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  borderRadius: 4,
-}));
-
-const OAuth2Button = React.forwardRef<HTMLButtonElement, ButtonUnstyledProps>(function OAuth2Button(props, ref) {
-  return <ButtonUnstyled ref={ref} {...props} component={OAuth2ButtonRoot} />;
-});
+const OAuth2Button = injectCSS("button", styles.oauth2Button);
+const AuthModalTitle = injectCSS("div", styles.modalTitle);
+const ModalContent = injectCSS("div", styles.modalContent);
 
 interface AuthModalProps {
   [key: string]: unknown;
@@ -64,7 +34,7 @@ const AuthModalContent = () => {
         <AuthModalTitle>{t("modal.title")}</AuthModalTitle>
         <OAuth2Button ref={githubElRef.ref}>
           <Stack direction="row" spacing={1}>
-            <GitHubIcon />
+            <GoMarkGithub fontSize={24} />
             <Typography>{sprintf(t("oauth2.auth-with"), "Github")}</Typography>
           </Stack>
         </OAuth2Button>
@@ -78,7 +48,9 @@ export const AuthModal = NiceModal.create<AuthModalProps>(() => {
 
   return (
     <Modal open={modal.visible} onClose={() => modal.hide()}>
-      <AuthModalContent />
+      <div className={styles.authModalRoot}>
+        <AuthModalContent />
+      </div>
     </Modal>
   );
 });
