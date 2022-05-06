@@ -11,8 +11,7 @@
     "clean": "rm -rf ./dist",
     "build:dev": "kkft build",
     "build:prod": "kkft build -e prod & pnpm run build:types",
-    "build:types": "tsc --emitDeclarationOnly -p tsconfig.prod.json",
-    "analyse": "kkft analyse"
+    "build:types": "tsc --emitDeclarationOnly -p tsconfig.prod.json"
   },
   "keywords": [],
   "author": "",

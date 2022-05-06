@@ -13,7 +13,11 @@
     "@keekijanai/vercel-adapter#build:prod": {
       "dependsOn": ["clean"]
     },
+    "@keekijanai/frontend-react-dev-demo#analyze": {
+      "dependsOn": ["@keekijanai/frontend-core#build:prod", "@keekijanai/react#build:prod"]
+    },
     "clean": {},
+    "analyze": {},
     "build:prod": {}
   }
 }

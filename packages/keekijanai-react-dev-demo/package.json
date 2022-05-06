@@ -5,7 +5,8 @@
   "main": "index.js",
   "private": true,
   "scripts": {
-    "serve": "webpack serve"
+    "serve": "webpack serve -c ./webpack.config.dev.js",
+    "analyze": "webpack build -c ./webpack.config.analyze.js"
   },
   "keywords": [],
   "author": "",
@@ -40,6 +41,8 @@
     "react-dom": "^17.0.2",
     "react-router": "^6.2.1",
     "react-router-dom": "^6.2.1",
-    "reflect-metadata": "^0.1.13"
+    "reflect-metadata": "^0.1.13",
+    "@keekijanai/frontend-core": "workspace:*",
+    "@keekijanai/react": "workspace:*"
   }
 }
