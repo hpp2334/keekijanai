@@ -1,0 +1,65 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .code-root {
+    // reset code font-family
+    pre {
+      code {
+        font-family: Roboto Mono, monospace;
+        span {
+          font-family: inherit;
+        }
+      }
+    }
+
+    .code-sources-controller-root {
+      .code-sources-controller-bar {
+        margin: #{spacing(1)} 0;
+      }
+    }
+
+    .code-render-root {
+      .component-render-container {
+        padding: #{spacing(1)} #{spacing(2)};
+        border: 1px solid #{$grey-300};
+        border-radius: 0.25em;
+      }
+    }
+
+    .code-sources-root {
+      .code-tab-container {
+        display: flex;
+        flex-wrap: wrap;
+        background-color: $grey-50;
+      }
+
+      .code-tab-root {
+        height: 20px;
+        font-size: 1em;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: #{spacing(2)} #{spacing(3.5)};
+        font-size: 0.9em;
+        background-color: $grey-200;
+        cursor: pointer;
+        transition: background-color 0.2s, color 0.2s;
+        border-left: 1px solid $grey-300;
+
+        &:hover {
+          background-color: $grey-300;
+        }
+
+        &.active {
+          background-color: $grey-400;
+          color: $primary-text;
+
+          &:hover {
+            background-color: $grey-500;
+            color: $primary-text;
+          }
+        }
+      }
+    }
+  }
+}

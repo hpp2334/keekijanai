@@ -1,11 +1,11 @@
+import styles from "./code.module.scss";
 import { useSwitch } from "@/common/helper";
-import { Fade, IconButton, Stack, Box, styled, Tooltip, Transitions, Collapse } from "@/components";
+import { Fade, IconButton, Stack, Tooltip } from "@/components";
 import React, { useCallback, useState } from "react";
-import CodeIcon from "@mui/icons-material/Code";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import CheckIcon from "@mui/icons-material/Check";
 import { useInternalCodeContext } from "./InternalCodeContext";
 import { TransitionGroup } from "react-transition-group";
+import { MdContentCopy, MdCheck, MdOutlineCode } from "react-icons/md";
+import { injectCSS } from "@/common/styles";
 
 export interface CodeSourcesControllerProps {
   children?: React.ReactNode;
@@ -16,10 +16,8 @@ enum CopyState {
   Success,
 }
 
-const CodeSourcesControllerBar = styled(Stack)(({ theme }) => ({
-  margin: `${theme.spacing(1)} 0`,
-}));
-
+const CodeSourcesControllerRoot = injectCSS("div", styles.codeSourcesControllerRoot);
+const CodeSourcesControllerBar = injectCSS(Stack, styles.codeSourcesControllerBar);
 export const CodeSourcesController = ({ children }: CodeSourcesControllerProps) => {
   const { codeService } = useInternalCodeContext();
   const switchHook = useSwitch();
@@ -27,44 +25,44 @@ export const CodeSourcesController = ({ children }: CodeSourcesControllerProps) 
   const [copyState, setCopyState] = useState(CopyState.Idle);
 
   const handleCopy = useCallback(() => {
-    codeService.copyCode().then((success) => {
-      setCopyState(CopyState.Success);
-      setTimeout(() => {
-        setCopyState(CopyState.Idle);
-      }, 2000);
-    });
-  }, [codeService]);
+    if (copyState === CopyState.Idle) {
+      codeService.copyCode().then((success) => {
+        setCopyState(CopyState.Success);
+        setTimeout(() => {
+          setCopyState(CopyState.Idle);
+        }, 2000);
+      });
+    }
+  }, [codeService, copyState]);
 
   return (
-    <div>
+    <CodeSourcesControllerRoot>
       <TransitionGroup>
         <CodeSourcesControllerBar direction="row" justifyContent="space-between">
           <Stack>
-            <Fade>
-              <>
-                {switchHook.isOpen && (
-                  <Tooltip title="Copy" placement="top">
-                    <IconButton>
-                      {copyState === CopyState.Idle && <ContentCopyIcon fontSize="small" onClick={handleCopy} />}
-                      {copyState === CopyState.Success && <CheckIcon fontSize="small" />}
-                    </IconButton>
-                  </Tooltip>
-                )}
-              </>
+            <Fade in={switchHook.isOpen}>
+              {switchHook.isOpen && (
+                <Tooltip title="Copy" placement="top">
+                  <IconButton onClick={handleCopy}>
+                    {copyState === CopyState.Idle && <MdContentCopy fontSize="inherit" />}
+                    {copyState === CopyState.Success && <MdCheck fontSize="inherit" />}
+                  </IconButton>
+                </Tooltip>
+              )}
             </Fade>
           </Stack>
           <Stack>
-            <IconButton onClick={switchHook.toggle}>
-              <CodeIcon fontSize="small" />
+            <IconButton onClick={switchHook.toggle} active={switchHook.isOpen}>
+              <MdOutlineCode fontSize="inherit" />
             </IconButton>
           </Stack>
         </CodeSourcesControllerBar>
         {switchHook.isOpen && (
-          <Collapse>
+          <div>
             <div>{children}</div>
-          </Collapse>
+          </div>
         )}
       </TransitionGroup>
-    </div>
+    </CodeSourcesControllerRoot>
   );
 };

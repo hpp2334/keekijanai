@@ -1,24 +1,20 @@
-import { styled } from "./reexport-mui";
+import styles from "./statical.module.scss";
 import React from "react";
 import { animated, useTransition } from "react-spring";
+import { CommonStyleProps, injectCSS } from "@/common/styles";
+import clsx from "clsx";
 
-const StaticalDivWrapper = styled("div")(({ theme }) => ({
-  position: "relative",
-  height: theme.typography.h4.fontSize,
-  width: "100%",
-  overflow: "hidden",
-}));
+export interface StaticalProps extends CommonStyleProps {
+  value: string | number | null | undefined;
+}
 
-const StaticalDiv = styled(animated.div)(({ theme }) => ({
-  position: "absolute",
-  fontSize: theme.typography.h4.fontSize,
-  left: "50%",
-  top: "50%",
-  cursor: "default",
-  userSelect: "none",
-}));
+const StaticalRoot = injectCSS("div", styles.staticalRoot);
+const StaticalContent = injectCSS(
+  animated.div as React.ComponentType<JSX.IntrinsicElements["div"]>,
+  styles.staticalContent
+);
 
-export const Statical = ({ value }: { value: string | number | null | undefined }) => {
+export const Statical = ({ value, className, style }: StaticalProps) => {
   const text = value ?? "-";
   const transitions = useTransition(text, {
     from: {
@@ -33,10 +29,10 @@ export const Statical = ({ value }: { value: string | number | null | undefined 
   });
 
   return (
-    <StaticalDivWrapper>
+    <StaticalRoot className={className} style={style}>
       {transitions((style, item) => (
-        <StaticalDiv style={{ ...style }}>{item}</StaticalDiv>
+        <StaticalContent style={{ ...(style as any) }}>{item}</StaticalContent>
       ))}
-    </StaticalDivWrapper>
+    </StaticalRoot>
   );
 };

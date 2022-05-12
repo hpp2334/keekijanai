@@ -1,12 +1,13 @@
+import styles from "./comment.module.scss";
 import React, { useCallback, useMemo, useRef } from "react";
 import { CommentEditor } from "./components/CommentEditor";
-import { styled } from "@/components";
 import { useTranslation } from "@/common/i18n";
 import { useRefreshToken } from "@/common/helper";
 import { switchTap, TreeComment } from "@keekijanai/frontend-core";
 import { firstValueFrom } from "rxjs";
 import { sprintf } from "sprintf-js";
 import { useInternalCommentContext } from "./provider";
+import { injectCSS } from "@/common/styles";
 
 export interface CommentPostProps {
   refComment?: TreeComment;
@@ -16,11 +17,7 @@ export interface CommentPostProps {
   onExpandChange?: (expand: boolean) => void;
 }
 
-const CommentToPostUnfocusContainer = styled("div")(({ theme }) => ({
-  padding: theme.spacing(1),
-  backgroundColor: theme.palette.grey[200],
-  color: theme.palette.grey[400],
-}));
+const CommentToPostUnfocusContainer = injectCSS("div", styles.commentToPostUnfocusContainer);
 
 export const CommentPost = ({ ...leftProps }: CommentPostProps) => {
   const { t } = useTranslation("Comment");
@@ -76,7 +73,7 @@ export const CommentPost = ({ ...leftProps }: CommentPostProps) => {
   );
 
   return (
-    <div>
+    <div className={styles.commentPostRoot}>
       {innerExpandRef.current ? (
         <CommentEditor onCancel={handleCollapse} onReply={handleReply} placeholder={placeholder} />
       ) : (

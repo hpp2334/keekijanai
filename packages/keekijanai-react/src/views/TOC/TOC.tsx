@@ -1,9 +1,15 @@
-import { Box, makeStyles, Typography, styled } from "@/components";
-import { isNil } from "lodash";
-import React, { useCallback, useContext, useEffect, useMemo, useRef } from "react";
+import styles from "./toc.module.scss";
+import { Stack, Typography } from "@/components";
+import { useCallback, useEffect, useMemo } from "react";
 import { TOCHeading, useInternalTOCContext } from "./Context";
-import { useObservable, useObservableState, useSubscription } from "observable-hooks";
+import { useObservableState } from "observable-hooks";
 import { CommonStylesProps } from "@/common/react";
+import { constants, injectCSS } from "@/common/styles";
+import clsx from "clsx";
+import { withCSSBaseline } from "@/common/hoc";
+import { useRef } from "react";
+import { useRefList } from "@/common/helper";
+import { keyBy } from "@keekijanai/frontend-core";
 
 export interface TOCProps extends CommonStylesProps {
   // depend how to calculate active heading
@@ -13,26 +19,13 @@ export interface TOCProps extends CommonStylesProps {
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface TOCStaticProps extends CommonStylesProps {}
 
-const TOCItemText = styled(Typography)({
-  fontSize: 14,
-});
+const TOCRoot = injectCSS("aside", styles.tocRoot);
+const TOCItemText = injectCSS(Typography, styles.tocItemText);
+const TOCItemContainer = injectCSS("li", styles.tocItemContainer);
+const TOCItemList = injectCSS("ul", styles.tocItemList);
+const TOCStaticItemList = injectCSS("ul", styles.tocStaticItemList);
 
-const TOCItemContainer = styled(Box)(({ theme }) => ({
-  display: "block",
-  cursor: "pointer",
-  marginBottom: 4,
-  "&:last-child": {
-    marginBottom: 0,
-  },
-}));
-
-const TOCItemList = styled("ul")(({}) => ({
-  maxWidth: 200,
-  maxHeight: 600,
-  overflowY: "auto",
-}));
-
-const TOCStaticItemList = styled("ul")(({}) => ({}));
+const withFeature = withCSSBaseline;
 
 function TOCItem({
   heading,
@@ -48,21 +41,58 @@ function TOCItem({
   }, [heading, onClick]);
 
   return (
-    <TOCItemText
-      sx={{
-        color: isActive ? "primary.main" : "text.secondary",
-      }}
-      onClick={handleClick}
-    >
+    <TOCItemText className={clsx(isActive && styles.active)} onClick={handleClick}>
       {heading.title}
     </TOCItemText>
   );
 }
 
-export const TOC = ({ className, style, offsetY = 0 }: TOCProps) => {
+function TOCActiveIndicator({ height, top }: { height?: number; top?: number }) {
+  return (
+    <div
+      className={styles.tocActiveIndicatorRoot}
+      style={{
+        height,
+        top,
+      }}
+    >
+      <div className={styles.tocActiveIndicator} />
+    </div>
+  );
+}
+
+export const TOC = withFeature(({ className, style, offsetY = 0 }: TOCProps) => {
   const { tocService } = useInternalTOCContext();
   const headings = useObservableState(tocService.headings$);
+  const headingIdMapIndex = useMemo(
+    () =>
+      headings.reduce((res, heading, index) => {
+        res[heading.id] = index;
+        return res;
+      }, {} as Record<string, number>),
+    [headings]
+  );
   const activeHeading = useObservableState(tocService.activeHeading$);
+  const tocItemsRefList = useRefList<HTMLLIElement>(headings.length);
+
+  const activeHeadingRefStyle: { height?: number; top?: number } = useMemo(() => {
+    if (!activeHeading) {
+      return {};
+    }
+    const id = activeHeading.id;
+    const index = headingIdMapIndex[id];
+    const el = tocItemsRefList.getRef(index);
+    if (!el) {
+      return {};
+    }
+
+    const height = el.scrollHeight;
+    const top = el.offsetTop;
+    return {
+      height,
+      top,
+    };
+  }, [activeHeading, headingIdMapIndex, tocItemsRefList]);
 
   const minLevel = useMemo(
     () => headings.reduce((pre, cur) => Math.min(pre, cur.level), Number.MAX_SAFE_INTEGER),
@@ -74,42 +104,46 @@ export const TOC = ({ className, style, offsetY = 0 }: TOCProps) => {
   }, [offsetY, tocService.offsetY$]);
 
   return (
-    <aside>
-      <TOCItemList className={className} style={style}>
-        {headings.map((heading, index) => {
-          const isActive = activeHeading === heading;
-          return (
-            <TOCItemContainer
-              key={index}
-              component="li"
-              sx={{
-                paddingLeft: (heading.level - minLevel + 1) * 2,
-                borderLeft: `3px solid transparent`,
-                borderLeftColor: isActive ? "primary.main" : undefined,
-              }}
-            >
-              <TOCItem isActive={isActive} heading={heading} onClick={() => tocService.activateHeading(heading)} />
-            </TOCItemContainer>
-          );
-        })}
+    <TOCRoot className={className} style={style}>
+      <TOCItemList>
+        <TOCActiveIndicator height={activeHeadingRefStyle.height} top={activeHeadingRefStyle.top} />
+        <Stack spacing={0}>
+          {headings.map((heading, index) => {
+            const isActive = activeHeading === heading;
+            return (
+              <TOCItemContainer
+                key={index}
+                ref={(el) => {
+                  if (el) {
+                    tocItemsRefList.setRef(index, el);
+                  }
+                }}
+                style={{
+                  paddingLeft: (heading.level - minLevel + 1) * constants.baseSpacing * 3,
+                }}
+              >
+                <TOCItem isActive={isActive} heading={heading} onClick={() => tocService.activateHeading(heading)} />
+              </TOCItemContainer>
+            );
+          })}
+        </Stack>
       </TOCItemList>
-    </aside>
+    </TOCRoot>
   );
-};
+});
 
-export const TOCStatic = ({ className, style }: TOCStaticProps) => {
+export const TOCStatic = withFeature(({ className, style }: TOCStaticProps) => {
   const { tocService } = useInternalTOCContext();
   const headings = useObservableState(tocService.headings$);
 
   return (
-    <aside>
-      <TOCStaticItemList className={className} style={style}>
+    <TOCRoot className={className} style={style}>
+      <TOCStaticItemList>
         {headings.map((heading, index) => {
           return (
             <TOCItemContainer
               key={index}
-              component="li"
-              sx={{
+              style={{
                 paddingLeft: (heading.level - 1) * 2,
               }}
             >
@@ -118,6 +152,6 @@ export const TOCStatic = ({ className, style }: TOCStaticProps) => {
           );
         })}
       </TOCStaticItemList>
-    </aside>
+    </TOCRoot>
   );
-};
+});

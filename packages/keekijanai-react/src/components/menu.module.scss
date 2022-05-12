@@ -1,0 +1,49 @@
+@use "../common/styles/scss" as *;
+
+:global(.keekijanai-reset).popper {
+  z-index: 1;
+}
+
+:global(.keekijanai-reset) {
+  .list-box {
+    font-family: sans-serif;
+    font-size: 0.875rem;
+    box-sizing: border-box;
+    padding: 5px;
+    margin: 10px 0;
+    min-width: 200px;
+    background: #fff;
+    border: $grey-300;
+    border-radius: 0.25em;
+    color: $grey-900;
+    overflow: auto;
+    outline: 0px;
+    box-shadow: 0px 0px 2px 2px $grey-300;
+  }
+
+  .menu-item {
+    list-style: none;
+    padding: spacing(2);
+    border-radius: 0.25em;
+    cursor: pointer;
+    transition: color 0.1s, background-color 0.1s;
+
+    &:last-of-type {
+      border-bottom: none;
+    }
+
+    &:global(.Mui-focusVisible) {
+      background-color: $primary;
+      color: $grey-900;
+    }
+
+    &:global(.Mui-disabled) {
+      color: $grey-400;
+    }
+
+    &:global(:hover:not(.Mui-disabled)) {
+      background-color: $primary;
+      color: white;
+    }
+  }
+}

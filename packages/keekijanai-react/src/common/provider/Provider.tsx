@@ -1,4 +1,4 @@
-import type React from "react";
+import React from "react";
 import NiceModal from "@ebay/nice-modal-react";
 import { i18n, I18nContext } from "../i18n";
 import { useLayoutEffect } from "react";

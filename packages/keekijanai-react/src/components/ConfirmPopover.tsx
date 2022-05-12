@@ -1,10 +1,13 @@
+import styles from "./confirm-popover.module.scss";
 import { useRemote } from "@/common/hooks/useRemote";
 import { StateType } from "@/common/state";
 import React, { useCallback, useState } from "react";
-import { Stack } from ".";
-import { Button, Popover, PopoverProps } from "./reexport-mui";
+import { Button } from "./Button";
+import { Stack } from "./Stack";
+import PopperUnstyled, { PopperUnstyledProps } from "@mui/base/PopperUnstyled";
+import { injectCSS } from "@/common/styles";
 
-export interface ConfirmPopoverProps extends Pick<PopoverProps, "anchorOrigin" | "transformOrigin"> {
+export interface ConfirmPopoverProps extends Pick<PopperUnstyledProps, "placement"> {
   trigger: (openPopover: (el: Element | null) => void) => React.ReactElement;
   onOk: () => Promise<unknown>;
   onCancel?: () => void;
@@ -19,15 +22,18 @@ interface State {
   el: Element | null;
 }
 
+const Popper = injectCSS(PopperUnstyled, ["keekijanai-reset", styles.confirmPopoverRoot]);
+const ConfirmPopoverContainer = injectCSS("div", styles.confirmPopoverContainer);
+const ConfirmPopoverContent = injectCSS("div", styles.confirmPopoverContent);
+
 const defaultState: State = {
   open: false,
   el: null,
 };
 
 export const ConfirmPopover: React.ComponentType<ConfirmPopoverProps> = ({
+  placement,
   trigger,
-  anchorOrigin,
-  transformOrigin,
   onOk,
   onCancel,
   texts,
@@ -61,23 +67,24 @@ export const ConfirmPopover: React.ComponentType<ConfirmPopoverProps> = ({
   return (
     <>
       {trigger(openPopover)}
-      <Popover
+      <Popper
         open={state.open}
         anchorEl={state.el}
-        anchorOrigin={anchorOrigin}
-        transformOrigin={transformOrigin}
-        onClose={handleClickCancel}
+        placement={placement}
+        // onClose={handleClickCancel}
       >
-        {children}
-        <Stack direction="row" justifyContent="flex-end">
-          <Button disabled={okState.type === StateType.Loading} color="inherit" onClick={handleClickCancel}>
-            {texts?.cancel ?? "Cancel"}
-          </Button>
-          <Button disabled={okState.type === StateType.Loading} onClick={handleClickOk}>
-            {texts?.ok ?? "Ok"}
-          </Button>
-        </Stack>
-      </Popover>
+        <ConfirmPopoverContainer>
+          <ConfirmPopoverContent>{children}</ConfirmPopoverContent>
+          <Stack direction="row" justifyContent="flex-end">
+            <Button disabled={okState.type === StateType.Loading} color="inherit" onClick={handleClickCancel}>
+              {texts?.cancel ?? "Cancel"}
+            </Button>
+            <Button disabled={okState.type === StateType.Loading} color="primary" onClick={handleClickOk}>
+              {texts?.ok ?? "Ok"}
+            </Button>
+          </Stack>
+        </ConfirmPopoverContainer>
+      </Popper>
     </>
   );
 };

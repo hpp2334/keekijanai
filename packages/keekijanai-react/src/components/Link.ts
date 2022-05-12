@@ -1,19 +1,4 @@
-import { styled } from "@mui/material";
+import { injectCSS } from "@/common/styles";
+import styles from "./link.module.scss";
 
-export const Link = styled("a")(({ theme }) => ({
-  textDecoration: "underline",
-  "&:link": {
-    color: "inherit",
-  },
-  "&:visited": {
-    color: "inherit",
-  },
-  "&:hover": {
-    color: theme.palette.primary.main,
-  },
-  "&:activated": {
-    color: "inherit",
-  },
-})) as any as React.ComponentType<
-  React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>
->;
+export const Link = injectCSS("a", styles.linkRoot);

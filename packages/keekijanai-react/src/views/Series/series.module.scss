@@ -1,0 +1,22 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .series-root {
+    .series-container {
+      padding: spacing(2);
+
+      .series-item {
+        margin: #{spacing(2)} 0;
+        cursor: default;
+
+        &.disable {
+          color: $grey-400;
+        }
+
+        &.match {
+          color: $primary;
+        }
+      }
+    }
+  }
+}

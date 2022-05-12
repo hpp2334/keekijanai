@@ -1,20 +1,30 @@
-
 $base-spacing: 4px;
-$grey-300: rgb(216, 216, 216);
 
-$primary: var(--root-primary);
-$primary-paper: var(--root-primary-paper);
-$typography-h4-fontSize: var(--root-typography-h4-fontSize);
-$typography-h5-fontSize: var(--root-typography-h5-fontSize);
+// color: https://mui.com/material-ui/customization/color/#playground
+$grey-50: #fafafa;
+$grey-100: #f5f5f5;
+$grey-200: #eeeeee;
+$grey-300: #e0e0e0;
+$grey-400: #bdbdbd;
+$grey-500: #9e9e9e;
+$grey-600: #757575;
+$grey-700: #616161;
+$grey-800: #424242;
+$grey-900: #212121;
+$red-500: #f44336;
+
+$color-error: $red-500;
+
+$primary: var(--keekijanai-root-primary);
+$primary-dark: var(--keekijanai-root-primary-dark);
+$primary-light: var(--keekijanai-root-primary-light);
+$primary-text: var(--keekijanai-root-primary-text);
+$primary-paper: var(--keekijanai-root-primary-paper);
+$secondary-text: $grey-400;
+$typography-h4-fontSize: var(--keekijanai-root-typography-h4-fontSize);
+$typography-h5-fontSize: var(--keekijanai-root-typography-h5-fontSize);
 
 @function spacing($size) {
   $result: $base-spacing * $size;
   @return $result;
-}
-
-:root {
-  --root-primary: #3498db;
-  --root-primary-paper: white;
-  --root-typography-h4-fontSize: 20px;
-  --root-typography-h5-fontSize: 16px;
 }

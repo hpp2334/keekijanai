@@ -1,10 +1,12 @@
 import { EditorPlugin, GetSetEditorState } from "@draft-js-plugins/editor";
 import { RichUtils } from "draft-js";
 import React, { useCallback } from "react";
-import FormatBoldOutlinedIcon from "@mui/icons-material/FormatBoldOutlined";
-import FormatItalicOutlinedIcon from "@mui/icons-material/FormatItalicOutlined";
-import FormatUnderlinedOutlinedIcon from "@mui/icons-material/FormatUnderlinedOutlined";
-import StrikethroughSOutlinedIcon from "@mui/icons-material/StrikethroughSOutlined";
+import {
+  MdOutlineFormatBold,
+  MdOutlineFormatItalic,
+  MdOutlineFormatUnderlined,
+  MdOutlineFormatStrikethrough,
+} from "react-icons/md";
 import { ToolbarButton } from "./ToolbarButton";
 import { partial } from "@keekijanai/frontend-core";
 
@@ -21,10 +23,10 @@ export type ToolbarPlugin = EditorPlugin & {
 };
 
 const switchButtons = [
-  { key: "bold", icon: <FormatBoldOutlinedIcon />, style: "BOLD" },
-  { key: "italic", icon: <FormatItalicOutlinedIcon />, style: "ITALIC" },
-  { key: "underline", icon: <FormatUnderlinedOutlinedIcon />, style: "UNDERLINE" },
-  { key: "strike-through-out", icon: <StrikethroughSOutlinedIcon />, style: "STRIKE_THROUGH" },
+  { key: "bold", icon: <MdOutlineFormatBold />, style: "BOLD" },
+  { key: "italic", icon: <MdOutlineFormatItalic />, style: "ITALIC" },
+  { key: "underline", icon: <MdOutlineFormatUnderlined />, style: "UNDERLINE" },
+  { key: "strike-through-out", icon: <MdOutlineFormatStrikethrough />, style: "STRIKE_THROUGH" },
 ];
 
 export function createToolbarPlugin(): ToolbarPlugin {

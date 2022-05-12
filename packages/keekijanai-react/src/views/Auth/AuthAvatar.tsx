@@ -5,14 +5,15 @@ import { Menu, MenuItem, MenuProps } from "@/components";
 import { showAuthModal } from "./AuthModal";
 import { useAuthService } from "./logic";
 import { useTranslation } from "@/common/i18n";
-import { withNoSSR } from "@/common/hoc/withNoSSR";
+import { composeHOC, withNoSSR, withCSSBaseline } from "@/common/hoc";
 
 export interface AuthAvatarProps {
-  anchorOrigin?: MenuProps["anchorOrigin"];
-  transformOrigin?: MenuProps["transformOrigin"];
+  placement?: MenuProps["placement"];
 }
 
-export const AuthAvatar = withNoSSR(({ anchorOrigin, transformOrigin }: AuthAvatarProps) => {
+const withFeature = composeHOC(withNoSSR, withCSSBaseline);
+
+export const AuthAvatar = withFeature(({ placement }: AuthAvatarProps) => {
   const { t } = useTranslation("Auth");
   const ref = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -42,18 +43,7 @@ export const AuthAvatar = withNoSSR(({ anchorOrigin, transformOrigin }: AuthAvat
         open={menuOpen}
         anchorEl={menuOpen ? ref.current : null}
         onClose={() => setMenuOpen(false)}
-        anchorOrigin={
-          anchorOrigin ?? {
-            vertical: "bottom",
-            horizontal: "right",
-          }
-        }
-        transformOrigin={
-          transformOrigin ?? {
-            vertical: "top",
-            horizontal: "right",
-          }
-        }
+        placement={placement ?? "bottom-end"}
       >
         <MenuItem onClick={handleClickLogout}>{t("logout")}</MenuItem>
       </Menu>

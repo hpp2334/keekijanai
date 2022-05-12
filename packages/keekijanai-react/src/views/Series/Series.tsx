@@ -1,24 +1,23 @@
+import styles from "./series.module.scss";
 import { Collapse } from "../Collapse";
-import { blue, grey } from "@/components/colors";
-import { Box, Link, styled } from "@/components";
+import { Link } from "@/components";
 import { useObservableState } from "observable-hooks";
 import React, { useEffect } from "react";
 import { isNil, Series as SeriesType } from "@keekijanai/frontend-core";
 import { CommonStylesProps } from "@/common/react";
 import { useGlobalService } from "../Global";
 import { useSeriesService } from "./logic";
+import clsx from "clsx";
+import { constants } from "@/common/styles";
+import { withCSSBaseline } from "@/common/hoc";
 
 export interface SeriesProps extends CommonStylesProps {
   series: SeriesType | null;
 }
 
-const StyledSeriesItemContainer = styled(Box)({
-  margin: "4px 0",
-});
+const withFeature = withCSSBaseline;
 
-const StyledWithoutHrefLink = styled("div")(({ theme }) => ({}));
-
-export const Series = ({ series, className, style }: SeriesProps) => {
+export const Series = withFeature(({ series, className, style }: SeriesProps) => {
   const seriesService = useSeriesService();
   const globalService = useGlobalService();
 
@@ -43,31 +42,27 @@ export const Series = ({ series, className, style }: SeriesProps) => {
   }
 
   return (
-    <Collapse title={normalizedSeries.name} defaultExpanded={true} className={className} style={style}>
-      <div>
-        {normalizedSeries.data.map((item, index) => {
-          const hasLink = !isNil(item.path);
+    <div className={styles.seriesRoot}>
+      <Collapse title={normalizedSeries.name} defaultExpanded={true} className={className} style={style}>
+        <div className={styles.seriesContainer}>
+          {normalizedSeries.data.map((item, index) => {
+            const hasLink = !isNil(item.path);
 
-          return (
-            <StyledSeriesItemContainer
-              sx={{
-                marginLeft: (item.level - 1) * 2,
-                color: item.match
-                  ? // TODO replace
-                    blue[500]
-                  : item.disable
-                  ? // TODO replace
-                    grey[300]
-                  : undefined,
-              }}
-              key={index}
-            >
-              {!hasLink && <StyledWithoutHrefLink>{item.title}</StyledWithoutHrefLink>}
-              {hasLink && <Link href={`/${item.path}`}>{item.title}</Link>}
-            </StyledSeriesItemContainer>
-          );
-        })}
-      </div>
-    </Collapse>
+            return (
+              <div
+                style={{
+                  marginLeft: (item.level - 1) * constants.baseSpacing * 4,
+                }}
+                className={clsx(styles.seriesItem, item.disable && styles.disable, item.match && styles.match)}
+                key={index}
+              >
+                {!hasLink && <div>{item.title}</div>}
+                {hasLink && <Link href={`/${item.path}`}>{item.title}</Link>}
+              </div>
+            );
+          })}
+        </div>
+      </Collapse>
+    </div>
   );
-};
+});

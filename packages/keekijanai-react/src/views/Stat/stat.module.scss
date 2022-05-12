@@ -1,0 +1,24 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .stat-root {
+    .stat-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .stat-title {
+        font-size: 0.85em;
+        height: 35px;
+        color: $secondary-text;
+        display: flex;
+        align-items: center;
+        cursor: default;
+      }
+
+      .statical-wrapper {
+        width: 5em;
+      }
+    }
+  }
+}

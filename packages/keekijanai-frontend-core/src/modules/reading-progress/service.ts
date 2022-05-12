@@ -7,6 +7,7 @@ import { isNil } from "@/utils/common";
 
 @injectable()
 export class ReadingProgressService {
+  /** range in [0, 1) */
   public progress$: Observable<number>;
 
   public constructor(private globalService: GlobalService) {

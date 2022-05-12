@@ -1,5 +1,6 @@
+import styles from "./comment.module.scss";
 import { CommentService, CommentTree, CommentVO, noop, TreeComment } from "@keekijanai/frontend-core";
-import { Typography, Avatar, Button, Stack, Popover, styled } from "@/components";
+import { Typography, Avatar, Button, Stack } from "@/components";
 import { useAutoUpdateResource, useTranslation } from "@/common/i18n";
 import { CommentPost } from "./CommentPost";
 import { useObservableEagerState } from "observable-hooks";
@@ -16,6 +17,7 @@ import { withNoSSR } from "@/common/hoc/withNoSSR";
 import { useAuthService } from "../Auth/logic";
 import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
 import { composeHOC } from "@/common/hoc/composeHOC";
+import { injectCSS } from "@/common/styles";
 
 interface CommentInnerProps {
   maxHeight?: number;
@@ -26,55 +28,14 @@ export interface CommentProps extends CommentInnerProps {
   belong: string;
 }
 
-const CommentHeaderText = styled(Typography)(({ theme }) => ({
-  fontSize: theme.typography.h5.fontSize,
-}));
-
-const CommentHeaderCount = styled("div")(({ theme }) => ({
-  color: theme.palette.primary.contrastText,
-  backgroundColor: theme.palette.primary.main,
-  borderRadius: 10,
-  height: 20,
-  fontSize: 14,
-  display: "flex",
-  padding: theme.spacing(1),
-  justifyContent: "center",
-  alignItems: "center",
-}));
-
-const CommentBody = styled("div")(({ theme }) => ({}));
-
-const CommentUserText = styled(Typography)({
-  fontWeight: 550,
-});
-
-const CommentLeavesWrapper = styled("div")({
-  marginLeft: 30,
-});
-
-const CommentButton = styled("div")(({ theme }) => ({
-  display: "inline-block",
-  cursor: "pointer",
-  color: theme.palette.grey[800],
-  fontSize: theme.typography.button.fontSize,
-  "&:hover": {
-    color: theme.palette.grey[900],
-  },
-}));
-
-const CommentEmptyContent = styled("div")(({ theme }) => ({
-  padding: `20px 0`,
-}));
-
-const CommentEmptyText = styled(Typography)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "center",
-  color: theme.palette.text.secondary,
-}));
-
-const RemoveCommentContentContainer = styled("div")(({ theme }) => ({
-  padding: [theme.spacing(1), theme.spacing(2)],
-}));
+const CommentHeaderRoot = injectCSS("div", styles.commentHeaderRoot);
+const CommentHeaderText = injectCSS(Typography, styles.text);
+const CommentHeaderCount = injectCSS("div", styles.count);
+const CommentBodyRoot = injectCSS("div", styles.commentBodyRoot);
+const CommentUserText = injectCSS(Typography, styles.commentUserText);
+const CommentLeavesWrapper = injectCSS("div", styles.commentLeavesWrapper);
+const CommentButton = injectCSS("button", styles.commentButton);
+const RemoveCommentContentContainer = injectCSS("div", styles.commentRemoveContentContainer);
 
 const commentInnerContext = React.createContext<{
   toReply: (params: { refComment?: TreeComment }) => void;
@@ -114,15 +75,15 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
 
   return (
     <Stack spacing={1.5}>
-      <Stack direction="row" spacing={2}>
+      <Stack direction="row" spacing={2} alignItems="flex-start">
         <Avatar src={comment.user?.avatar_url}></Avatar>
-        <Stack spacing={0.5}>
-          <Stack direction="row" spacing={1}>
+        <Stack spacing={2}>
+          <Stack direction="row" spacing={3}>
             <CommentUserText>{comment.user?.name}</CommentUserText>
             <CommentTime timestamp={comment.created_time} />
           </Stack>
           <CommentEditor initialValue={content} mode="read" />
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={3}>
             <CommentButton onClick={handleClickReply}>{t("block.panel.reply")}</CommentButton>
             {service.canRemove(comment) && (
               <ConfirmPopover
@@ -136,14 +97,7 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
                   ok: t("remove.confirm.button.ok"),
                   cancel: t("remove.confirm.button.cancel"),
                 }}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                transformOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
+                placement="top-start"
               >
                 <RemoveCommentContentContainer>
                   <Typography>{t("remove.confirm.content")}</Typography>
@@ -195,9 +149,9 @@ function CommentLoading() {
 function CommentEmpty() {
   const { t } = useTranslation("Comment");
   return (
-    <CommentEmptyContent>
-      <CommentEmptyText>{t("empty.title")}</CommentEmptyText>
-    </CommentEmptyContent>
+    <div className={styles.commentEmptyRoot}>
+      <div className={styles.text}>{t("empty.title")}</div>
+    </div>
   );
 }
 
@@ -285,20 +239,22 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   });
 
   return (
-    <div>
+    <div className={styles.commentRoot}>
       <commentInnerContext.Provider value={ctxValue}>
         <Stack direction="column" spacing={2}>
-          <Stack direction="row" justifyContent="space-between">
-            <Stack direction="row" spacing={1} alignItems="center">
-              <CommentHeaderText>{t("header")}</CommentHeaderText>
-              <CommentHeaderCount>{commentTree?.pagination.total ?? "-"}</CommentHeaderCount>
-            </Stack>
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <CommentHeaderRoot>
+              <Stack direction="row" spacing={1} alignItems="center">
+                <CommentHeaderText>{t("header")}</CommentHeaderText>
+                <CommentHeaderCount>{commentTree?.pagination.total ?? "-"}</CommentHeaderCount>
+              </Stack>
+            </CommentHeaderRoot>
             {headerSuffix}
           </Stack>
-          <CommentBody sx={commentBodyStyle}>
+          <CommentBodyRoot style={commentBodyStyle}>
             {!commentTree && <CommentLoading />}
             {commentTree && <CommentRoots commentTree={commentTree} />}
-          </CommentBody>
+          </CommentBodyRoot>
           <CommentPost
             expand={commentPostState.expand}
             onExpandChange={handleCommentPostExpandChange}

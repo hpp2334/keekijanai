@@ -18,7 +18,7 @@ const transitionStyles = {
 } as const;
 
 export const Fade = React.forwardRef<HTMLDivElement, FadeProps>(function Fade(
-  { in: inProp, duration = 3000, children },
+  { in: inProp, duration = 300, children },
   ref
 ) {
   const containerRef = useRef<HTMLDivElement>(null);

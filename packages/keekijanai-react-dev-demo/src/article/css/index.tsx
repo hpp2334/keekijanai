@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { Metadata, RenderContent } from "../../Article";
-import { Reference, Collapse, Code, CodeSource } from "@keekijanai/react";
+import { Reference, Collapse, Code, CodeSource, Pagination, Series } from "@keekijanai/react";
 
 import { Demo, requireRaw } from "./code";
 
@@ -9,6 +9,50 @@ export const metadata: Metadata = {
   path: "/css-trick",
   series: "tricks",
 };
+
+function TestPagination() {
+  const [page, setPage] = useState(1);
+
+  return (
+    <div style={{ display: "flex", justifyContent: "center" }}>
+      <Pagination page={page} count={10} onChange={setPage} />
+    </div>
+  );
+}
+
+function TestSeries() {
+  return (
+    <Series
+      series={{
+        name: "Test",
+        data: [
+          {
+            title: "CSS",
+            children: [
+              {
+                title: "CSS Basic",
+                path: "/#",
+              },
+              {
+                title: "CSS Basic (Basic)",
+                disable: true,
+              },
+            ],
+          },
+          {
+            title: "JS",
+            path: "/#",
+          },
+          {
+            title: "HTML",
+            path: "/#",
+            disable: true,
+          },
+        ],
+      }}
+    />
+  );
+}
 
 export const renderContent: RenderContent = (info, { H1, H2, H3, H4 }) => (
   <article>
@@ -68,5 +112,7 @@ export const renderContent: RenderContent = (info, { H1, H2, H3, H4 }) => (
         <CodeSource getSource={requireRaw} sourceKey="./css-prop/index.js" />
       </Code>
     </Collapse>
+    <TestPagination />
+    <TestSeries />
   </article>
 );

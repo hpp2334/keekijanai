@@ -1,33 +1,21 @@
-import { StatService } from "@keekijanai/frontend-core";
+import styles from "./stat.module.scss";
 import React from "react";
 import { useObservableEagerState } from "observable-hooks";
-import { Statical, styled, Tooltip } from "@/components";
+import { Statical, Tooltip } from "@/components";
 import { withNoSSR } from "@/common/hoc/withNoSSR";
 import { useStatService } from "./logic";
 import { composeHOC } from "@/common/hoc/composeHOC";
 import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
+import { injectCSS } from "@/common/styles";
 
 export interface StatProps {
   belong: string;
 }
 
-const StatContainer = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center",
-}));
-
-const StaticalWrapper = styled("div")(({ theme }) => ({
-  width: "5rem",
-}));
-
-const StatTitle = styled("div")(({ theme }) => ({
-  fontSize: 12,
-  color: theme.palette.text.secondary,
-  height: "40px",
-  display: "flex",
-  alignItems: "center",
-}));
+const StatRoot = injectCSS("div", styles.statRoot);
+const StatContainer = injectCSS("div", styles.statContainer);
+const StaticalWrapper = injectCSS("div", styles.staticalWrapper);
+const StatTitle = injectCSS("div", styles.statTitle);
 
 const withFeature = composeHOC(withNoSSR, withCSSBaseline);
 
@@ -38,13 +26,15 @@ export const Stat = withFeature(({ belong }: StatProps) => {
   const pvText = `${visit?.pv ?? "-"} page visits`;
 
   return (
-    <StatContainer>
-      <Tooltip title={pvText} placement="top">
-        <StaticalWrapper>
-          <Statical value={visit?.uv} />
-        </StaticalWrapper>
-      </Tooltip>
-      <StatTitle>VIEWS</StatTitle>
-    </StatContainer>
+    <StatRoot>
+      <StatContainer>
+        <Tooltip title={pvText} placement="top">
+          <StaticalWrapper>
+            <Statical value={visit?.uv} />
+          </StaticalWrapper>
+        </Tooltip>
+        <StatTitle>VIEWS</StatTitle>
+      </StatContainer>
+    </StatRoot>
   );
 });

@@ -1,19 +1,18 @@
+import styles from "./comment.module.scss";
 import React from "react";
 import format from "date-fns/format";
 import formatDistance from "date-fns/formatDistance";
 import { TimeService } from "@keekijanai/frontend-core";
 import { useObservableEagerState } from "observable-hooks";
-import { Typography, Tooltip, styled } from "@/components";
+import { Typography, Tooltip } from "@/components";
 import { useTimeService } from "../Time/logic";
+import { injectCSS } from "@/common/styles";
 
 export interface CommentTimeProps {
   timestamp: number;
 }
 
-const StyledDistanceText = styled(Typography)(({ theme }) => ({
-  color: theme.palette.grey[400],
-  cursor: "default",
-}));
+const StyledDistanceText = injectCSS(Typography, [styles.commentTimeRoot, styles.commentTimeText]);
 
 export const CommentTime = ({ timestamp }: CommentTimeProps) => {
   const timeService = useTimeService();

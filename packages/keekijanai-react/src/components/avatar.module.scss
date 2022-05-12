@@ -1,21 +1,23 @@
 $size: 40px;
 
-.avatar-root {
-  width: $size;
-  height: $size;
-  border-radius: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+:global(.keekijanai-reset) {
+  .avatar-root {
+    width: inherit;
+    height: inherit;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
 
-  &.fallback-avatar {
-    background-color: #ccc;
-    color: white;
-  }
+    &.fallback-avatar {
+      background-color: #ccc;
+      color: white;
+    }
 
-  > img {
-    width: $size;
-    height: $size;
+    > img {
+      width: $size;
+      height: $size;
+    }
   }
 }

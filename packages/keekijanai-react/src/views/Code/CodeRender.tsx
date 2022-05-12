@@ -1,29 +1,28 @@
 /* eslint-disable no-inner-declarations */
 
-import { Paper, Typography, styled, Alert, AlertTitle } from "@/components";
+import { Alert, AlertTitle } from "@/components";
 import React, { useEffect, useMemo } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 import { GetRenderHandler, GetRenderResult, RenderType, switchAllCaseCheck } from "@keekijanai/frontend-core";
 import { useInternalCodeContext } from "./InternalCodeContext";
+import { injectCSS } from "@/common/styles";
+
+import styles from "./code.module.scss";
 
 export interface CodeRenderProps {
-  /** 获取文件导出，如使用 webpack，可以使用 require.context API  */
+  /** Get render handler. If in webpack，`require.context` can be used to get render handler */
   getRender: GetRenderHandler;
   entryKey: string;
 }
 
-const RenderContainer = styled(Paper)({
-  padding: "4px 8px",
-});
+const RenderContainer = injectCSS("div", styles.componentRenderContainer);
 
 function ErrorFallbackComponent({ error }: { error: Error }) {
   return (
-    <>
-      <Alert severity="error">
-        <AlertTitle>Render Fail</AlertTitle>
-        {error.message}
-      </Alert>
-    </>
+    <Alert>
+      <AlertTitle>Render Fail</AlertTitle>
+      {error.message}
+    </Alert>
   );
 }
 
@@ -78,5 +77,5 @@ export const CodeRender = ({ getRender, entryKey }: CodeRenderProps) => {
     return getRenderedElement(renderResult);
   }, [codeService, entryKey]);
 
-  return <Paper>{codeRenderElement}</Paper>;
+  return <div className={styles.codeRenderRoot}>{codeRenderElement}</div>;
 };

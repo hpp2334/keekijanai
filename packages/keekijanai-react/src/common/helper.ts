@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useReducer, useState } from "react";
+import React, { useCallback, useLayoutEffect, useMemo, useReducer, useRef, useState } from "react";
 
 export const EMPTY_LIST = Object.seal([]) as any;
 
@@ -47,3 +47,35 @@ export const useSwitch = (defaultValue?: boolean) => {
 
   return exported;
 };
+
+// https://stackoverflow.com/questions/54633690/how-can-i-use-multiple-refs-for-an-array-of-elements-with-hooks
+export const useRefList = <T>(len: number) => {
+  const itemsRef = useRef<T[]>([]);
+
+  const setRef = useCallback((index: number, ref: T) => {
+    itemsRef.current[index] = ref;
+  }, []);
+
+  const getRef = useCallback((index: number) => {
+    return itemsRef.current[index];
+  }, []);
+
+  useLayoutEffect(() => {
+    itemsRef.current = itemsRef.current.slice(0, len);
+  }, [len]);
+
+  const exported = useMemo(
+    () => ({
+      getRef,
+      setRef,
+    }),
+    [getRef, setRef]
+  );
+
+  return exported;
+};
+
+export const range = (start: number, end: number) =>
+  Array.from({ length: end - start })
+    .fill(0)
+    .map((v, index) => start + index);

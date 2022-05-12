@@ -1,67 +1,68 @@
-// modify from https://mui.com/components/accordion/ Customization example
-
-import React, { useRef } from "react";
-import ArrowForwardIosSharpIcon from "@mui/icons-material/ArrowForwardIosSharp";
-import {
-  styled,
-  Accordion as MuiAccordion,
-  AccordionSummary as MuiAccordionSummary,
-  AccordionDetails as MuiAccordionDetails,
-  Typography,
-  type AccordionProps,
-  type AccordionSummaryProps,
-} from "@/components";
+import styles from "./collapse.module.scss";
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Typography, Stack } from "@/components";
+import { useRefreshToken, useSwitch } from "@/common/helper";
+import { withCSSBaseline } from "@/common/hoc";
 import { CommonStylesProps } from "@/common/react";
-import { useSwitch } from "@/common/helper";
-import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
+import { MdKeyboardArrowRight } from "react-icons/md";
+import clsx from "clsx";
 
 export interface CollapseProps extends CommonStylesProps {
-  title: string;
+  title: React.ReactElement | string;
   /** (default: false) */
   defaultExpanded?: boolean;
   children?: React.ReactNode;
 }
 
-const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={0} square {...props} />)(
-  ({ theme }) => ({
-    border: `1px solid ${theme.palette.divider}`,
-    "&:before": {
-      display: "none",
-    },
-  })
-);
+const CollapseContent = ({ children, onMount }: { children?: React.ReactNode; onMount: () => void }) => {
+  useLayoutEffect(() => {
+    setTimeout(() => {
+      onMount();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-const AccordionSummary = styled((props: AccordionSummaryProps) => (
-  <MuiAccordionSummary expandIcon={<ArrowForwardIosSharpIcon sx={{ fontSize: "0.9rem" }} />} {...props} />
-))(({ theme }) => ({
-  backgroundColor: theme.palette.mode === "dark" ? "rgba(255, 255, 255, .05)" : "rgba(0, 0, 0, .03)",
-  flexDirection: "row-reverse",
-  "& .MuiAccordionSummary-expandIconWrapper.Mui-expanded": {
-    transform: "rotate(90deg)",
-  },
-  "& .MuiAccordionSummary-content": {
-    marginLeft: theme.spacing(1),
-  },
-}));
-
-const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
-  padding: theme.spacing(2),
-  borderTop: "1px solid rgba(0, 0, 0, .125)",
-}));
+  return <>{children}</>;
+};
 
 export const Collapse = withCSSBaseline(
   ({ title, defaultExpanded = false, children, className, style }: CollapseProps) => {
+    const [refreshToken, updateRefreshToken] = useRefreshToken();
+    const collapseContentWrapperRef = useRef<HTMLDivElement>(null);
     const { isOpen, toggle } = useSwitch(defaultExpanded);
     const haveOpenedRef = React.useRef(isOpen);
     haveOpenedRef.current ||= isOpen;
 
+    const collapseContentWrapperStyle = useMemo((): React.CSSProperties | undefined => {
+      const el = collapseContentWrapperRef.current;
+      if (!isOpen || !el) {
+        return undefined;
+      }
+      const elHeight = el.scrollHeight;
+      return {
+        height: elHeight,
+      };
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isOpen, refreshToken]);
+
     return (
-      <Accordion expanded={isOpen} onChange={toggle} className={className} style={style}>
-        <AccordionSummary>
-          <Typography>{title}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>{haveOpenedRef.current && children}</AccordionDetails>
-      </Accordion>
+      <div className={clsx(styles.collapseRoot, isOpen && styles.expanded, className)} style={style}>
+        <div className={clsx(styles.controllerBar, isOpen && styles.expanded)} onClick={toggle}>
+          <Stack direction="row" alignItems="center">
+            <MdKeyboardArrowRight fontSize="inherit" className={clsx(styles.expandIcon, isOpen && styles.expanded)} />
+            {typeof title === "string" ? <Typography>{title}</Typography> : title}
+          </Stack>
+        </div>
+        <div className={clsx(styles.collapseContentRoot, isOpen && styles.expanded)}>
+          <div
+            ref={collapseContentWrapperRef}
+            className={clsx(styles.collapseContentWrapper, isOpen && styles.expanded)}
+            style={collapseContentWrapperStyle}
+          >
+            {haveOpenedRef.current && <CollapseContent onMount={updateRefreshToken}>{children}</CollapseContent>}
+          </div>
+        </div>
+      </div>
     );
   }
 );

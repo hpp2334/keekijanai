@@ -1,16 +1,24 @@
-import { Chip, Stack, styled } from "@/components";
+import styles from "./code.module.scss";
 import { useObservableState } from "observable-hooks";
 import React, { useEffect } from "react";
 import { isNil, SourceNameMap } from "@keekijanai/frontend-core";
 import { useInternalCodeContext } from "./InternalCodeContext";
 import { SyntaxHighlighter } from "@/components/SyntaxHighlighter";
+import { injectCSS } from "@/common/styles";
+import clsx from "clsx";
+
+interface CodeTabProps {
+  active: boolean;
+  children?: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLDivElement>;
+}
 
 export interface CodeSourcesProps {
-  /** 获取文件自身内容（即源码），如使用 webpack，可以使用 require.context API 与 raw-loader */
+  /** Get source code. If in webpack，`require.context` and raw-loader can be used to get it */
   getSource: (key: string) => string | { default: string };
-  /** 从 key 映射到 name，渲染时标签页名称会使用 name */
+  /** Map source key to name, which is used in code tab */
   sourceKeyMap?: SourceNameMap;
-  /** 需要显示源代码的文件的 key 组成的数组 */
+  /** The list of source code keys */
   sourceKeyList: string[];
 }
 
@@ -23,14 +31,19 @@ export interface CodeSourceProps {
   sourceKey: string;
 }
 
-const SourceChipContainer = styled("div")({
-  display: "flex",
-  flexWrap: "wrap",
-  gap: "4px",
-});
+const CodeTabContainer = injectCSS("div", styles.codeTabContainer);
 
 const customSyntaxHighlighterStyle: React.CSSProperties = {
-  fontSize: 12,
+  fontSize: "0.8em",
+  margin: 0,
+};
+
+const CodeTab = ({ active, onClick, children }: CodeTabProps) => {
+  return (
+    <div className={clsx(styles.codeTabRoot, active && styles.active)} onClick={onClick}>
+      {children}
+    </div>
+  );
 };
 
 export const CodeSourceContent = ({ code, lang }: CodeSourceContentProps) => {
@@ -75,18 +88,18 @@ export const CodeSources = ({ getSource, sourceKeyMap, sourceKeyList }: CodeSour
   }, []);
 
   return (
-    <div>
-      <SourceChipContainer>
+    <div className={styles.codeSourcesRoot}>
+      <CodeTabContainer>
         {sourceEntries.map((sourceEntry, index) => (
-          <Chip
+          <CodeTab
             key={index}
-            label={sourceEntry.name}
-            color="primary"
-            variant={currentSourceKey === sourceEntry.key ? undefined : "outlined"}
+            active={currentSourceKey === sourceEntry.key}
             onClick={() => codeService.currentSourceKey$.next(sourceEntry.key)}
-          />
+          >
+            {sourceEntry.name}
+          </CodeTab>
         ))}
-      </SourceChipContainer>
+      </CodeTabContainer>
       {!isNil(currentSourceCode) && <CodeSourceContent code={currentSourceCode} lang={currentSourceCodeLang} />}
     </div>
   );

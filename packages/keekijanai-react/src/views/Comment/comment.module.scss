@@ -1,0 +1,75 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .comment-root {
+    .comment-header-root {
+      .text {
+        font-size: $typography-h5-fontSize;
+        letter-spacing: spacing(0.2);
+      }
+
+      .count {
+        color: $primary-text;
+        background-color: $primary;
+        border-radius: 1em;
+        height: 1em;
+        width: 1.25em;
+        display: flex;
+        padding: spacing(1);
+        justify-content: center;
+        align-items: center;
+      }
+    }
+
+    .comment-body-root {
+    }
+
+    .comment-leaves-wrapper {
+      margin-left: 2em;
+    }
+
+    .comment-empty-root {
+      padding: #{spacing(3)} 0;
+
+      .text {
+        display: flex;
+        justify-content: center;
+        color: $secondary-text;
+      }
+    }
+
+    .comment-user-text {
+      font-weight: 500;
+    }
+
+    .comment-button {
+      display: inline-block;
+      cursor: pointer;
+      color: $grey-800;
+      font-size: 1em;
+
+      &:hover {
+        color: $grey-900;
+      }
+    }
+  }
+
+  .comment-post-root {
+    .comment-to-post-unfocus-container {
+      padding: #{spacing(2)} #{spacing(3)};
+      background-color: $grey-200;
+      color: $grey-400;
+      border-radius: 0.25em;
+    }
+  }
+
+  .comment-time-root {
+    &.comment-time-text {
+      color: $grey-400;
+      cursor: default;
+    }
+  }
+  .comment-remove-content-container {
+    padding: #{spacing(1)} #{spacing(2)};
+  }
+}

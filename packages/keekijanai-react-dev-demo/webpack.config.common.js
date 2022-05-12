@@ -48,6 +48,11 @@ module.exports = {
       },
       {
         test: /\.s[ac]ss$/i,
+        exclude: /\.module\.s[ac]ss$/i,
+        use: ["style-loader", "css-loader", "sass-loader"],
+      },
+      {
+        test: /\.module\.s[ac]ss$/i,
         use: [
           "style-loader",
           {

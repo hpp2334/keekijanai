@@ -33,7 +33,7 @@ const AuthModalContent = () => {
       <Stack direction="column" spacing={2}>
         <AuthModalTitle>{t("modal.title")}</AuthModalTitle>
         <OAuth2Button ref={githubElRef.ref}>
-          <Stack direction="row" spacing={1}>
+          <Stack direction="row" spacing={1} alignItems="center">
             <GoMarkGithub fontSize={24} />
             <Typography>{sprintf(t("oauth2.auth-with"), "Github")}</Typography>
           </Stack>

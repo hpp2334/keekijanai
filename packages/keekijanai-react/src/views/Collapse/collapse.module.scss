@@ -1,0 +1,78 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  $rad: 5px;
+  $animation-duration: 0.2s;
+  $default-bg-color: $grey-100;
+  $expand-bg-color: $primary;
+
+  .collapse-root {
+    border: 2px solid $default-bg-color;
+    border-radius: $rad;
+    &.expanded {
+      border-color: $expand-bg-color;
+    }
+
+    .controller-bar {
+      background-color: transparent;
+      padding: #{spacing(2)} #{spacing(2.5)};
+      cursor: pointer;
+      user-select: none;
+      position: relative;
+      overflow: hidden;
+      transition: color $animation-duration;
+
+      &.expanded {
+        color: white;
+
+        &::before {
+          width: 100%;
+        }
+
+        &::after {
+          width: 0%;
+        }
+      }
+
+      @mixin controller-bar-bg-block {
+        position: absolute;
+        content: "";
+        z-index: -1;
+        top: 0;
+        bottom: 0;
+        transition: width #{$animation-duration};
+      }
+
+      &::before {
+        @include controller-bar-bg-block;
+        left: 0;
+        width: 0%;
+        background-color: $expand-bg-color;
+      }
+
+      &::after {
+        @include controller-bar-bg-block;
+        right: 0;
+        width: 100%;
+        background-color: $default-bg-color;
+      }
+
+      .expand-icon {
+        transition: transform #{$animation-duration};
+
+        &.expanded {
+          transform: rotateZ(90deg);
+        }
+      }
+    }
+
+    .collapse-content-root {
+      overflow: hidden;
+
+      .collapse-content-wrapper {
+        height: 0;
+        transition: height #{$animation-duration};
+      }
+    }
+  }
+}

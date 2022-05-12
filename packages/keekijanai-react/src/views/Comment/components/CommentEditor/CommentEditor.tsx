@@ -1,10 +1,12 @@
+import styles from "./comment-editor.module.scss";
 import React, { useCallback, useMemo, useRef, useState } from "react";
 import { convertFromRaw, convertToRaw, EditorState } from "draft-js";
 import NativeEditor, { EditorPlugin } from "@draft-js-plugins/editor";
 import { createToolbarPlugin } from "./plugins/toolbar";
-import { Button, styled, useTheme } from "@/components";
+import { Button } from "@/components";
 import { useRemote } from "@/common/hooks/useRemote";
 import { StateType } from "@/common/state";
+import { injectCSS } from "@/common/styles";
 
 export interface CommentEditorProps {
   initialValue?: string;
@@ -23,35 +25,11 @@ export interface CommentEditorProps {
   onCancel?: () => void;
 }
 
-const StyledEditContainer = styled("div")(({ theme }) => ({
-  border: `1px solid ${theme.palette.grey[300]}`,
-  "& .DraftEditor-root": {
-    padding: 10,
-    minHeight: 60,
-    maxHeight: 300,
-  },
-  "& .public-DraftEditorPlaceholder-root": {
-    position: "relative",
-  },
-  "& .public-DraftEditorPlaceholder-inner": {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    color: theme.palette.grey[300],
-  },
-}));
-
-const StyledReadContainer = styled("div")({});
-
-const StyledPanel = styled("div")({
-  display: "flex",
-  justifyContent: "space-between",
-});
-
-const StyledAction = styled("div")({
-  display: "flex",
-  gap: 1,
-});
+const CommentEditorRoot = injectCSS("div", styles.commentEditorRoot);
+const StyledEditContainer = injectCSS("div", styles.editContainer);
+const StyledReadContainer = injectCSS("div", styles.readContainer);
+const StyledPanel = injectCSS("div", styles.panel);
+const StyledAction = injectCSS("div", styles.action);
 
 const styleMap: Record<string, React.CSSProperties> = {
   BOLD: {
@@ -116,41 +94,36 @@ export const CommentEditor = ({
   }, [editorState, handleReply]);
 
   return (
-    <StyledContainer className="keekijanai-comment" onClick={handleClick}>
-      <NativeEditor
-        ref={refEditor}
-        readOnly={mode === "read"}
-        editorState={editorState}
-        onChange={setEditorState}
-        plugins={plugins}
-        customStyleMap={styleMap}
-        placeholder={placeholder}
-      />
-      {mode === "edit" && (
-        <StyledPanel>
-          <Toolbar />
-          <StyledAction>
-            <Button
-              variant="text"
-              color="inherit"
-              size="small"
-              onClick={onCancel}
-              disabled={replyRS.type === StateType.Loading}
-            >
-              {texts?.cancel ?? "Cancel"}
-            </Button>
-            <Button
-              variant="text"
-              color="primary"
-              size="small"
-              onClick={handleClickReply}
-              disabled={replyRS.type === StateType.Loading}
-            >
-              {texts?.post ?? "Post"}
-            </Button>
-          </StyledAction>
-        </StyledPanel>
-      )}
-    </StyledContainer>
+    <CommentEditorRoot>
+      <StyledContainer onClick={handleClick}>
+        <NativeEditor
+          ref={refEditor}
+          readOnly={mode === "read"}
+          editorState={editorState}
+          onChange={setEditorState}
+          plugins={plugins}
+          customStyleMap={styleMap}
+          placeholder={placeholder}
+        />
+        {mode === "edit" && (
+          <StyledPanel>
+            <Toolbar />
+            <StyledAction>
+              <Button color="inherit" size="small" onClick={onCancel} disabled={replyRS.type === StateType.Loading}>
+                {texts?.cancel ?? "Cancel"}
+              </Button>
+              <Button
+                color="primary"
+                size="small"
+                onClick={handleClickReply}
+                disabled={replyRS.type === StateType.Loading}
+              >
+                {texts?.post ?? "Post"}
+              </Button>
+            </StyledAction>
+          </StyledPanel>
+        )}
+      </StyledContainer>
+    </CommentEditorRoot>
   );
 };

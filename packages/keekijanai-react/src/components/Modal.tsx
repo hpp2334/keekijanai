@@ -1,4 +1,4 @@
-import { CommonStylesProps } from "@/common/styles";
+import { CommonStyleProps } from "@/common/styles";
 import ModalUnstyled, { ModalUnstyledProps } from "@mui/base/ModalUnstyled";
 import clsx from "clsx";
 import React from "react";
@@ -6,7 +6,7 @@ import React from "react";
 import styles from "./modal.module.scss";
 import { Fade } from "./transitions/Fade";
 
-interface BackdropProps extends CommonStylesProps {
+interface BackdropProps extends CommonStyleProps {
   open?: boolean;
   children?: React.ReactNode;
 }
@@ -34,18 +34,12 @@ const Backdrop = React.forwardRef<HTMLDivElement, BackdropProps>(function Backdr
 });
 
 const modalClasses = {
-  root: styles.modalRoot,
+  root: clsx("keekijanai-reset", styles.modalRoot),
 };
 
 export function Modal({ open, children, onClose }: ModalProps) {
   return (
-    <ModalUnstyled
-      classes={modalClasses}
-      open={open}
-      onClose={onClose}
-      BackdropComponent={Backdrop}
-      closeAfterTransition
-    >
+    <ModalUnstyled classes={modalClasses} open={open} onClose={onClose} BackdropComponent={Backdrop}>
       <Fade in={open}>{children}</Fade>
     </ModalUnstyled>
   );
