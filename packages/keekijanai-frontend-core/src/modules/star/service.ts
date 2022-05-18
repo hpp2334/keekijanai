@@ -1,7 +1,6 @@
 import { switchTap } from "@/utils/rxjs-helper";
-import { Service, ServiceFactory, serviceFactory } from "@/core/service";
+import { Service, ServiceFactory, setServiceFactory } from "@/core/service";
 import { BehaviorSubject, catchError, Observable, of, switchMapTo } from "rxjs";
-import { injectable, postConstruct } from "inversify";
 import { StarApi } from "./api";
 import { Star, StarType } from "./data";
 import { AuthService } from "../auth";
@@ -79,8 +78,6 @@ export class StarService implements Service {
   }
 }
 
-@injectable()
-@serviceFactory()
 export class StarServiceFactory implements ServiceFactory<[string], StarService> {
   public constructor(private _authService: AuthService, private api: StarApi) {}
 
@@ -92,4 +89,8 @@ export class StarServiceFactory implements ServiceFactory<[string], StarService>
   }
 }
 
-container.bind(StarServiceFactory).toSelf();
+setServiceFactory(StarServiceFactory);
+container.register({
+  class: StarServiceFactory,
+  constructorArgClasses: [AuthService, StarApi],
+});

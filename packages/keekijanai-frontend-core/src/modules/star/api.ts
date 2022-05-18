@@ -1,10 +1,8 @@
-import { injectable } from "inversify";
 import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable } from "rxjs";
 import { container } from "@/core/container";
 
-@injectable()
 export class StarApi {
   public getCurrent(belong: string) {
     return ajax<Data.GetStarResponse>({
@@ -27,4 +25,7 @@ export class StarApi {
   }
 }
 
-container.bind(StarApi).toSelf();
+container.register({
+  class: StarApi,
+  constructorArgClasses: [],
+});

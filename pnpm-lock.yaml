@@ -37,7 +37,6 @@ importers:
       '@swc/core': ^1.2.124
       '@swc/helpers': ^0.3.2
       '@types/node': ^17.0.4
-      inversify: ^6.0.1
       localstorage-memory: ^1.0.3
       reflect-metadata: ^0.1.13
       rxjs: ^7.4.0
@@ -48,7 +47,6 @@ importers:
       typescript-transform-paths: ^3.3.1
     dependencies:
       '@swc/helpers': 0.3.2
-      inversify: 6.0.1
       localstorage-memory: 1.0.3
       rxjs: 7.5.2
     devDependencies:
@@ -7562,10 +7560,6 @@ packages:
     resolution: {integrity: sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==}
     dependencies:
       loose-envify: 1.4.0
-    dev: false
-
-  /inversify/6.0.1:
-    resolution: {integrity: sha512-B3ex30927698TJENHR++8FfEaJGqoWOgI6ZY5Ht/nLUsFCwHn6akbwtnUAPCgUepAnTpe2qHxhDNjoKLyz6rgQ==}
     dev: false
 
   /ip/1.1.5:

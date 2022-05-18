@@ -41,7 +41,6 @@
     "react-dom": "^17.0.2",
     "react-router": "^6.2.1",
     "react-router-dom": "^6.2.1",
-    "reflect-metadata": "^0.1.13",
     "@keekijanai/frontend-core": "workspace:*",
     "@keekijanai/react": "workspace:*"
   }

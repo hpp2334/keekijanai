@@ -15,7 +15,6 @@ import {
   takeWhile,
   throwError,
 } from "rxjs";
-import { injectable, postConstruct } from "inversify";
 import { AuthApi } from "./api";
 import * as Data from "./data";
 import { Service } from "@/core/service";
@@ -23,7 +22,6 @@ import { GlobalService } from "../global";
 
 const TOKEN_KEY = LocalStoreEntryKey("auth-token");
 
-@injectable()
 export class AuthService implements Service {
   private token$ = new BehaviorSubject<string | null>(null);
   private tokenStoreEntry = new LocalStoreEntry<string>(TOKEN_KEY, {
@@ -102,8 +100,7 @@ export class AuthService implements Service {
     );
   }
 
-  @postConstruct()
-  private postConstruct() {
+  public postConstruct() {
     this.registerRequestInterceptorToken();
     const token = this.tokenStoreEntry.get();
     console.debug("[auth][postConstruct]", { token });
@@ -139,4 +136,9 @@ export class AuthService implements Service {
   }
 }
 
-container.bind(AuthService).toSelf().inSingletonScope();
+container.register({
+  class: AuthService,
+  constructorArgClasses: [GlobalService, AuthApi],
+  postConstruct: "postConstruct",
+  mode: "singleton",
+});

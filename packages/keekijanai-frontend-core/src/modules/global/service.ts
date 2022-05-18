@@ -1,9 +1,7 @@
 import { of, fromEvent, interval, debounce, throttle, switchMap } from "rxjs";
 import { startWith } from "rxjs/operators";
-import { injectable } from "inversify";
 import { container } from "@/core/container";
 
-@injectable()
 export class GlobalService {
   public get global() {
     if (typeof typeof window === "undefined") {
@@ -62,4 +60,8 @@ export class GlobalService {
   }
 }
 
-container.bind(GlobalService).toSelf().inSingletonScope();
+container.register({
+  class: GlobalService,
+  constructorArgClasses: [],
+  mode: "singleton",
+});

@@ -1,11 +1,9 @@
 import { switchMap } from "rxjs/operators";
 import { Observable, of } from "rxjs";
 import { GlobalService } from "../global/service";
-import { injectable } from "inversify";
 import { container } from "@/core/container";
 import { isNil } from "@/utils/common";
 
-@injectable()
 export class ReadingProgressService {
   /** range in [0, 1) */
   public progress$: Observable<number>;
@@ -27,4 +25,7 @@ export class ReadingProgressService {
   }
 }
 
-container.bind(ReadingProgressService).toSelf();
+container.register({
+  class: ReadingProgressService,
+  constructorArgClasses: [GlobalService],
+});

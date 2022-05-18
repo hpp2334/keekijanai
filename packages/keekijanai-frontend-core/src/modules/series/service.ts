@@ -1,8 +1,8 @@
 import { BehaviorSubject, combineLatest, Observable, Subscription } from "rxjs";
 import { distinctUntilChanged, filter } from "rxjs/operators";
-import { injectable } from "inversify";
 import { Service } from "@/core/service";
 import { isNil } from "@/utils/common";
+import { container } from "@/core/container";
 
 export interface SeriesItem {
   title?: string;
@@ -31,7 +31,6 @@ export interface NormalizedSeries {
   data: Array<NormalizedSeriesItem>;
 }
 
-@injectable()
 export class SeriesService implements Service {
   public currentPath$ = new BehaviorSubject<string | null>(null);
   public series$ = new BehaviorSubject<Series | null>(null);
@@ -113,3 +112,8 @@ export class SeriesService implements Service {
     return this.normalizeSlug(a) === this.normalizeSlug(b);
   }
 }
+
+container.register({
+  class: SeriesService,
+  constructorArgClasses: [],
+});

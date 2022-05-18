@@ -3,12 +3,11 @@ import { assert } from "@/utils/assert";
 import { switchTap } from "@/utils/rxjs-helper";
 import { omit, noop } from "@/utils/common";
 import { BehaviorSubject, catchError, Observable, of, switchMap, switchMapTo } from "rxjs";
-import { injectable, postConstruct } from "inversify";
 import { AuthService, UserRole } from "../auth";
 import { CommentApi } from "./api";
 import * as Data from "./data";
 import { container } from "@/core/container";
-import { Service, ServiceFactory, serviceFactory } from "@/core/service";
+import { Service, ServiceFactory, setServiceFactory } from "@/core/service";
 
 const DEFAULT_PAGINATION = {
   limit: 0,
@@ -260,8 +259,6 @@ export class CommentService implements Service {
   }
 }
 
-@injectable()
-@serviceFactory()
 export class CommentServiceFactory implements ServiceFactory<[string], CommentService> {
   public constructor(private authService: AuthService, private api: CommentApi) {}
 
@@ -272,4 +269,8 @@ export class CommentServiceFactory implements ServiceFactory<[string], CommentSe
   }
 }
 
-container.bind(CommentService).toSelf();
+setServiceFactory(CommentServiceFactory);
+container.register({
+  class: CommentServiceFactory,
+  constructorArgClasses: [AuthService, CommentApi],
+});

@@ -1,3 +1,3 @@
-import { Container } from "inversify";
+import { DIContainer } from "@/libs/keekijanai-dependency-injection";
 
-export const container = new Container();
+export const container = new DIContainer();

@@ -1,11 +1,9 @@
-import { injectable } from "inversify";
 import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable, of, switchMap } from "rxjs";
 import { ElementRef } from "@/utils/element-ref";
 import { container } from "@/core/container";
 
-@injectable()
 export class AuthApi {
   public legacyLogin(params: Data.LoginParams) {
     return ajax<Data.LoginRespPayload>({
@@ -40,4 +38,7 @@ export class AuthApi {
   }
 }
 
-container.bind(AuthApi).toSelf();
+container.register({
+  class: AuthApi,
+  constructorArgClasses: [],
+});

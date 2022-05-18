@@ -1,5 +1,3 @@
-/// <reference types="reflect-metadata" />
-
 export * from "./modules";
 export * from "./core/request/type";
 export { keekijanaiConfig } from "./core/config";

@@ -9,7 +9,11 @@ export interface Service {
 }
 
 const isServiceFactory = (classTarget: any): classTarget is new (...args: any[]) => ServiceFactory<any[], any> => {
-  return Reflect.getMetadata("service:isFactory", classTarget);
+  return "$keekijanai-service-factory" in classTarget;
+};
+
+export const setServiceFactory = (classTarget: any) => {
+  classTarget["$keekijanai-service-factory"] = true;
 };
 
 export function createService<S extends new (...args: any[]) => any>(
@@ -30,12 +34,3 @@ export function createService(Service: any, ...args: any[]): any {
     return container.resolve(Service);
   }
 }
-
-// Decorators
-
-export const serviceFactory = () => {
-  const decorator: ClassDecorator = function (target) {
-    Reflect.defineMetadata("service:isFactory", true, target);
-  };
-  return decorator;
-};

@@ -1,7 +1,6 @@
 import { isNil, isObjectLike, shouldOverride } from "@/utils/common";
 import { BehaviorSubject, combineLatest, filter, of, Subject, switchMap } from "rxjs";
 import { first } from "rxjs/operators";
-import { injectable } from "inversify";
 import { GlobalService } from "../global/service";
 import { container } from "@/core/container";
 import { Service } from "@/core/service";
@@ -51,7 +50,6 @@ const KEY2LANG = [
   [/\.ya?ml$/, "yaml"],
 ] as const;
 
-@injectable()
 export class CodeService implements Service {
   /** get source code (In webpack, require.context API and raw-loader can be used to obtain it) */
   private _getSource: GetSourceHandler = shouldOverride("getSource");
@@ -160,4 +158,7 @@ export class CodeService implements Service {
   }
 }
 
-container.bind(CodeService).toSelf();
+container.register({
+  class: CodeService,
+  constructorArgClasses: [GlobalService],
+});

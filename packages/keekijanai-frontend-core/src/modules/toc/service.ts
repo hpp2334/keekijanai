@@ -1,9 +1,9 @@
 import { of, Observable, Subject, BehaviorSubject, combineLatest, Subscription } from "rxjs";
 import { startWith, switchMap, switchMapTo, tap } from "rxjs/operators";
 import { GlobalService } from "../global/service";
-import { injectable, inject } from "inversify";
 import { isNil, keyBy } from "@/utils/common";
 import { Service } from "@/core/service";
+import { container } from "@/core/container";
 
 export type TOCLevel = 1 | 2 | 3 | 4;
 
@@ -16,7 +16,6 @@ export type TOCHeading = {
   };
 };
 
-@injectable()
 export class TOCService implements Service {
   private allocHeadingId = 1;
   private shouldScrollToMatchedHeading$ = new Subject<boolean>();
@@ -135,3 +134,8 @@ export class TOCService implements Service {
     this.subscriptions = [];
   }
 }
+
+container.register({
+  class: TOCService,
+  constructorArgClasses: [GlobalService],
+});

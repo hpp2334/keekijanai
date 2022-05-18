@@ -1,4 +1,3 @@
-import { injectable } from "inversify";
 import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable, of, switchMap } from "rxjs";
@@ -7,7 +6,6 @@ import { UserVO, CommentVO } from "@/generated/keekijanai-api";
 import { StyledCommentVO } from "./data";
 import { container } from "@/core/container";
 
-@injectable()
 export class CommentApi {
   public list(query?: Data.ListCommentQuery) {
     return ajax<Data.ListCommentRespPayload>({
@@ -83,4 +81,7 @@ export class CommentApi {
   }
 }
 
-container.bind(CommentApi).toSelf();
+container.register({
+  class: CommentApi,
+  constructorArgClasses: [],
+});
