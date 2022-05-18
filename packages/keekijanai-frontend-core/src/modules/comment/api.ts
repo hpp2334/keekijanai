@@ -2,7 +2,6 @@ import { injectable } from "inversify";
 import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable, of, switchMap } from "rxjs";
-import { AxiosResponse } from "axios";
 import { keyBy, omit } from "@/utils/common";
 import { UserVO, CommentVO } from "@/generated/keekijanai-api";
 import { StyledCommentVO } from "./data";
@@ -11,7 +10,7 @@ import { container } from "@/core/container";
 @injectable()
 export class CommentApi {
   public list(query?: Data.ListCommentQuery) {
-    return ajax<Data.ListCommentRespPayload, unknown>({
+    return ajax<Data.ListCommentRespPayload>({
       url: "/comment",
       params: query,
     }).pipe(
@@ -28,7 +27,7 @@ export class CommentApi {
   }
 
   public getTree(query: Data.GetTreeCommentQuery) {
-    return ajax<Data.GetCommentTreeRespPayload, unknown>({
+    return ajax<Data.GetCommentTreeRespPayload>({
       url: "/comment/tree",
       params: query,
     }).pipe(
@@ -45,7 +44,7 @@ export class CommentApi {
   }
 
   public create(params: Data.CreateCommentParams) {
-    return ajax<Data.CreateCommentRespPayload, unknown>({
+    return ajax<Data.CreateCommentRespPayload>({
       method: "POST",
       url: "/comment",
       data: params,
@@ -67,7 +66,7 @@ export class CommentApi {
     );
   }
 
-  public remove(id: number): Observable<AxiosResponse<void>> {
+  public remove(id: number) {
     return ajax({
       method: "DELETE",
       url: `/comment/${id}`,

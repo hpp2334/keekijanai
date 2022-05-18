@@ -2,13 +2,12 @@ import { injectable } from "inversify";
 import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable } from "rxjs";
-import { AxiosResponse } from "axios";
 import { container } from "@/core/container";
 
 @injectable()
 export class StarApi {
-  public getCurrent(belong: string): Observable<AxiosResponse<Data.GetStarResponse>> {
-    return ajax({
+  public getCurrent(belong: string) {
+    return ajax<Data.GetStarResponse>({
       url: "/star",
       params: {
         belong,
@@ -16,8 +15,8 @@ export class StarApi {
     });
   }
 
-  public update(belong: string, payload: Data.UpdateStarReqPayload): Observable<AxiosResponse<void>> {
-    return ajax({
+  public update(belong: string, payload: Data.UpdateStarReqPayload) {
+    return ajax<void>({
       url: "/star",
       method: "PUT",
       params: {

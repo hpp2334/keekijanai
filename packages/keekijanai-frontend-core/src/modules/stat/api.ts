@@ -6,7 +6,7 @@ import type * as Data from "./data";
 @injectable()
 export class StatApi {
   public update(belong: string) {
-    return ajax<Data.VisitRespPayload, unknown>({
+    return ajax<Data.VisitRespPayload>({
       url: "/stat",
       method: "PUT",
       params: {

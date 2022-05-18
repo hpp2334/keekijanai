@@ -1,4 +1,4 @@
-import { axiosInstance } from "@/core/request";
+import { registerInterceptor } from "@/core/request";
 import { container } from "@/core/container";
 import { ElementRef } from "@/utils/element-ref";
 import { LocalStoreEntry, LocalStoreEntryKey } from "@/utils/local-store";
@@ -20,7 +20,6 @@ import { AuthApi } from "./api";
 import * as Data from "./data";
 import { Service } from "@/core/service";
 import { GlobalService } from "../global";
-import { AxiosResponse } from "axios";
 
 const TOKEN_KEY = LocalStoreEntryKey("auth-token");
 
@@ -87,7 +86,7 @@ export class AuthService implements Service {
         const { user } = resp.data;
         this.current$.next(user);
       }),
-      catchError((resp: AxiosResponse) => {
+      catchError((resp) => {
         console.debug("[auth][updateCurrent] error", { resp });
         return this.clearToken();
       })
@@ -116,18 +115,13 @@ export class AuthService implements Service {
   }
 
   private registerRequestInterceptorToken() {
-    axiosInstance.interceptors.request.use((reqConfig) => {
+    registerInterceptor((req) => {
       const token = this.token;
-      console.debug("[auth][axios.interceptors]", { url: reqConfig.url, token });
+      console.debug("[auth][axios.interceptors]", { url: req.url, token });
 
       if (!isNil(token)) {
-        reqConfig.headers = {
-          ...(reqConfig.headers ?? {}),
-          Authorization: token,
-        };
+        req.headers.set("Authorization", token);
       }
-
-      return reqConfig;
     });
   }
 

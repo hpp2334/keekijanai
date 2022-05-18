@@ -2,30 +2,29 @@ import { injectable } from "inversify";
 import type * as Data from "./data";
 import { ajax } from "@/core/request";
 import { Observable, of, switchMap } from "rxjs";
-import { AxiosResponse } from "axios";
 import { ElementRef } from "@/utils/element-ref";
 import { container } from "@/core/container";
 
 @injectable()
 export class AuthApi {
-  public legacyLogin(params: Data.LoginParams): Observable<AxiosResponse<Data.LoginRespPayload>> {
-    return ajax({
+  public legacyLogin(params: Data.LoginParams) {
+    return ajax<Data.LoginRespPayload>({
       method: "POST",
       url: "/auth/login",
       data: params,
     });
   }
 
-  public legacyRegister(params: Data.RegisterParams): Observable<AxiosResponse<void>> {
-    return ajax({
+  public legacyRegister(params: Data.RegisterParams) {
+    return ajax<void>({
       method: "POST",
       url: "/auth/register",
       data: params,
     });
   }
 
-  public current(): Observable<AxiosResponse<Data.CurrentRespPayload>> {
-    return ajax({
+  public current() {
+    return ajax<Data.CurrentRespPayload>({
       url: "/auth/current",
     });
   }
