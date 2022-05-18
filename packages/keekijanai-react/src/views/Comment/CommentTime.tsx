@@ -1,8 +1,6 @@
 import styles from "./comment.module.scss";
 import React from "react";
-import format from "date-fns/format";
-import formatDistance from "date-fns/formatDistance";
-import { TimeService } from "@keekijanai/frontend-core";
+import { format, formatDistance } from "@/common/date-util";
 import { useObservableEagerState } from "observable-hooks";
 import { Typography, Tooltip } from "@/components";
 import { useTimeService } from "../Time/logic";
