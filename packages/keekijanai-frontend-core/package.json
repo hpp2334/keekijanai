@@ -35,8 +35,6 @@
   "license": "ISC",
   "devDependencies": {
     "@keekijanai/frontend-toolkit": "workspace:*",
-    "@swc/cli": "^0.1.55",
-    "@swc/core": "^1.2.124",
     "@types/node": "^17.0.4",
     "swagger-typescript-api": "^9.3.1",
     "ts-node": "^10.4.0",
@@ -45,7 +43,6 @@
     "typescript-transform-paths": "^3.3.1"
   },
   "dependencies": {
-    "@swc/helpers": "^0.3.2",
     "localstorage-memory": "^1.0.3",
     "rxjs": "^7.4.0"
   }
