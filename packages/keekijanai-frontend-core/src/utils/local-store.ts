@@ -1,5 +1,6 @@
 import { isNil } from "@/utils/common";
 import * as localStorageMemory from "localstorage-memory";
+import { noop } from "./common";
 
 interface LocalStoreEntryOptions {
   // ttl in ms
@@ -11,8 +12,17 @@ interface InternalSchema<T> {
   expire: number | null;
 }
 
+const dummyLocalStorage: Storage = {
+  length: 0,
+  clear: noop,
+  getItem: noop,
+  setItem: noop,
+  key: noop,
+  removeItem: noop,
+};
+
 const now = () => Date.now();
-const localStorage = typeof window !== "undefined" ? window.localStorage : (localStorageMemory as Storage);
+const localStorage = typeof window !== "undefined" ? window.localStorage : dummyLocalStorage;
 
 export const LocalStoreEntryKey = (key: string) => "keekijanai-local-store/" + key;
 

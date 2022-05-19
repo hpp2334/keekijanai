@@ -43,7 +43,6 @@
     "typescript-transform-paths": "^3.3.1"
   },
   "dependencies": {
-    "localstorage-memory": "^1.0.3",
     "rxjs": "^7.4.0"
   }
 }

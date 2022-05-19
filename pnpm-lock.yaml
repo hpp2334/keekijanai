@@ -33,12 +33,7 @@ importers:
   packages/keekijanai-frontend-core:
     specifiers:
       '@keekijanai/frontend-toolkit': workspace:*
-      '@swc/cli': ^0.1.55
-      '@swc/core': ^1.2.124
-      '@swc/helpers': ^0.3.2
       '@types/node': ^17.0.4
-      localstorage-memory: ^1.0.3
-      reflect-metadata: ^0.1.13
       rxjs: ^7.4.0
       swagger-typescript-api: ^9.3.1
       ts-node: ^10.4.0
@@ -46,17 +41,12 @@ importers:
       typescript: ^4.5.4
       typescript-transform-paths: ^3.3.1
     dependencies:
-      '@swc/helpers': 0.3.2
-      localstorage-memory: 1.0.3
       rxjs: 7.5.2
     devDependencies:
       '@keekijanai/frontend-toolkit': link:../keekijanai-frontend-toolkit
-      '@swc/cli': 0.1.55_@swc+core@1.2.135
-      '@swc/core': 1.2.135
       '@types/node': 17.0.12
-      reflect-metadata: 0.1.13
       swagger-typescript-api: 9.3.1
-      ts-node: 10.4.0_n3yziwltbxyipocwe3n7h3lsfm
+      ts-node: 10.4.0_ut3ddxw3ioqcl3ena7yfxijgqy
       ts-toolbelt: 9.6.0
       typescript: 4.5.5
       typescript-transform-paths: 3.3.1_typescript@4.5.5
@@ -237,7 +227,6 @@ importers:
       react-refresh: ^0.11.0
       react-router: ^6.2.1
       react-router-dom: ^6.2.1
-      reflect-metadata: ^0.1.13
       sass: ^1.51.0
       sass-loader: ^12.6.0
       source-map-loader: ^3.0.0
@@ -257,7 +246,6 @@ importers:
       react-dom: 17.0.2_react@17.0.2
       react-router: 6.2.1_react@17.0.2
       react-router-dom: 6.2.1_sfoxds7t5ydpegc3knd667wn6m
-      reflect-metadata: 0.1.13
     devDependencies:
       '@pmmmwh/react-refresh-webpack-plugin': 0.5.4_5aoh4kuleirnwv26isbxhqcsjy
       '@swc/core': 1.2.135
@@ -2282,24 +2270,6 @@ packages:
       lodash.deburr: 4.1.0
     dev: false
 
-  /@swc/cli/0.1.55_@swc+core@1.2.135:
-    resolution: {integrity: sha512-akkLuRexFq8XTi6JNZ27mXD4wcKXLDSLj4g7YMU+/upFM8IeD1IEp1Mxtre7MzCZn+QOQgPF8N8IReJoHuSn3g==}
-    engines: {node: '>= 12.13'}
-    hasBin: true
-    peerDependencies:
-      '@swc/core': ^1.2.66
-      chokidar: ^3.5.1
-    peerDependenciesMeta:
-      chokidar:
-        optional: true
-    dependencies:
-      '@swc/core': 1.2.135
-      commander: 7.2.0
-      fast-glob: 3.2.11
-      slash: 3.0.0
-      source-map: 0.7.3
-    dev: true
-
   /@swc/core-android-arm-eabi/1.2.135:
     resolution: {integrity: sha512-Qx5PXLzedOVSWHIY88iTxEa6m5RONs7bDIF05mNH1qaXsOkBD52MZ+mFDW6uGZ2OnOuMjD2OY08877429atBgA==}
     engines: {node: '>=10'}
@@ -2435,10 +2405,6 @@ packages:
       '@swc/core-win32-ia32-msvc': 1.2.135
       '@swc/core-win32-x64-msvc': 1.2.135
     dev: true
-
-  /@swc/helpers/0.3.2:
-    resolution: {integrity: sha512-qEru2uaH1vKZNCZR4rFCUZaflsBP7IWiGcIoQe22qi5tm+HEG/yPdhSba+ZCNTWk2xyYpx/nEFkncDY3orEx3w==}
-    dev: false
 
   /@szmarczak/http-timer/1.1.2:
     resolution: {integrity: sha512-XIB2XbzHTN6ieIjfIMV9hlVcfPU26s2vafYWQcZHWXHOxiaRZYEDKEwdl129Zyg50+foYV2jCgtrqSA6qNuNSA==}
@@ -8241,10 +8207,6 @@ packages:
       emojis-list: 3.0.0
       json5: 2.2.0
 
-  /localstorage-memory/1.0.3:
-    resolution: {integrity: sha512-t9P8WB6DcVttbw/W4PIE8HOqum8Qlvx5SjR6oInwR9Uia0EEmyUeBh7S+weKByW+l/f45Bj4L/dgZikGFDM6ng==}
-    dev: false
-
   /locate-path/2.0.0:
     resolution: {integrity: sha1-K1aLJl7slExtnA3pw9u7ygNUzY4=}
     engines: {node: '>=4'}
@@ -10224,6 +10186,7 @@ packages:
 
   /reflect-metadata/0.1.13:
     resolution: {integrity: sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==}
+    dev: false
 
   /refractor/3.6.0:
     resolution: {integrity: sha512-MY9W41IOWxxk31o+YvFCNyNzdkc9M20NoZK5vq6jkv4I/uh2zkWcfudj0Q1fovjUQJrNewS9NMzeTtqPf+n5EA==}
@@ -11702,6 +11665,36 @@ packages:
     dependencies:
       '@cspotcode/source-map-support': 0.7.0
       '@swc/core': 1.2.135
+      '@tsconfig/node10': 1.0.8
+      '@tsconfig/node12': 1.0.9
+      '@tsconfig/node14': 1.0.1
+      '@tsconfig/node16': 1.0.2
+      '@types/node': 17.0.12
+      acorn: 8.7.0
+      acorn-walk: 8.2.0
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 4.5.5
+      yn: 3.1.1
+    dev: true
+
+  /ts-node/10.4.0_ut3ddxw3ioqcl3ena7yfxijgqy:
+    resolution: {integrity: sha512-g0FlPvvCXSIO1JDF6S232P5jPYqBkRL9qly81ZgAOSU7rwI0stphCgd2kLiCrU9DjQCrJMWEqcNSjQL02s6d8A==}
+    hasBin: true
+    peerDependencies:
+      '@swc/core': '>=1.2.50'
+      '@swc/wasm': '>=1.2.50'
+      '@types/node': '*'
+      typescript: '>=2.7'
+    peerDependenciesMeta:
+      '@swc/core':
+        optional: true
+      '@swc/wasm':
+        optional: true
+    dependencies:
+      '@cspotcode/source-map-support': 0.7.0
       '@tsconfig/node10': 1.0.8
       '@tsconfig/node12': 1.0.9
       '@tsconfig/node14': 1.0.1
