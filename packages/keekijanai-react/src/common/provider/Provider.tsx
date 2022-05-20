@@ -34,7 +34,7 @@ export const KeekijanaiProvider: React.FC<KeekijanaiProviderProps> = ({ queryRou
   }, []);
 
   return (
-    <I18nContext instance={i18n}>
+    <I18nContext instance={i18n as any}>
       <AuthContext>
         <NiceModal.Provider>{children}</NiceModal.Provider>
       </AuthContext>
