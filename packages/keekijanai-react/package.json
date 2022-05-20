@@ -31,6 +31,7 @@
     "@types/react-syntax-highlighter": "^13.5.2",
     "@types/react-transition-group": "^4.4.4",
     "@types/sprintf-js": "^1.1.2",
+    "clean-webpack-plugin": "^4.0.0",
     "eslint": "7",
     "eslint-plugin-react": "^7.28.0",
     "eslint-plugin-react-hooks": "^4.3.0",

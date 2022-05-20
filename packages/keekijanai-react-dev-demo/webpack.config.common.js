@@ -3,6 +3,11 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 const path = require("path");
 const webpack = require("webpack");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+
+const isProd = process.env.NODE_ENV === "production";
+
+const styleLoader = isProd ? MiniCssExtractPlugin.loader : "style-loader";
 
 module.exports = {
   mode: "development",
@@ -11,7 +16,6 @@ module.exports = {
     path: path.resolve(__dirname, "./dist"),
     filename: "[name].js",
   },
-  devtool: "eval-source-map",
   module: {
     rules: [
       {
@@ -24,17 +28,14 @@ module.exports = {
               parser: {
                 syntax: "typescript",
                 tsx: true,
-                decorators: true,
                 dynamicImport: true,
               },
               target: "es2020",
               transform: {
-                legacyDecorator: true,
-                decoratorMetadata: true,
                 react: {
                   runtime: "automatic",
-                  development: true,
-                  refresh: true,
+                  development: !isProd,
+                  refresh: !isProd,
                 },
               },
             },
@@ -44,17 +45,17 @@ module.exports = {
       },
       {
         test: /\.css$/i,
-        use: ["style-loader", "css-loader"],
+        use: [styleLoader, "css-loader"],
       },
       {
         test: /\.s[ac]ss$/i,
         exclude: /\.module\.s[ac]ss$/i,
-        use: ["style-loader", "css-loader", "sass-loader"],
+        use: [styleLoader, "css-loader", "sass-loader"],
       },
       {
         test: /\.module\.s[ac]ss$/i,
         use: [
-          "style-loader",
+          styleLoader,
           {
             loader: "css-loader",
             options: {
@@ -77,6 +78,7 @@ module.exports = {
       template: path.resolve(__dirname, "./public/template.html"),
       publicPath: "/",
     }),
+    isProd && new MiniCssExtractPlugin(),
   ].filter(Boolean),
   devServer: {
     hot: true,

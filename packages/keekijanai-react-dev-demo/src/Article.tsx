@@ -1,10 +1,8 @@
 import React from "react";
 import { type Series as SeriesType } from "@keekijanai/frontend-core";
 import { TOCHeadings } from "@keekijanai/react";
-import { KeekijanaiProvider, OAuth2CallbackRedirect, TOCContext, TOC, ReadingProgress } from "@keekijanai/react";
-import { BrowserRouter as Router, Routes, Route, Link, useParams } from "react-router-dom";
+import { TOCContext, TOC, ReadingProgress } from "@keekijanai/react";
 
-import * as articleCSS from "./article/css";
 import { ArticleReaction } from "./ArticleReaction";
 
 const _ArticleUtils = {

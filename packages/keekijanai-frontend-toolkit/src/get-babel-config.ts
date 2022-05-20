@@ -1,4 +1,12 @@
-export function getBabelConfig({ isProd, isTSX }: { isProd: boolean; isTSX: boolean }) {
+export function getBabelConfig({
+  isProd,
+  isTSX,
+  importReplacers = [],
+}: {
+  isProd: boolean;
+  isTSX: boolean;
+  importReplacers?: Array<{ test: RegExp; replacer: (value: string) => string }>;
+}) {
   return {
     presets: [
       [
@@ -34,26 +42,11 @@ export function getBabelConfig({ isProd, isTSX }: { isProd: boolean; isTSX: bool
           },
         },
       ],
-      "babel-plugin-transform-typescript-metadata",
-      [
-        "babel-plugin-import",
-        {
-          libraryName: "@material-ui/core",
-          libraryDirectory: "",
-          camel2DashComponentName: false,
-        },
-        "core",
-      ],
-      [
-        "babel-plugin-import",
-        {
-          libraryName: "@material-ui/icons",
-          libraryDirectory: "",
-          camel2DashComponentName: false,
-        },
-        "icons",
-      ],
-      ["@babel/plugin-proposal-decorators", { legacy: true }],
+      ...importReplacers.map((replacer, index) => [
+        require.resolve("babel-plugin-replace-imports"),
+        replacer,
+        `babel-plugin-replace-imports:${index + 1}`,
+      ]),
       isProd && ["transform-remove-console", { exclude: ["error", "warn"] }],
     ].filter(Boolean) as any[],
   };

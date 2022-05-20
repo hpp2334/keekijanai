@@ -1,10 +1,4 @@
-import {
-  KeekijanaiProvider,
-  OAuth2CallbackRedirect,
-  TOCContext,
-  TOC,
-  CircularReadingProgress,
-} from "@keekijanai/react";
+import { KeekijanaiProvider, OAuth2CallbackRedirect, TOCContext, TOC } from "@keekijanai/react";
 import { BrowserRouter as Router, Routes, Route, Link, useParams } from "react-router-dom";
 
 import * as articleCSS from "./article/css";

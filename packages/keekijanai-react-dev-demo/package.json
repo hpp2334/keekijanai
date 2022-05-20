@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "serve": "webpack serve -c ./webpack.config.dev.js",
-    "analyze": "webpack build -c ./webpack.config.analyze.js"
+    "analyze": "NODE_ENV=production webpack build -c ./webpack.config.analyze.js"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +21,7 @@
     "cross-env": "^7.0.3",
     "css-loader": "^6.5.1",
     "html-webpack-plugin": "^5.5.0",
+    "mini-css-extract-plugin": "^2.6.0",
     "raw-loader": "^4.0.2",
     "react-refresh": "^0.11.0",
     "sass": "^1.51.0",
@@ -36,12 +37,12 @@
     "webpack-dev-server": "^4.6.0"
   },
   "dependencies": {
+    "@keekijanai/frontend-core": "workspace:*",
+    "@keekijanai/react": "workspace:*",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-router": "^6.2.1",
-    "react-router-dom": "^6.2.1",
-    "@keekijanai/frontend-core": "workspace:*",
-    "@keekijanai/react": "workspace:*"
+    "react-router-dom": "^6.2.1"
   }
 }
