@@ -12,14 +12,31 @@ interface InternalSchema<T> {
   expire: number | null;
 }
 
-const dummyLocalStorage: Storage = {
-  length: 0,
-  clear: noop,
-  getItem: noop,
-  setItem: noop,
-  key: noop,
-  removeItem: noop,
-};
+const dummyLocalStorage = (() => {
+  const container = new Map<any, any>();
+
+  const ret: Storage = {
+    get length() {
+      return container.size;
+    },
+    clear: () => {
+      container.clear();
+    },
+    getItem: (key) => {
+      return container.get(key) ?? null;
+    },
+    setItem: (key, value) => {
+      container.set(key, value);
+    },
+    key: (index) => {
+      return [...container.keys()][index] ?? null;
+    },
+    removeItem: (key) => {
+      container.delete(key);
+    },
+  };
+  return ret;
+})();
 
 const now = () => Date.now();
 const localStorage = typeof window !== "undefined" ? window.localStorage : dummyLocalStorage;
