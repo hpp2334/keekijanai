@@ -27,6 +27,8 @@ const ajaxGlobalContext: AjaxGlobalContext = {
   },
 };
 
+const allDependencyDefined = typeof fetch !== "undefined" && typeof Request !== "undefined";
+
 const buildSearch = (obj: Record<string, any>): string => {
   const searches = [];
   for (const key in obj) {
@@ -71,6 +73,10 @@ export const registerInterceptor = (interceptor: (req: Request) => void) => {
 
 export const ajax = <T>(config: AjaxRequestConfig): Observable<AjaxResponse<T>> => {
   const subject = new Subject<AjaxResponse<T>>();
+  // In SSR environment
+  if (!allDependencyDefined) {
+    return subject.asObservable();
+  }
 
   const req = buildFetchRequest(config);
 
