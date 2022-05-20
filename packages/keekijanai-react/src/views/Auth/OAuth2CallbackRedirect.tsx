@@ -2,13 +2,18 @@ import { useTranslation } from "@/common/i18n";
 import { sprintf } from "sprintf-js";
 import { useEffect } from "react";
 import { useInternalAuthContext } from "./Context";
+import { withNoSSR, withCSSBaseline, composeHOC } from "@/common/hoc";
 
 export interface OAuth2CallbackRedirectProps {
   /** default: 3000 */
   timeout?: number;
 }
 
-export const OAuth2CallbackRedirect = ({ timeout = 3000 }: OAuth2CallbackRedirectProps) => {
+const withFeature = composeHOC(withNoSSR, withCSSBaseline);
+
+export const OAuth2CallbackRedirect = withFeature(function OAuth2CallbackRedirect({
+  timeout = 3000,
+}: OAuth2CallbackRedirectProps) {
   const { t } = useTranslation("Auth");
   const { authService } = useInternalAuthContext();
 
@@ -28,4 +33,4 @@ export const OAuth2CallbackRedirect = ({ timeout = 3000 }: OAuth2CallbackRedirec
   }, []);
 
   return <div>{sprintf(t("oauth2.callback"), timeout / 1000)}</div>;
-};
+});
