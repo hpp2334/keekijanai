@@ -9,7 +9,7 @@ export interface ResourceUpdatedEventPayload {
 type ResourceFetchHandler<T> = (lang: string) => Promise<T> | T;
 
 export function detectBrowserLanguage() {
-  if ("language" in navigator) {
+  if (typeof navigator !== "undefined" && "language" in navigator) {
     return navigator.language;
   }
 }

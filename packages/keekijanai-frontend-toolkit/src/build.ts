@@ -113,6 +113,7 @@ const buildSCSS = async (params: {
               const code = `import "./${outputCSSFileName}"\nexport default ${JSON.stringify(json, null, 2)}`;
               await forceWriteFile(CSSRenameMapper.map(info.absoluteDest, "js"), code);
             },
+            localsConvention: "camelCaseOnly",
           }),
       ])
     ).process(css, {
