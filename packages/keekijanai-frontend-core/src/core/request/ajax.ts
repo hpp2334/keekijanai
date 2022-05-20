@@ -21,12 +21,14 @@ export interface AjaxResponse<C> {
 
 const ajaxGlobalContext: AjaxGlobalContext = {
   baseURL: "/api/keekijanai",
-  useQueryRoute: keekijanaiConfig.queryRoute,
   interceptors: new Set(),
+  get useQueryRoute() {
+    return keekijanaiConfig.queryRoute;
+  },
 };
 
 const buildSearch = (obj: Record<string, any>): string => {
-  let searches = [];
+  const searches = [];
   for (const key in obj) {
     const entries = Array.isArray(obj[key]) ? obj[key] : [obj[key]];
     for (const item of entries) {
