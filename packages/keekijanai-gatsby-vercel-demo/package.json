@@ -1,4 +1,5 @@
 {
+  "name": "keekijanai-gatsby-vercel-demo",
   "private": true,
   "scripts": {
     "develop": "gatsby develop",
