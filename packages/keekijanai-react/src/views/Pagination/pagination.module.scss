@@ -1,0 +1,36 @@
+@use "../../common/styles/scss" as *;
+
+$button-size: 2em;
+
+:global(.keekijanai-reset) {
+  .pagination-root {
+    .pagination-button {
+      width: $button-size;
+      height: $button-size;
+      border-radius: 100%;
+      font-size: 1em;
+      padding: spacing(1);
+      cursor: pointer;
+      transition: background-color 0.2s;
+
+      &:disabled {
+        cursor: default;
+      }
+
+      &:not([disabled]) {
+        &:hover {
+          background-color: $grey-200;
+        }
+      }
+
+      &.active {
+        background-color: $primary;
+        color: $primary-text;
+
+        &:hover {
+          background-color: $primary-dark;
+        }
+      }
+    }
+  }
+}

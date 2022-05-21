@@ -1,0 +1,33 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .reference-root {
+    .reference-container {
+      padding: spacing(3);
+      border: 1px solid $grey-300;
+      border-radius: 0.4em;
+    }
+
+    .reference-header-title {
+      font-size: $typography-h4-fontSize;
+      margin: 0;
+      letter-spacing: spacing(0.2);
+    }
+
+    .reference-list {
+      padding-left: spacing(2);
+      margin: #{spacing(1)} 0;
+    }
+
+    .reference-list-item {
+      margin: #{spacing(2)} 0;
+
+      &:first-child {
+        margin-top: 0;
+      }
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}

@@ -1,0 +1,20 @@
+@use "../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .statical-root {
+    position: relative;
+    height: $typography-h4-fontSize;
+    width: 100%;
+    overflow: hidden;
+    margin: #{spacing(2)} 0;
+
+    .statical-content {
+      position: absolute;
+      font-size: $typography-h4-fontSize;
+      left: 50%;
+      top: 50%;
+      cursor: default;
+      user-select: none;
+    }
+  }
+}

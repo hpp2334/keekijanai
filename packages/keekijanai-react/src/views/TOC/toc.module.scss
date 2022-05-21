@@ -1,0 +1,51 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .toc-root {
+    .toc-item-list {
+      $list-width: 200px;
+
+      width: $list-width;
+      max-height: 600px;
+      overflow-y: auto;
+      position: relative;
+
+      .toc-item-container {
+        display: block;
+        cursor: pointer;
+        font-size: 0.85em;
+        color: $grey-900;
+
+        .toc-static-item-list {
+          color: $secondary-text;
+
+          &.active {
+            color: $primary;
+          }
+        }
+
+        .toc-item-text {
+          padding: #{spacing(1)} 0;
+        }
+      }
+
+      .toc-active-indicator-root {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 0;
+        width: $list-width;
+        border-radius: 0.2em;
+        overflow: hidden;
+        z-index: -1;
+        transition: height 0.2s, top 0.2s;
+
+        .toc-active-indicator {
+          height: 100%;
+          background-color: $grey-100;
+          border-left: 3px solid $primary;
+        }
+      }
+    }
+  }
+}

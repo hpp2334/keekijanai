@@ -1,0 +1,48 @@
+{
+  "name": "@keekijanai/frontend-core",
+  "version": "0.3.0-alpha.9",
+  "description": "",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    },
+    "./libs/i18n": {
+      "import": "./dist/libs/keekijanai-i18n/index.js",
+      "require": "./dist/libs/keekijanai-i18n/index.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "libs/i18n": [
+        "src/libs/keekijanai-i18n/index.d.ts",
+        "dist/libs/keekijanai-i18n/index.d.ts"
+      ]
+    }
+  },
+  "scripts": {
+    "prepare": "ts-patch install -s",
+    "clean": "rm -rf ./dist",
+    "build:dev": "kkft build",
+    "build:prod": "kkft build -e prod & pnpm run build:types",
+    "build:types": "tsc --emitDeclarationOnly",
+    "sync:api": "swagger-typescript-api -p ./src/generated/keekijanai-api.json -o ./src/generated -n keekijanai-api.ts --no-client"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@keekijanai/frontend-toolkit": "workspace:*",
+    "@types/node": "^17.0.4",
+    "swagger-typescript-api": "^9.3.1",
+    "ts-node": "^10.4.0",
+    "ts-toolbelt": "^9.6.0",
+    "typescript": "^4.5.4",
+    "typescript-transform-paths": "^3.3.1"
+  },
+  "dependencies": {
+    "rxjs": "^7.4.0"
+  }
+}

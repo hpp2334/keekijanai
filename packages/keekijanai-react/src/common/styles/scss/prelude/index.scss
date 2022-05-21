@@ -1,0 +1,11 @@
+@use "./reset.scss" as *;
+
+:root {
+  --keekijanai-root-primary: #3498db;
+  --keekijanai-root-primary-light: #90caf9;
+  --keekijanai-root-primary-dark: #1976d2;
+  --keekijanai-root-primary-text: white;
+  --keekijanai-root-primary-paper: white;
+  --keekijanai-root-typography-h4-fontSize: 1.5em;
+  --keekijanai-root-typography-h5-fontSize: 1.25em;
+}

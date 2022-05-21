@@ -1,0 +1,10 @@
+database:
+  url: "postgresql://admin:123456@localhost:5432/keekijanai_db"
+auth:
+  # Only for development
+  secret: "12321$2dzcxfd@#!SAD23qqadfwe@#"
+  redirect_url: "http://localhost:3000/callback"
+  github:
+    client_id: 46626721dbe60689d1ca
+    # Only for development
+    client_secret: 38f89e1104015d42543f07b2392444e3fdebe463

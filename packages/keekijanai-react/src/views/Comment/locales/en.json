@@ -1,0 +1,12 @@
+{
+  "header": "Comment",
+  "empty.title": "No comment yet",
+  "post.create.placeholder": "Write some comment...",
+  "post.reply.placeholder": "Reply user \"%s\" with...",
+  "block.panel.reply": "Reply",
+  "block.panel.remove": "Remove",
+  "loadmore": "Load more...",
+  "remove.confirm.content": "Confirm to remove this comment?",
+  "remove.confirm.button.cancel": "Cancel",
+  "remove.confirm.button.ok": "Confirm"
+}

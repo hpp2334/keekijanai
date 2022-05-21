@@ -1,0 +1,19 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .star-root {
+    .star-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+
+      .star-button {
+        font-size: 1.4em;
+
+        &.current {
+          color: $primary;
+        }
+      }
+    }
+  }
+}

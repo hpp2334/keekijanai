@@ -1,12 +1,11 @@
-[package]
-name = "keekijanai-v3"
-version = "0.1.0"
-edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [workspace]
 members = [
-  "src/backend",
-  "src/backend-server"
+  "packages/keekijanai-serve-macro",
+  "packages/keekijanai-serve-core",
+  "packages/keekijanai-serve-rust-server-demo",
+  "packages/keekijanai-serve-node-wrapper"
+]
+exclude = [
+  "packages/keekijanai-gatsby-vercel-demo/api"
 ]

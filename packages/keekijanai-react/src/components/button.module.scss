@@ -1,0 +1,26 @@
+@use "../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .button-root {
+    font-size: 1em;
+    border-radius: 0.25em;
+    transition: background-color 0.1s;
+    cursor: pointer;
+    padding: #{spacing(1.5)} #{spacing(2)};
+
+    &:hover {
+      background-color: $grey-100;
+    }
+    &:active {
+      background-color: $grey-200;
+    }
+
+    &.primary {
+      color: $primary;
+    }
+
+    &.small {
+      font-size: 0.8em;
+    }
+  }
+}

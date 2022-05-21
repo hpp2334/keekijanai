@@ -1,0 +1,24 @@
+@use "../common/styles/scss" as *;
+
+$size: 35px;
+
+:global(.keekijanai-reset) {
+  .icon-button-root {
+    width: $size;
+    height: $size;
+    box-shadow: none;
+    border-radius: 100%;
+    cursor: pointer;
+    transition: box-shadow 0.1s;
+    font-size: 1.1em;
+
+    &.active {
+      background-color: $primary;
+      color: $primary-text;
+    }
+
+    &:hover {
+      box-shadow: 1px 1px 5px #ccc;
+    }
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "name": "keekijanai",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "analyze:fe": "turbo run analyze --scope=@keekijanai/frontend-react-dev-demo",
+    "prepare": "husky install",
+    "build:fe": "turbo run build:prod",
+    "build:node-wrapper": "sh ./scripts/build-node-wrapper/run.sh",
+    "run:node-server": "node ./packages/keekijanai-serve-node-server-demo/src/index.js",
+    "run:rust-server": "cargo run -p keekijanai-serve-rust-server-demo",
+    "run:react-demo": "cd ./packages/keekijanai-react-dev-demo && pnpm run serve",
+    "start:db": "docker compose -f ./db-service.yml up -d",
+    "stop:db": "docker compose -f ./db-service.yml down",
+    "publish:fe": "ts-node ./scripts/publish-frontend.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hpp2334/keekijanai.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hpp2334/keekijanai/issues"
+  },
+  "homepage": "https://github.com/hpp2334/keekijanai#readme",
+  "devDependencies": {
+    "@types/node": "^16.0.4",
+    "@typescript-eslint/eslint-plugin": "^5.15.0",
+    "@typescript-eslint/parser": "^5.15.0",
+    "eslint": "^8.11.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.7",
+    "prettier": "^2.6.0",
+    "ts-node": "^10.4.0",
+    "ts-patch": "^2.0.1",
+    "turbo": "^1.1.6",
+    "typescript": "^4.6.2",
+    "typescript-transform-paths": "^3.3.1"
+  },
+  "lint-staged": {
+    "**/*.{ts|tsx|js|jsx|json|html|css|js}": "prettier --write --ignore-unknown"
+  },
+  "packageManager": "pnpm@6.32.2"
+}

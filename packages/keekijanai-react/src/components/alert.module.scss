@@ -1,0 +1,18 @@
+@use "../common/styles/scss" as *;
+
+$text-color: white;
+
+:global(.keekijanai-reset) {
+  .alert-root {
+    border-radius: 0.25em;
+    background-color: $color-error;
+    color: $text-color;
+    padding: #{spacing(3)} #{spacing(6)};
+  }
+  .alert-title-root {
+    margin: #{spacing(2)} 0;
+    font-size: 1.25em;
+    font-weight: 700;
+    color: $text-color;
+  }
+}

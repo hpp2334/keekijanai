@@ -1,0 +1,20 @@
+@use "../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .link-root {
+    text-decoration: underline;
+
+    &:link {
+      color: inherit;
+    }
+    &:visited {
+      color: inherit;
+    }
+    &:hover {
+      color: $primary;
+    }
+    &:active {
+      color: inherit;
+    }
+  }
+}

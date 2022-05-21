@@ -1,0 +1,37 @@
+@use "../../common/styles/scss" as *;
+
+.auth-modal-root {
+  .oauth2-button {
+    padding: #{spacing(1)} #{spacing(2)};
+    background-color: $primary-paper;
+    border: 1px solid #{$grey-300};
+    border-radius: 4px;
+    transition: border-color 0.2s;
+    cursor: pointer;
+
+    &:hover:enabled {
+      border-color: $primary;
+    }
+    &:disabled {
+      cursor: not-allowed;
+    }
+  }
+
+  .modal-title {
+    margin: #{spacing(1)} 0;
+    font-size: $typography-h5-fontSize;
+    display: flex;
+    justify-content: center;
+  }
+
+  .modal-content {
+    width: 400px;
+    padding: spacing(4);
+    background-color: $primary-paper;
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 4px;
+  }
+}

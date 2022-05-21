@@ -1,0 +1,9 @@
+packages:
+  - "packages/keekijanai-frontend-core"
+  - "packages/keekijanai-frontend-toolkit"
+  - "packages/keekijanai-serve-node-wrapper"
+  - "packages/keekijanai-vercel-adapter"
+  - "packages/keekijanai-react"
+  - "packages/keekijanai-react-dev-demo"
+  - "packages/keekijanai-gatsby-vercel-demo"
+  - "packages/keekijanai-serve-node-server-demo"

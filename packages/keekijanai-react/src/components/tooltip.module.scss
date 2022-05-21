@@ -1,0 +1,15 @@
+@use "../common/styles/scss" as *;
+
+:global(.keekijanai-reset).popper {
+  z-index: 1;
+}
+
+:global(.keekijanai-reset) {
+  .tooltip-content {
+    padding: #{spacing(1)} #{spacing(2.5)};
+    background-color: $grey-700;
+    color: white;
+    border-radius: 0.25em;
+    font-size: 0.85em;
+  }
+}

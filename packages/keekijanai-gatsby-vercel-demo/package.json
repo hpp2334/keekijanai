@@ -1,0 +1,26 @@
+{
+  "name": "keekijanai-gatsby-vercel-demo",
+  "private": true,
+  "scripts": {
+    "develop": "gatsby develop",
+    "build": "gatsby build",
+    "serve": "gatsby develop",
+    "gatsby:serve": "gatsby serve",
+    "clean": "gatsby clean",
+    "vercel:dev": "vercel dev"
+  },
+  "dependencies": {
+    "@keekijanai/frontend-core": "workspace:*",
+    "@keekijanai/react": "workspace:*",
+    "@keekijanai/vercel-adapter": "workspace:*",
+    "gatsby": "^4.7.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "reflect-metadata": "^0.1.13"
+  },
+  "devDependencies": {
+    "gatsby-plugin-pnpm": "^1.2.10",
+    "gatsby-plugin-typescript": "^4.7.0",
+    "vercel": "^23.1.2"
+  }
+}
