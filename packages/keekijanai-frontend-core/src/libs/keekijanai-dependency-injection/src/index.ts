@@ -1,6 +1,4 @@
-import {} from "ts-toolbelt";
-
-type ConstructorTypeWithReturn<P extends any[] = any[], R extends any = any> = new (...args: P) => R;
+type ConstructorTypeWithReturn<P extends any[] = any[], R = any> = new (...args: P) => R;
 type ConstructorType<P extends any[] = any[]> = ConstructorTypeWithReturn<P, any>;
 
 interface RegisterEntry<C extends ConstructorType, ARG_CLASSES extends ConstructorType[]> {
@@ -80,7 +78,7 @@ export class DIContainer {
       }
 
       // now all dependency classes are resolved
-      let args: any[] = [];
+      const args: any[] = [];
       for (const depCls of entry.constructorArgClasses) {
         const depInstance = currentResolved.get(depCls) ?? this.singletonClassMapInstance.get(depCls);
         if (!depInstance) {

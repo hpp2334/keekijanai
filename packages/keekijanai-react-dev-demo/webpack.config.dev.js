@@ -8,7 +8,6 @@ const webpackCommonConfig = require("./webpack.config.common");
 
 webpackCommonConfig.mode = "development";
 webpackCommonConfig.devtool = "eval-source-map";
-z;
 webpackCommonConfig.resolve.alias = {
   "@keekijanai/react": path.resolve(__dirname, "../keekijanai-react/src/index.ts"),
   "@keekijanai/frontend-core/libs/i18n": path.resolve(
