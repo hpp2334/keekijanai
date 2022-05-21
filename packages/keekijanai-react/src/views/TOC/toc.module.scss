@@ -2,6 +2,23 @@
 
 :global(.keekijanai-reset) {
   .toc-root {
+    .toc-static-item-list {
+      .toc-item-container {
+        display: block;
+        cursor: pointer;
+        font-size: 0.9em;
+        color: $grey-900;
+        transition: color 0.2s;
+
+        &:hover {
+          color: $primary;
+        }
+
+        .toc-item-text {
+        }
+      }
+    }
+
     .toc-item-list {
       $list-width: 200px;
 
@@ -15,14 +32,6 @@
         cursor: pointer;
         font-size: 0.85em;
         color: $grey-900;
-
-        .toc-static-item-list {
-          color: $secondary-text;
-
-          &.active {
-            color: $primary;
-          }
-        }
 
         .toc-item-text {
           padding: #{spacing(1)} 0;

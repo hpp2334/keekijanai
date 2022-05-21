@@ -1,6 +1,6 @@
 import React from "react";
 import { type Series as SeriesType } from "@keekijanai/frontend-core";
-import { TOCHeadings } from "@keekijanai/react";
+import { TOCHeadings, TOCStatic } from "@keekijanai/react";
 import { TOCContext, TOC, ReadingProgress } from "@keekijanai/react";
 
 import { ArticleReaction } from "./ArticleReaction";
@@ -96,6 +96,7 @@ export const ArticleLayout = ({ belong, children }: { belong: string; children: 
             zIndex: 50,
           }}
         />
+        <TOCStatic />
         <ReadingProgress />
         {children}
       </TOCContext>

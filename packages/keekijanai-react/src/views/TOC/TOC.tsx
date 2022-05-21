@@ -139,18 +139,20 @@ export const TOCStatic = withFeature(({ className, style }: TOCStaticProps) => {
   return (
     <TOCRoot className={className} style={style}>
       <TOCStaticItemList>
-        {headings.map((heading, index) => {
-          return (
-            <TOCItemContainer
-              key={index}
-              style={{
-                paddingLeft: (heading.level - 1) * 2,
-              }}
-            >
-              <TOCItem isActive={false} heading={heading} onClick={() => tocService.activateHeading(heading)} />
-            </TOCItemContainer>
-          );
-        })}
+        <Stack spacing={1}>
+          {headings.map((heading, index) => {
+            return (
+              <TOCItemContainer
+                key={index}
+                style={{
+                  paddingLeft: (heading.level - 1) * constants.baseSpacing * 3,
+                }}
+              >
+                <TOCItem isActive={false} heading={heading} onClick={() => tocService.activateHeading(heading)} />
+              </TOCItemContainer>
+            );
+          })}
+        </Stack>
       </TOCStaticItemList>
     </TOCRoot>
   );
