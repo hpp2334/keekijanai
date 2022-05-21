@@ -5,7 +5,7 @@
   "private": true,
   "main": "index.js",
   "bin": {
-    "kkft": "./dist/cli.js"
+    "kkft": "./cli.js"
   },
   "scripts": {
     "clean": "rm -rf ./dist",
