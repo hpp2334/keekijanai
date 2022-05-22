@@ -11,6 +11,9 @@ $size: 35px;
     cursor: pointer;
     transition: box-shadow 0.1s;
     font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &.active {
       background-color: $primary;

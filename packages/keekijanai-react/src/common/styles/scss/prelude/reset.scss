@@ -89,6 +89,7 @@ $base-font-size: 1rem;
   mark,
   audio,
   video {
+    box-sizing: content-box;
     margin: 0;
     padding: 0;
     border: 0;
@@ -109,30 +110,36 @@ $base-font-size: 1rem;
   menu,
   nav,
   section {
+    box-sizing: content-box;
     display: block;
   }
   ol,
   ul {
+    box-sizing: content-box;
     list-style: none;
   }
   blockquote,
   q {
+    box-sizing: content-box;
     quotes: none;
   }
   blockquote:before,
   blockquote:after,
   q:before,
   q:after {
+    box-sizing: content-box;
     content: "";
     content: none;
   }
   table {
+    box-sizing: content-box;
     border-collapse: collapse;
     border-spacing: 0;
   }
 
   // custom
   button {
+    box-sizing: content-box;
     outline: none;
     border: none;
     background-color: inherit;
