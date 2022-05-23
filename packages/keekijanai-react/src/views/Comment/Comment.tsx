@@ -6,7 +6,7 @@ import { CommentPost } from "./CommentPost";
 import { useObservableEagerState } from "observable-hooks";
 import { firstValueFrom } from "rxjs";
 import { InternalCommentContext, useInternalCommentContext } from "./provider";
-import { CommentEditor } from "./components/CommentEditor";
+import { CommentEditor, CommentEditorMode } from "./CommentEditor";
 import React, { useCallback, useContext, useImperativeHandle, useMemo, useState } from "react";
 import { CommentTime } from "./CommentTime";
 import { useRemote } from "@/common/hooks/useRemote";
@@ -82,7 +82,7 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
             <CommentUserText>{comment.user?.name}</CommentUserText>
             <CommentTime timestamp={comment.created_time} />
           </Stack>
-          <CommentEditor initialValue={content} mode="read" />
+          <CommentEditor initialValue={content} mode={CommentEditorMode.Read} />
           <Stack direction="row" spacing={3}>
             <CommentButton onClick={handleClickReply}>{t("block.panel.reply")}</CommentButton>
             {service.canRemove(comment) && (

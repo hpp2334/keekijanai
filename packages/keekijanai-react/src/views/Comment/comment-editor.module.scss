@@ -1,0 +1,24 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .comment-editor-root {
+    .read-core-root {
+    }
+    .read-core-editable-root {
+      min-height: auto !important;
+      box-shadow: none;
+      padding: 0;
+    }
+
+    .panel {
+      display: flex;
+      justify-content: flex-end;
+      margin: #{spacing(2)} 0;
+    }
+
+    .action {
+      display: flex;
+      gap: 1;
+    }
+  }
+}

@@ -1,6 +1,6 @@
 import styles from "./comment.module.scss";
 import React, { useCallback, useMemo, useRef } from "react";
-import { CommentEditor } from "./components/CommentEditor";
+import { CommentEditor } from "./CommentEditor";
 import { useTranslation } from "@/common/i18n";
 import { useRefreshToken } from "@/common/helper";
 import { switchTap, TreeComment } from "@keekijanai/frontend-core";
