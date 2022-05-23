@@ -42,7 +42,6 @@
   },
   "dependencies": {
     "@ebay/nice-modal-react": "^1.2.1",
-    "@emotion/css": "^11.9.0",
     "@mui/base": "^5.0.0-alpha.80",
     "@react-spring/web": "^9.4.1",
     "clsx": "^1.1.1",
