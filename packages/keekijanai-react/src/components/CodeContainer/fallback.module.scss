@@ -1,0 +1,9 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .code-container-root {
+    background-color: rgb(250, 250, 250);
+    padding: spacing(4);
+    font-family: Roboto Mono, monospace;
+  }
+}

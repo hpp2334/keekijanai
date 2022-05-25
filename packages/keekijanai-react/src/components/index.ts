@@ -9,6 +9,7 @@ export { IconButton } from "./IconButton";
 export { Menu, MenuItem, type MenuProps, type MenuItemProps } from "./Menu";
 export { Alert, AlertTitle, type AlertProps } from "./Alert";
 export { Tooltip, type TooltipProps } from "./Tooltip";
+export * from "./CodeContainer";
 
 export { Fade } from "./transitions/Fade";
 export { useTransition } from "./transitions/useTransition";
