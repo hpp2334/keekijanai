@@ -1,6 +1,6 @@
 import styles from "./collapse.module.scss";
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { Typography, Stack } from "@/components";
+import { Typography, Stack, CollapseCore } from "@/components";
 import { useRefreshToken, useSwitch } from "@/common/helper";
 import { withCSSBaseline } from "@/common/hoc";
 import { CommonStylesProps } from "@/common/react";
@@ -27,23 +27,7 @@ const CollapseContent = ({ children, onMount }: { children?: React.ReactNode; on
 
 export const Collapse = withCSSBaseline(
   ({ title, defaultExpanded = false, children, className, style }: CollapseProps) => {
-    const [refreshToken, updateRefreshToken] = useRefreshToken();
-    const collapseContentWrapperRef = useRef<HTMLDivElement>(null);
     const { isOpen, toggle } = useSwitch(defaultExpanded);
-    const haveOpenedRef = React.useRef(isOpen);
-    haveOpenedRef.current ||= isOpen;
-
-    const collapseContentWrapperStyle = useMemo((): React.CSSProperties | undefined => {
-      const el = collapseContentWrapperRef.current;
-      if (!isOpen || !el) {
-        return undefined;
-      }
-      const elHeight = el.scrollHeight;
-      return {
-        height: elHeight,
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [isOpen, refreshToken]);
 
     return (
       <div className={clsx(styles.collapseRoot, isOpen && styles.expanded, className)} style={style}>
@@ -53,15 +37,7 @@ export const Collapse = withCSSBaseline(
             {typeof title === "string" ? <Typography>{title}</Typography> : title}
           </Stack>
         </div>
-        <div className={clsx(styles.collapseContentRoot, isOpen && styles.expanded)}>
-          <div
-            ref={collapseContentWrapperRef}
-            className={clsx(styles.collapseContentWrapper, isOpen && styles.expanded)}
-            style={collapseContentWrapperStyle}
-          >
-            {haveOpenedRef.current && <CollapseContent onMount={updateRefreshToken}>{children}</CollapseContent>}
-          </div>
-        </div>
+        <CollapseCore expand={isOpen}>{children}</CollapseCore>
       </div>
     );
   }

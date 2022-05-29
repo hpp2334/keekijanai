@@ -5,6 +5,7 @@ import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
 import { MdChevronLeft, MdChevronRight, MdMoreHoriz } from "react-icons/md";
 import { range } from "@/common/helper";
 import clsx from "clsx";
+import { injectCSS } from "@/common/styles";
 
 export interface PaginationProps {
   /** total page number */
@@ -23,6 +24,8 @@ interface PaginationButtonProps {
 
 const DEFAULT_SHOW_NEIGHBOR_PAGE_BUTTON = 2;
 
+const PaginationRoot = injectCSS("div", styles.paginationRoot);
+
 function PaginationButton({ disabled, active, children, onClick }: PaginationButtonProps) {
   return (
     <button disabled={disabled} className={clsx(styles.paginationButton, active && styles.active)} onClick={onClick}>
@@ -39,14 +42,14 @@ function PaginationMore() {
   );
 }
 
-function PaginationRoot({ count, page, onChange }: PaginationProps) {
+function PaginationComp({ count, page, onChange }: PaginationProps) {
   const includeFirstPage = page - DEFAULT_SHOW_NEIGHBOR_PAGE_BUTTON <= 1;
   const includeLastPage = page + DEFAULT_SHOW_NEIGHBOR_PAGE_BUTTON >= count;
   const startPage = Math.max(page - DEFAULT_SHOW_NEIGHBOR_PAGE_BUTTON, 1);
   const endPage = Math.min(page + DEFAULT_SHOW_NEIGHBOR_PAGE_BUTTON, count);
 
   return (
-    <div className={styles.paginationRoot}>
+    <PaginationRoot>
       <Stack direction="row" alignItems="center" spacing={3}>
         <PaginationButton
           disabled={page === 1}
@@ -106,10 +109,10 @@ function PaginationRoot({ count, page, onChange }: PaginationProps) {
           <MdChevronRight />
         </PaginationButton>
       </Stack>
-    </div>
+    </PaginationRoot>
   );
 }
 
 const withFeature = withCSSBaseline;
 
-export const Pagination = withFeature(PaginationRoot);
+export const Pagination = withFeature(PaginationComp);

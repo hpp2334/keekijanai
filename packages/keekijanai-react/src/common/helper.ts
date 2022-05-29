@@ -79,3 +79,21 @@ export const range = (start: number, end: number) =>
   Array.from({ length: end - start })
     .fill(0)
     .map((v, index) => start + index);
+
+export const nextTick = (fn: () => void) => {
+  if (typeof Promise !== "undefined") {
+    Promise.resolve(null).then(fn);
+  } else {
+    fn();
+  }
+};
+
+export const nextFrame = (fn: () => void) => {
+  if (typeof setTimeout !== "undefined") {
+    setTimeout(() => {
+      fn();
+    }, 16);
+  } else {
+    fn();
+  }
+};
