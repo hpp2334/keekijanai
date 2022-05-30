@@ -6,7 +6,7 @@ import clsx from "clsx";
 export interface ButtonProps extends CommonStyleProps {
   color?: "primary" | "inherit";
   size?: "small" | "medium";
-  variant?: "text";
+  variant?: "text" | "contained";
   disabled?: JSX.IntrinsicElements["button"]["disabled"];
   onClick?: JSX.IntrinsicElements["button"]["onClick"];
   children?: React.ReactNode;
@@ -24,6 +24,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(function 
         styles.buttonRoot,
         color === "primary" && styles.primary,
         size === "small" && styles.small,
+        variant === "contained" && styles.contained,
         className
       )}
       style={style}

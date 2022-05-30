@@ -48,10 +48,13 @@ export class AuthService implements Service {
   public createOAuth2LoginRef(provider: Data.OAuth2.Provider): ElementRef<HTMLButtonElement> {
     const elementRef = new ElementRef<HTMLButtonElement>((current) => {
       current.onclick = () => {
+        if (!this.globalService.valid) {
+          return;
+        }
         this.api.getUrlOfOAuth2Login(provider).subscribe((href) => {
           console.debug("[auth][createOAuth2LoginRef]", "href", href);
           current.disabled = true;
-          window.location.href = href;
+          this.globalService.global.location.href = href;
         });
       };
     });
@@ -67,7 +70,10 @@ export class AuthService implements Service {
   }
 
   public handleOAuth2TokenOnUrl(): Observable<unknown> {
-    const searchStr = window.location.search;
+    if (!this.globalService.valid) {
+      return of(null);
+    }
+    const searchStr = this.globalService.global.location.search;
     const search = new URLSearchParams(searchStr);
     const token = search.get("token");
     console.debug("[auth][handleOAuth2TokenOnUrl]", { token });

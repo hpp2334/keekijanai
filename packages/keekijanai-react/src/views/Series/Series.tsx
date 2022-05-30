@@ -1,6 +1,6 @@
 import styles from "./series.module.scss";
 import { Collapse } from "../Collapse";
-import { Link } from "@/components";
+import { CollapseCore, Link } from "@/components";
 import { useObservableState } from "observable-hooks";
 import React, { useEffect } from "react";
 import { isNil, Series as SeriesType } from "@keekijanai/frontend-core";
@@ -8,12 +8,17 @@ import { CommonStylesProps } from "@/common/react";
 import { useGlobalService } from "../Global";
 import { useSeriesService } from "./logic";
 import clsx from "clsx";
-import { constants } from "@/common/styles";
+import { constants, injectCSS } from "@/common/styles";
 import { withCSSBaseline } from "@/common/hoc";
+import { RiRhythmLine } from "react-icons/ri";
+import { MdChevronRight } from "react-icons/md";
+import { useSwitch } from "@/common/helper";
 
 export interface SeriesProps extends CommonStylesProps {
   series: SeriesType | null;
 }
+
+const SeriesRoot = injectCSS("div", styles.seriesRoot);
 
 const withFeature = withCSSBaseline;
 
@@ -21,13 +26,17 @@ export const Series = withFeature(({ series, className, style }: SeriesProps) =>
   const seriesService = useSeriesService();
   const globalService = useGlobalService();
 
+  const expandSwitchHook = useSwitch();
+
   const normalizedSeries = useObservableState(seriesService.normalizedSeries$, null);
   const currentPath = useObservableState(globalService.path$, null);
+  const currentSeries = useObservableState(seriesService.currentSeries$, null);
 
   console.debug("[Series]", {
     series,
     normalizedSeries,
     currentPath,
+    currentSeries,
   });
 
   useEffect(() => {
@@ -41,9 +50,23 @@ export const Series = withFeature(({ series, className, style }: SeriesProps) =>
     return null;
   }
 
+  const expandClass = expandSwitchHook.isOpen && styles.expand;
+
   return (
-    <div className={styles.seriesRoot}>
-      <Collapse title={normalizedSeries.name} defaultExpanded={true} className={className} style={style}>
+    <SeriesRoot className={clsx(expandClass, className)} style={style}>
+      <div className={clsx(styles.seriesHeader, expandClass)} onClick={expandSwitchHook.toggle}>
+        <div className={styles.icon}>
+          <RiRhythmLine />
+        </div>
+        <div className={styles.seriesTitle}>{normalizedSeries.name}</div>
+        {currentSeries && (
+          <div className={styles.seriesHeaderItem}>
+            <MdChevronRight className={clsx(styles.icon, expandClass)} />
+            <div className={clsx(styles.itemTitle, expandClass)}>{currentSeries.title}</div>
+          </div>
+        )}
+      </div>
+      <CollapseCore expand={expandSwitchHook.isOpen}>
         <div className={styles.seriesContainer}>
           {normalizedSeries.data.map((item, index) => {
             const hasLink = !isNil(item.path);
@@ -56,13 +79,25 @@ export const Series = withFeature(({ series, className, style }: SeriesProps) =>
                 className={clsx(styles.seriesItem, item.disable && styles.disable, item.match && styles.match)}
                 key={index}
               >
-                {!hasLink && <div>{item.title}</div>}
-                {hasLink && <Link href={`/${item.path}`}>{item.title}</Link>}
+                {!hasLink && <div className={styles.content}>{item.title}</div>}
+                {hasLink && (
+                  <Link
+                    className={clsx(styles.link, styles.content, !item.disable && styles.canHover)}
+                    href={`/${item.path}`}
+                  >
+                    {item.title}
+                  </Link>
+                )}
               </div>
             );
           })}
         </div>
-      </Collapse>
-    </div>
+      </CollapseCore>
+      {/* <Collapse title={normalizedSeries.name} defaultExpanded={true}>
+        <div className={styles.seriesContainer}>
+          
+        </div>
+      </Collapse> */}
+    </SeriesRoot>
   );
 });

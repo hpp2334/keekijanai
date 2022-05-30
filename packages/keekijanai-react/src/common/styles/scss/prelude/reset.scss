@@ -1,3 +1,5 @@
+@use "../base.scss" as *;
+
 /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
    License: none (public domain)
@@ -9,6 +11,7 @@ $base-font-size: 1rem;
 
 .keekijanai-reset {
   font-size: $base-font-size;
+  color: $primary-text;
 
   div,
   span,
@@ -147,6 +150,23 @@ $base-font-size: 1rem;
     margin: 0;
     &:hover {
       background-color: inherit;
+    }
+  }
+
+  a {
+    text-decoration: underline;
+
+    &:link {
+      color: inherit;
+    }
+    &:visited {
+      color: inherit;
+    }
+    &:hover {
+      color: inherit;
+    }
+    &:active {
+      color: inherit;
     }
   }
 }

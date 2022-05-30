@@ -4,6 +4,7 @@ import { injectCSS } from "@/common/styles";
 import { CommentEditorCore, CommentEditorCoreProps, deserializeToValue, serializeFromEditor, Editor } from "./editor";
 import { useTranslation } from "@/common/i18n";
 import { Button } from "@/components";
+import clsx from "clsx";
 
 export enum CommentEditorMode {
   Read,
@@ -14,25 +15,22 @@ export interface CommentEditorProps {
   initialValue?: string;
   mode?: CommentEditorMode;
   placeholder?: string;
+  classes?: {
+    root?: string;
+    editor?: string;
+  };
 
   onReply?: (value: string) => Promise<unknown>;
   onCancel?: () => void;
 }
 
 const CommentEditorRoot = injectCSS("div", styles.commentEditorRoot);
-const CommentEditorCoreRoot = injectCSS("div", styles.commentEditorCoreRoot);
-const StyledEditContainer = injectCSS("div", styles.editContainer);
-const StyledReadContainer = injectCSS("div", styles.readContainer);
 const StyledPanel = injectCSS("div", styles.panel);
-const StyledAction = injectCSS("button", styles.action);
 
-export const CommentEditor = ({
-  initialValue,
-  mode = CommentEditorMode.Edit,
-  placeholder,
-  onReply,
-  onCancel,
-}: CommentEditorProps) => {
+export const CommentEditor = React.forwardRef<HTMLDivElement, CommentEditorProps>(function CommentEditor(
+  { initialValue, mode = CommentEditorMode.Edit, placeholder, classes, onReply, onCancel },
+  ref
+) {
   const refEditor = useRef<Editor>();
   const { t } = useTranslation("Comment");
 
@@ -59,14 +57,14 @@ export const CommentEditor = ({
   const overrideClasses = useMemo(() => {
     if (mode === CommentEditorMode.Read) {
       return {
-        root: styles.readCoreRoot,
+        root: clsx(styles.readCoreRoot, classes?.editor),
         editableRoot: styles.readCoreEditableRoot,
       };
     }
-  }, [mode]);
+  }, [classes?.editor, mode]);
 
   return (
-    <CommentEditorRoot>
+    <CommentEditorRoot className={classes?.root} ref={ref}>
       <CommentEditorCore
         refEditor={refEditor}
         initialValue={parsedInitialValue}
@@ -78,9 +76,11 @@ export const CommentEditor = ({
       {mode === CommentEditorMode.Edit && (
         <StyledPanel>
           <Button onClick={handleCancel}>{t("editor.action.cancel")}</Button>
-          <Button onClick={handleReply}>{t("editor.action.post")}</Button>
+          <Button onClick={handleReply} variant="contained" color="primary">
+            {t("editor.action.post")}
+          </Button>
         </StyledPanel>
       )}
     </CommentEditorRoot>
   );
-};
+});

@@ -14,3 +14,5 @@ export * from "./CodeContainer";
 export { Fade } from "./transitions/Fade";
 export { useTransition } from "./transitions/useTransition";
 export { CollapseCore, type CollapseCoreProps } from "./transitions/CollapseCore";
+
+export { FunctionAsChildren, type FunctionAsChildrenProps } from "./helpers/FunctionAsChildren";

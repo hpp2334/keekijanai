@@ -6,6 +6,7 @@ import { Button } from "./Button";
 import { Stack } from "./Stack";
 import PopperUnstyled, { PopperUnstyledProps } from "@mui/base/PopperUnstyled";
 import { injectCSS } from "@/common/styles";
+import { CollapseCore } from "./transitions/CollapseCore";
 
 export interface ConfirmPopoverProps extends Pick<PopperUnstyledProps, "placement"> {
   trigger: (openPopover: (el: Element | null) => void) => React.ReactElement;
@@ -74,15 +75,23 @@ export const ConfirmPopover: React.ComponentType<ConfirmPopoverProps> = ({
         // onClose={handleClickCancel}
       >
         <ConfirmPopoverContainer>
-          <ConfirmPopoverContent>{children}</ConfirmPopoverContent>
-          <Stack direction="row" justifyContent="flex-end">
-            <Button disabled={okState.type === StateType.Loading} color="inherit" onClick={handleClickCancel}>
-              {texts?.cancel ?? "Cancel"}
-            </Button>
-            <Button disabled={okState.type === StateType.Loading} color="primary" onClick={handleClickOk}>
-              {texts?.ok ?? "Ok"}
-            </Button>
-          </Stack>
+          <CollapseCore expand={Boolean(state.el)}>
+            <ConfirmPopoverContent>{children}</ConfirmPopoverContent>
+            <Stack direction="row" justifyContent="flex-end" spacing={0}>
+              <Button disabled={okState.type === StateType.Loading} color="inherit" onClick={handleClickCancel}>
+                {texts?.cancel ?? "Cancel"}
+              </Button>
+              <Button
+                disabled={okState.type === StateType.Loading}
+                variant="contained"
+                color="primary"
+                onClick={handleClickOk}
+                className={styles.okButton}
+              >
+                {texts?.ok ?? "Ok"}
+              </Button>
+            </Stack>
+          </CollapseCore>
         </ConfirmPopoverContainer>
       </Popper>
     </>

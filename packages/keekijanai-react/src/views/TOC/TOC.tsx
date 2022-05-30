@@ -1,5 +1,5 @@
 import styles from "./toc.module.scss";
-import { Stack, Typography } from "@/components";
+import { FunctionAsChildren, Stack, Typography } from "@/components";
 import { useCallback, useEffect, useMemo } from "react";
 import { TOCHeading, useInternalTOCContext } from "./Context";
 import { useObservableState } from "observable-hooks";
@@ -75,7 +75,7 @@ export const TOC = withFeature(({ className, style, offsetY = 0 }: TOCProps) => 
   const activeHeading = useObservableState(tocService.activeHeading$);
   const tocItemsRefList = useRefList<HTMLLIElement>(headings.length);
 
-  const activeHeadingRefStyle: { height?: number; top?: number } = useMemo(() => {
+  const getActiveHeadingRefStyle = useCallback((): { height?: number; top?: number } => {
     if (!activeHeading) {
       return {};
     }
@@ -106,13 +106,13 @@ export const TOC = withFeature(({ className, style, offsetY = 0 }: TOCProps) => 
   return (
     <TOCRoot className={className} style={style}>
       <TOCItemList>
-        <TOCActiveIndicator height={activeHeadingRefStyle.height} top={activeHeadingRefStyle.top} />
         <Stack spacing={0}>
           {headings.map((heading, index) => {
             const isActive = activeHeading === heading;
             return (
               <TOCItemContainer
                 key={index}
+                className={clsx(isActive && styles.active)}
                 ref={(el) => {
                   if (el) {
                     tocItemsRefList.setRef(index, el);
@@ -127,6 +127,12 @@ export const TOC = withFeature(({ className, style, offsetY = 0 }: TOCProps) => 
             );
           })}
         </Stack>
+        <FunctionAsChildren>
+          {() => {
+            const style = getActiveHeadingRefStyle();
+            return <TOCActiveIndicator height={style.height} top={style.top} />;
+          }}
+        </FunctionAsChildren>
       </TOCItemList>
     </TOCRoot>
   );

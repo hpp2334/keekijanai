@@ -3,11 +3,11 @@
 :global(.keekijanai-reset) {
   .comment-editor-root {
     .read-core-root {
-    }
-    .read-core-editable-root {
-      min-height: auto !important;
-      box-shadow: none !important;
-      padding: 0 !important;
+      .read-core-editable-root {
+        box-shadow: none !important;
+        min-height: auto !important;
+        padding: 0 !important;
+      }
     }
 
     .panel {

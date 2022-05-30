@@ -1,5 +1,5 @@
-import { BehaviorSubject, combineLatest, Observable, Subscription } from "rxjs";
-import { distinctUntilChanged, filter } from "rxjs/operators";
+import { BehaviorSubject, combineLatest, Observable, of, Subscription } from "rxjs";
+import { distinctUntilChanged, filter, switchMap } from "rxjs/operators";
 import { Service } from "@/core/service";
 import { isNil } from "@/utils/common";
 import { container } from "@/core/container";
@@ -35,6 +35,18 @@ export class SeriesService implements Service {
   public currentPath$ = new BehaviorSubject<string | null>(null);
   public series$ = new BehaviorSubject<Series | null>(null);
   public normalizedSeries$ = new BehaviorSubject<NormalizedSeries | null>(null);
+
+  public currentSeries$ = combineLatest([this.currentPath$, this.normalizedSeries$]).pipe(
+    switchMap(([currentPath, normalizedSeries]) => {
+      if (isNil(currentPath)) {
+        return of(null);
+      }
+      const series = normalizedSeries?.data.find(
+        (series) => !isNil(series.path) && this.isSlugEqual(series.path, currentPath)
+      );
+      return of(series ?? null);
+    })
+  );
 
   private subscriptions: Array<Subscription> = [];
 

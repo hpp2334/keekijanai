@@ -61,8 +61,10 @@ export const Star = withFeature(({ belong }: StarProps) => {
           {starConfig.map(({ type, Icon }, index) => (
             <IconButton
               key={index}
-              className={clsx(styles.starButton, type === star?.current && styles.current)}
+              className={clsx(styles.starButton)}
               onClick={handleClickStar(type)}
+              active={type === star?.current}
+              variant="outlined"
             >
               <Icon fontSize="inherit" />
             </IconButton>

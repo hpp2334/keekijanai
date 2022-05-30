@@ -34,6 +34,10 @@ function TestSeries() {
                 path: "/#",
               },
               {
+                title: "CSS Tricks",
+                path: "/css-trick",
+              },
+              {
                 title: "CSS Basic (Basic)",
                 disable: true,
               },
@@ -56,6 +60,7 @@ function TestSeries() {
 
 export const renderContent: RenderContent = (info, { H1, H2, H3, H4 }) => (
   <article>
+    <TestSeries />
     <Reference
       entries={[
         ["npmjs", "https://www.npmjs.com/"],
@@ -113,6 +118,5 @@ export const renderContent: RenderContent = (info, { H1, H2, H3, H4 }) => (
       </Code>
     </Collapse>
     <TestPagination />
-    <TestSeries />
   </article>
 );

@@ -58,6 +58,34 @@ export class GlobalService {
   public async copyToClipboard(code: string): Promise<void> {
     return await this.global?.navigator.clipboard.writeText(code);
   }
+
+  public scrollTo(
+    el: HTMLElement,
+    opts?: {
+      behavior?: "smooth";
+      offset?: number;
+    }
+  ) {
+    if (!this.valid) {
+      return;
+    }
+    const offset = opts?.offset ?? 0;
+    const elHeight = el.clientHeight;
+    const pos = el.offsetTop + elHeight + offset;
+    this.global.scrollTo({
+      top: pos,
+      behavior: opts?.behavior ?? "smooth",
+    });
+  }
+
+  public changeLocation(fn: (current: URL) => URL) {
+    if (!this.valid) {
+      return;
+    }
+    const current = new URL(this.global.location.href);
+    const next = fn(current);
+    this.global.location.href = next.href;
+  }
 }
 
 container.register({

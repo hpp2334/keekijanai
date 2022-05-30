@@ -14,17 +14,6 @@ export interface CollapseProps extends CommonStylesProps {
   children?: React.ReactNode;
 }
 
-const CollapseContent = ({ children, onMount }: { children?: React.ReactNode; onMount: () => void }) => {
-  useLayoutEffect(() => {
-    setTimeout(() => {
-      onMount();
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return <>{children}</>;
-};
-
 export const Collapse = withCSSBaseline(
   ({ title, defaultExpanded = false, children, className, style }: CollapseProps) => {
     const { isOpen, toggle } = useSwitch(defaultExpanded);

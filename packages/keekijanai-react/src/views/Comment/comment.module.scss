@@ -6,10 +6,11 @@
       .text {
         font-size: $typography-h5-fontSize;
         letter-spacing: spacing(0.2);
+        user-select: none;
       }
 
       .count {
-        color: $primary-text;
+        color: $primary-contrast-text;
         background-color: $primary;
         border-radius: 1em;
         height: 1em;
@@ -19,6 +20,7 @@
         font-size: 0.8em;
         justify-content: center;
         align-items: center;
+        user-select: none;
       }
     }
 
