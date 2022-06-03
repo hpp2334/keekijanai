@@ -1,0 +1,32 @@
+@use "../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  $default-size: 4px;
+  $max-size-scale: 1.5;
+
+  .loading-dot-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: $default-size * $max-size-scale;
+    height: $default-size * $max-size-scale;
+
+    .loading-dot {
+      width: $default-size;
+      height: $default-size;
+      border-radius: 100%;
+      background-color: $primary;
+      animation: loading 600ms ease infinite alternate;
+    }
+  }
+
+  @keyframes loading {
+    0% {
+      scale: 0.9;
+    }
+
+    100% {
+      scale: $max-size-scale;
+    }
+  }
+}

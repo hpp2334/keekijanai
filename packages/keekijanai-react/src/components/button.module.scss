@@ -2,11 +2,17 @@
 
 :global(.keekijanai-reset) {
   .button-root {
+    position: relative;
     font-size: 0.95em;
     border-radius: 0.25em;
     transition: background-color 0.2s;
     cursor: pointer;
     padding: #{spacing(1.5)} #{spacing(2.5)};
+    transition: padding 0.2s;
+
+    &:disabled {
+      cursor: not-allowed;
+    }
 
     &:hover {
       background-color: $grey-100;
@@ -18,8 +24,14 @@
     &.primary {
       color: $primary;
 
-      &:hover {
+      &:not([disabled]):hover {
         background-color: $primary-x-light;
+      }
+
+      .loading-dot {
+        .inner {
+          background-color: $primary-x-light;
+        }
       }
     }
 
@@ -39,9 +51,28 @@
         background-color: $primary;
         color: $primary-contrast-text;
 
-        &:hover {
+        &:disabled {
+          opacity: 0.7;
+        }
+
+        &:not([disabled]):hover {
           background-color: $primary-dark;
         }
+      }
+    }
+
+    &.loading {
+      padding-left: spacing(5.5);
+    }
+
+    .loading-dot {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      left: spacing(2.5);
+
+      .inner {
+        background-color: $grey-400;
       }
     }
   }

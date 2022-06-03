@@ -69,7 +69,7 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
     toReply({
       refComment: comment,
     });
-  }, [comment, globalService, toReply]);
+  }, [comment, toReply]);
 
   const handleClickRemove = useCallback(() => {
     const id = comment.id;

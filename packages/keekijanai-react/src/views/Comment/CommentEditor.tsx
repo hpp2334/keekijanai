@@ -1,10 +1,13 @@
 import styles from "./comment-editor.module.scss";
+import { noop } from "@keekijanai/frontend-core";
 import React, { useCallback, useMemo, useRef } from "react";
 import { injectCSS } from "@/common/styles";
 import { CommentEditorCore, CommentEditorCoreProps, deserializeToValue, serializeFromEditor, Editor } from "./editor";
 import { useTranslation } from "@/common/i18n";
 import { Button } from "@/components";
 import clsx from "clsx";
+import { useRemote } from "@/common/hooks/useRemote";
+import { StateType } from "@/common/state";
 
 export enum CommentEditorMode {
   Read,
@@ -28,11 +31,12 @@ const CommentEditorRoot = injectCSS("div", styles.commentEditorRoot);
 const StyledPanel = injectCSS("div", styles.panel);
 
 export const CommentEditor = React.forwardRef<HTMLDivElement, CommentEditorProps>(function CommentEditor(
-  { initialValue, mode = CommentEditorMode.Edit, placeholder, classes, onReply, onCancel },
+  { initialValue, mode = CommentEditorMode.Edit, placeholder, classes, onReply: nativeOnReply, onCancel },
   ref
 ) {
   const refEditor = useRef<Editor>();
   const { t } = useTranslation("Comment");
+  const [onReplyState, onReply] = useRemote(nativeOnReply ?? noop);
 
   const parsedInitialValue: CommentEditorCoreProps["initialValue"] = useMemo(() => {
     if (!initialValue) {
@@ -51,7 +55,9 @@ export const CommentEditor = React.forwardRef<HTMLDivElement, CommentEditorProps
     }
     const editor = refEditor.current;
     const value = serializeFromEditor(editor);
-    onReply?.(value);
+    if (editor.children.length > 0) {
+      onReply?.(value);
+    }
   }, [onReply]);
 
   const overrideClasses = useMemo(() => {
@@ -75,8 +81,15 @@ export const CommentEditor = React.forwardRef<HTMLDivElement, CommentEditorProps
       />
       {mode === CommentEditorMode.Edit && (
         <StyledPanel>
-          <Button onClick={handleCancel}>{t("editor.action.cancel")}</Button>
-          <Button onClick={handleReply} variant="contained" color="primary">
+          <Button onClick={handleCancel} disabled={onReplyState.type === StateType.Loading}>
+            {t("editor.action.cancel")}
+          </Button>
+          <Button
+            onClick={handleReply}
+            variant="contained"
+            color="primary"
+            loading={onReplyState.type === StateType.Loading}
+          >
             {t("editor.action.post")}
           </Button>
         </StyledPanel>

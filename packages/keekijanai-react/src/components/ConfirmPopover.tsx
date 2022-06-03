@@ -7,6 +7,7 @@ import { Stack } from "./Stack";
 import PopperUnstyled, { PopperUnstyledProps } from "@mui/base/PopperUnstyled";
 import { injectCSS } from "@/common/styles";
 import { CollapseCore } from "./transitions/CollapseCore";
+import { useIsMount } from "@/common/hooks/useIsMount";
 
 export interface ConfirmPopoverProps extends Pick<PopperUnstyledProps, "placement"> {
   trigger: (openPopover: (el: Element | null) => void) => React.ReactElement;
@@ -41,6 +42,7 @@ export const ConfirmPopover: React.ComponentType<ConfirmPopoverProps> = ({
   children,
 }) => {
   const [state, setState] = useState<State>(defaultState);
+  const isMount = useIsMount();
   const openPopover = useCallback((el: Element | null) => {
     setState({
       open: true,
@@ -50,10 +52,12 @@ export const ConfirmPopover: React.ComponentType<ConfirmPopoverProps> = ({
 
   const [okState, handleOk] = useRemote(onOk);
   const handleCancel = useCallback(() => {
-    setState({
-      open: false,
-      el: null,
-    });
+    if (isMount()) {
+      setState({
+        open: false,
+        el: null,
+      });
+    }
     onCancel?.();
   }, [onCancel]);
   const handleClickCancel = useCallback(() => {
@@ -82,7 +86,7 @@ export const ConfirmPopover: React.ComponentType<ConfirmPopoverProps> = ({
                 {texts?.cancel ?? "Cancel"}
               </Button>
               <Button
-                disabled={okState.type === StateType.Loading}
+                loading={okState.type === StateType.Loading}
                 variant="contained"
                 color="primary"
                 onClick={handleClickOk}

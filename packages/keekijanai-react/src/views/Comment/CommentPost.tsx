@@ -22,9 +22,8 @@ const CommentToPostUnfocusContainer = injectCSS("div", styles.commentToPostUnfoc
 
 export const CommentPost = ({ ...props }: CommentPostProps) => {
   const { t } = useTranslation("Comment");
-  const globalService = useGlobalService();
   const [_token, refreshToken] = useRefreshToken();
-  const { commentService: service, commentPostElRef, scrollToPost } = useInternalCommentContext();
+  const { commentService: service, scrollToPost } = useInternalCommentContext();
 
   const placeholder = props.refComment
     ? sprintf(t("post.reply.placeholder"), props.refComment.user?.name)
