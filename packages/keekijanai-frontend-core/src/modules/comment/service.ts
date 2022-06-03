@@ -101,6 +101,7 @@ export class CommentService implements Service {
           parent.children.data.splice(index, 1);
           parent.child_count -= 1;
           parent.children.pagination.total -= 1;
+          commentTree.pagination.total -= 1;
         }
         this.commentTree$.next({ ...commentTree });
       })
@@ -189,6 +190,8 @@ export class CommentService implements Service {
       if (pagination.cursor === null) {
         pagination.cursor = created.id;
       }
+
+      commentTree.pagination.total += 1;
     }
     this.commentTree$.next({ ...commentTree });
   }

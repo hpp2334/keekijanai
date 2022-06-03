@@ -2,16 +2,17 @@ import styles from "./comment.module.scss";
 import React, { useCallback, useMemo, useRef } from "react";
 import { CommentEditor } from "./CommentEditor";
 import { useTranslation } from "@/common/i18n";
-import { useRefreshToken } from "@/common/helper";
+import { nextFrame, useRefreshToken } from "@/common/helper";
 import { switchTap, TreeComment } from "@keekijanai/frontend-core";
 import { firstValueFrom } from "rxjs";
 import { sprintf } from "sprintf-js";
 import { useInternalCommentContext } from "./provider";
 import { injectCSS } from "@/common/styles";
+import { useGlobalService } from "../Global";
 
 export interface CommentPostProps {
   refComment?: TreeComment;
-
+  refRoot?: React.RefObject<HTMLDivElement>;
   defaultExpand?: boolean;
   expand?: boolean;
   onExpandChange?: (expand: boolean) => void;
@@ -19,34 +20,36 @@ export interface CommentPostProps {
 
 const CommentToPostUnfocusContainer = injectCSS("div", styles.commentToPostUnfocusContainer);
 
-export const CommentPost = ({ ...leftProps }: CommentPostProps) => {
+export const CommentPost = ({ ...props }: CommentPostProps) => {
   const { t } = useTranslation("Comment");
+  const globalService = useGlobalService();
   const [_token, refreshToken] = useRefreshToken();
-  const { commentService: service } = useInternalCommentContext();
+  const { commentService: service, commentPostElRef, scrollToPost } = useInternalCommentContext();
 
-  const placeholder = leftProps.refComment
-    ? sprintf(t("post.reply.placeholder"), leftProps.refComment.user?.name)
+  const placeholder = props.refComment
+    ? sprintf(t("post.reply.placeholder"), props.refComment.user?.name)
     : t("post.create.placeholder");
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const isControlled = useMemo(() => leftProps.expand !== undefined, []);
-  const innerExpandRef = useRef((isControlled ? leftProps.expand : leftProps.defaultExpand) ?? false);
+  const isControlled = useMemo(() => props.expand !== undefined, []);
+  const innerExpandRef = useRef((isControlled ? props.expand : props.defaultExpand) ?? false);
   const innerChangeExpandRef = useRef(
     isControlled
-      ? leftProps.onExpandChange
+      ? props.onExpandChange
       : (next: boolean) => {
           innerExpandRef.current = next;
         }
   );
   if (isControlled) {
-    innerExpandRef.current = leftProps.expand ?? false;
-    innerChangeExpandRef.current = leftProps.onExpandChange;
+    innerExpandRef.current = props.expand ?? false;
+    innerChangeExpandRef.current = props.onExpandChange;
   }
 
   const handleExpand = useCallback(() => {
     innerChangeExpandRef.current?.(true);
+    scrollToPost();
     refreshToken();
-  }, [refreshToken]);
+  }, [refreshToken, scrollToPost]);
 
   const handleCollapse = useCallback(() => {
     innerChangeExpandRef.current?.(false);
@@ -60,7 +63,7 @@ export const CommentPost = ({ ...leftProps }: CommentPostProps) => {
           {
             content: value,
           },
-          leftProps.refComment ?? null
+          props.refComment ?? null
         )
         .pipe(
           switchTap(() => {
@@ -69,11 +72,11 @@ export const CommentPost = ({ ...leftProps }: CommentPostProps) => {
         );
       return firstValueFrom(observable);
     },
-    [handleCollapse, leftProps.refComment, service]
+    [handleCollapse, props.refComment, service]
   );
 
   return (
-    <div className={styles.commentPostRoot}>
+    <div ref={props.refRoot} className={styles.commentPostRoot}>
       {innerExpandRef.current ? (
         <CommentEditor onCancel={handleCollapse} onReply={handleReply} placeholder={placeholder} />
       ) : (

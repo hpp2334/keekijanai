@@ -58,7 +58,6 @@ const CommentLoadMoreButton = ({ handler }: { handler: () => Promise<unknown> })
 
 const CommentBlock = ({ comment }: { comment: TreeComment }) => {
   const globalService = useGlobalService();
-  const refEditorEl = useRef<HTMLDivElement>(null);
   const { t } = useTranslation("Comment");
   const content = comment.content;
   const hasLeaves = comment.child_count > 0;
@@ -69,14 +68,6 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
   const handleClickReply = useCallback(() => {
     toReply({
       refComment: comment,
-    });
-    const editorEl = refEditorEl.current;
-    nextFrame(() => {
-      if (editorEl) {
-        globalService.scrollTo(editorEl, {
-          offset: -300,
-        });
-      }
     });
   }, [comment, globalService, toReply]);
 
@@ -94,7 +85,7 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
             <CommentUserText>{comment.user?.name}</CommentUserText>
             <CommentTime timestamp={comment.created_time} />
           </Stack>
-          <CommentEditor ref={refEditorEl} initialValue={content} mode={CommentEditorMode.Read} />
+          <CommentEditor initialValue={content} mode={CommentEditorMode.Read} />
           <Stack direction="row" spacing={3}>
             <CommentButton onClick={handleClickReply}>{t("block.panel.reply")}</CommentButton>
             {service.canRemove(comment) && (
@@ -195,7 +186,7 @@ const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
 
 const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   const { t } = useTranslation("Comment");
-  const { commentService } = useInternalCommentContext();
+  const { commentService, commentPostElRef, scrollToPost } = useInternalCommentContext();
   const authService = useAuthService();
 
   const commentTree = useObservableEagerState(commentService.commentTree$);
@@ -223,11 +214,12 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
           expand: true,
           refComment: params.refComment,
         });
+        scrollToPost();
       } else {
         showAuthModal();
       }
     },
-    [authService]
+    [authService, scrollToPost]
   );
 
   const ctxValue = useMemo(
@@ -271,6 +263,7 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
             expand={commentPostState.expand}
             onExpandChange={handleCommentPostExpandChange}
             refComment={commentPostState.refComment}
+            refRoot={commentPostElRef}
           />
         </Stack>
       </commentInnerContext.Provider>
