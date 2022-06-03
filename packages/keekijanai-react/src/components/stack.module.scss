@@ -1,0 +1,33 @@
+@use "../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .stack-root {
+    display: flex;
+    $spacing-scales: 0.5 "005", 1 "010", 1.5 "015", 2 "020", 2.5 "025", 3 "030", 3.5 "035", 4 "040", 4.5 "045", 5 "050";
+
+    &.column {
+      flex-direction: column;
+      @each $spacing-scale, $spacing-scale-class-suffix in $spacing-scales {
+        &.spacing-scale-#{$spacing-scale-class-suffix} {
+          & > :not(style) + :not(style) {
+            margin-top: spacing($spacing-scale);
+            margin-bottom: 0;
+          }
+        }
+      }
+    }
+
+    &.row {
+      flex-direction: row;
+
+      @each $spacing-scale, $spacing-scale-class-suffix in $spacing-scales {
+        &.spacing-scale-#{$spacing-scale-class-suffix} {
+          & > :not(style) + :not(style) {
+            margin-left: spacing($spacing-scale);
+            margin-right: 0;
+          }
+        }
+      }
+    }
+  }
+}

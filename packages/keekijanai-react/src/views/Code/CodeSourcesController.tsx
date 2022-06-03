@@ -1,6 +1,6 @@
 import styles from "./code.module.scss";
 import { useSwitch } from "@/common/helper";
-import { Fade, IconButton, Stack, Tooltip } from "@/components";
+import { CollapseCore, Fade, IconButton, Stack, Tooltip } from "@/components";
 import React, { useCallback, useState } from "react";
 import { useInternalCodeContext } from "./InternalCodeContext";
 import { TransitionGroup } from "react-transition-group";
@@ -37,32 +37,26 @@ export const CodeSourcesController = ({ children }: CodeSourcesControllerProps) 
 
   return (
     <CodeSourcesControllerRoot>
-      <TransitionGroup>
-        <CodeSourcesControllerBar direction="row" justifyContent="space-between">
-          <Stack>
-            <Fade in={switchHook.isOpen}>
-              {switchHook.isOpen && (
-                <Tooltip title="Copy" placement="top">
-                  <IconButton onClick={handleCopy}>
-                    {copyState === CopyState.Idle && <MdContentCopy fontSize="inherit" />}
-                    {copyState === CopyState.Success && <MdCheck fontSize="inherit" />}
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Fade>
-          </Stack>
-          <Stack>
-            <IconButton onClick={switchHook.toggle} active={switchHook.isOpen}>
-              <MdOutlineCode fontSize="inherit" />
-            </IconButton>
-          </Stack>
-        </CodeSourcesControllerBar>
-        {switchHook.isOpen && (
-          <div>
-            <div>{children}</div>
-          </div>
-        )}
-      </TransitionGroup>
+      <CodeSourcesControllerBar direction="row" justifyContent="space-between">
+        <Stack>
+          <Fade in={switchHook.isOpen}>
+            {switchHook.isOpen && (
+              <Tooltip title="Copy" placement="top">
+                <IconButton onClick={handleCopy}>
+                  {copyState === CopyState.Idle && <MdContentCopy fontSize="inherit" />}
+                  {copyState === CopyState.Success && <MdCheck fontSize="inherit" />}
+                </IconButton>
+              </Tooltip>
+            )}
+          </Fade>
+        </Stack>
+        <Stack>
+          <IconButton onClick={switchHook.toggle} active={switchHook.isOpen}>
+            <MdOutlineCode fontSize="inherit" />
+          </IconButton>
+        </Stack>
+      </CodeSourcesControllerBar>
+      <CollapseCore expand={switchHook.isOpen}>{children}</CollapseCore>
     </CodeSourcesControllerRoot>
   );
 };

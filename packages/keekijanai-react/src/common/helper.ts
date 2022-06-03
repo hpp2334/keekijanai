@@ -51,18 +51,23 @@ export const useSwitch = (defaultValue?: boolean) => {
 // https://stackoverflow.com/questions/54633690/how-can-i-use-multiple-refs-for-an-array-of-elements-with-hooks
 export const useRefList = <T>(len: number) => {
   const itemsRef = useRef<T[]>([]);
+  const [_token, refreshToken] = useRefreshToken();
+
+  useMemo(() => {
+    itemsRef.current = itemsRef.current.slice(0, len);
+  }, [len]);
 
   const setRef = useCallback((index: number, ref: T) => {
+    const prev = itemsRef.current[index];
     itemsRef.current[index] = ref;
+    if (!prev) {
+      refreshToken();
+    }
   }, []);
 
   const getRef = useCallback((index: number) => {
     return itemsRef.current[index];
   }, []);
-
-  useLayoutEffect(() => {
-    itemsRef.current = itemsRef.current.slice(0, len);
-  }, [len]);
 
   const exported = useMemo(
     () => ({
@@ -75,7 +80,56 @@ export const useRefList = <T>(len: number) => {
   return exported;
 };
 
+export const useSingletonTimeout = () => {
+  const timerIdRef = useRef<number | undefined>(undefined);
+
+  const cancel = useCallback(() => {
+    if (timerIdRef.current) {
+      clearTimeout(timerIdRef.current);
+    }
+  }, []);
+
+  const schedule = useCallback(
+    (fn: () => void, timeoutMs: number) => {
+      cancel();
+      timerIdRef.current = setTimeout(() => {
+        timerIdRef.current = undefined;
+        fn();
+      }, timeoutMs) as unknown as number;
+    },
+    [cancel]
+  );
+
+  const exported = useMemo(
+    () => ({
+      cancel,
+      schedule,
+    }),
+    [cancel, schedule]
+  );
+
+  return exported;
+};
+
 export const range = (start: number, end: number) =>
   Array.from({ length: end - start })
     .fill(0)
     .map((v, index) => start + index);
+
+export const nextTick = (fn: () => void) => {
+  if (typeof Promise !== "undefined") {
+    Promise.resolve(null).then(fn);
+  } else {
+    fn();
+  }
+};
+
+export const nextFrame = (fn: () => void) => {
+  if (typeof setTimeout !== "undefined") {
+    setTimeout(() => {
+      fn();
+    }, 16);
+  } else {
+    fn();
+  }
+};

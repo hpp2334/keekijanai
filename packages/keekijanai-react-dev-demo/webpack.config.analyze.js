@@ -11,7 +11,7 @@ webpackCommonConfig.plugins.push(new CleanWebpackPlugin());
 // split chunks to better analyze
 webpackCommonConfig.optimization = {
   splitChunks: {
-    chunks: "all",
+    chunks: "initial",
     cacheGroups: {
       reactIcons: {
         name: "react-icons",
@@ -19,7 +19,7 @@ webpackCommonConfig.optimization = {
         priority: -5,
         reuseExistingChunk: true,
       },
-      reactIcons: {
+      react: {
         name: "react",
         test: /[\\/]node_modules\/react(-dom)?[\\/]/,
         priority: -5,

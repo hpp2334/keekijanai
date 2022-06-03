@@ -1,11 +1,11 @@
 import styles from "./code.module.scss";
 import { useObservableState } from "observable-hooks";
-import React, { useEffect } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import { isNil, SourceNameMap } from "@keekijanai/frontend-core";
 import { useInternalCodeContext } from "./InternalCodeContext";
-import { SyntaxHighlighter } from "@/components/SyntaxHighlighter";
 import { injectCSS } from "@/common/styles";
 import clsx from "clsx";
+import { internalCodeGlobalContext } from "./CodeGlobalContext";
 
 interface CodeTabProps {
   active: boolean;
@@ -33,11 +33,6 @@ export interface CodeSourceProps {
 
 const CodeTabContainer = injectCSS("div", styles.codeTabContainer);
 
-const customSyntaxHighlighterStyle: React.CSSProperties = {
-  fontSize: "0.8em",
-  margin: 0,
-};
-
 const CodeTab = ({ active, onClick, children }: CodeTabProps) => {
   return (
     <div className={clsx(styles.codeTabRoot, active && styles.active)} onClick={onClick}>
@@ -47,11 +42,8 @@ const CodeTab = ({ active, onClick, children }: CodeTabProps) => {
 };
 
 export const CodeSourceContent = ({ code, lang }: CodeSourceContentProps) => {
-  return (
-    <SyntaxHighlighter customStyle={customSyntaxHighlighterStyle} language={lang}>
-      {code}
-    </SyntaxHighlighter>
-  );
+  const CodeContainer = useContext(internalCodeGlobalContext);
+  return <CodeContainer language={lang}>{code}</CodeContainer>;
 };
 
 export const CodeSource = ({ getSource, sourceKey }: CodeSourceProps) => {

@@ -28,9 +28,12 @@
 
     .code-sources-root {
       .code-tab-container {
+        position: relative;
         display: flex;
-        flex-wrap: wrap;
         background-color: $grey-50;
+        box-shadow: 0px 1px 2px 0 $grey-300;
+        z-index: 1;
+        overflow-x: auto;
       }
 
       .code-tab-root {
@@ -39,24 +42,27 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: #{spacing(2)} #{spacing(3.5)};
+        flex-wrap: nowrap;
+        padding: #{spacing(2)} #{spacing(5)};
         font-size: 0.9em;
         background-color: $grey-200;
         cursor: pointer;
         transition: background-color 0.2s, color 0.2s;
         border-left: 1px solid $grey-300;
+        flex: 0 0 max-content;
 
         &:hover {
           background-color: $grey-300;
         }
 
         &.active {
-          background-color: $grey-400;
-          color: $primary-text;
+          background-color: $primary-x-light;
+          color: $primary;
+          border-left-color: $primary;
 
           &:hover {
-            background-color: $grey-500;
-            color: $primary-text;
+            background-color: $primary-light;
+            color: $primary;
           }
         }
       }

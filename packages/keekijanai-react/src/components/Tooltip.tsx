@@ -45,13 +45,13 @@ export const Tooltip = ({ title, placement, children }: TooltipProps) => {
   }, []);
 
   return (
-    <TransitionGroup>
+    <>
       <StyledPopper open={switchHook.isOpen} placement={placement} anchorEl={ref.current}>
         <Fade in={switchHook.isOpen} duration={200}>
           <TootipContent>{title}</TootipContent>
         </Fade>
       </StyledPopper>
       {clonedChildren}
-    </TransitionGroup>
+    </>
   );
 };

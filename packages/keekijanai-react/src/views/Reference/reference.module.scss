@@ -3,30 +3,53 @@
 :global(.keekijanai-reset) {
   .reference-root {
     .reference-container {
-      padding: spacing(3);
-      border: 1px solid $grey-300;
       border-radius: 0.4em;
     }
 
     .reference-header-title {
-      font-size: $typography-h4-fontSize;
+      display: flex;
+      align-items: baseline;
+      font-size: $typography-h5-fontSize;
       margin: 0;
       letter-spacing: spacing(0.2);
+      cursor: default;
+
+      .icon {
+        color: $primary;
+        font-size: 14px;
+        width: 25px;
+      }
     }
 
     .reference-list {
-      padding-left: spacing(2);
-      margin: #{spacing(1)} 0;
+      padding-left: spacing(5);
     }
 
     .reference-list-item {
-      margin: #{spacing(2)} 0;
+      .reference-list-item-link {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        transition: background-color 0.2s;
 
-      &:first-child {
-        margin-top: 0;
-      }
-      &:last-child {
-        margin-bottom: 0;
+        &::before {
+          display: inline-block;
+          content: " ";
+          width: 5px;
+          height: 5px;
+          border-radius: 100%;
+          background-color: $grey-400;
+          margin-right: spacing(2);
+        }
+
+        &:hover {
+          background-color: $grey-hover-bg;
+        }
+
+        text-decoration: none;
+        font-size: 0.9em;
+        padding: #{spacing(2)};
+        border-radius: 4px;
       }
     }
   }

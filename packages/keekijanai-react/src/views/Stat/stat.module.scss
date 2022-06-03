@@ -13,7 +13,7 @@
         color: $secondary-text;
         display: flex;
         align-items: center;
-        cursor: default;
+        user-select: none;
       }
 
       .statical-wrapper {

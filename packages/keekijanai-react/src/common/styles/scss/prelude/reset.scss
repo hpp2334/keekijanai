@@ -1,3 +1,5 @@
+@use "../base.scss" as *;
+
 /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
    License: none (public domain)
@@ -9,6 +11,7 @@ $base-font-size: 1rem;
 
 .keekijanai-reset {
   font-size: $base-font-size;
+  color: $primary-text;
 
   div,
   span,
@@ -89,6 +92,7 @@ $base-font-size: 1rem;
   mark,
   audio,
   video {
+    box-sizing: content-box;
     margin: 0;
     padding: 0;
     border: 0;
@@ -109,30 +113,36 @@ $base-font-size: 1rem;
   menu,
   nav,
   section {
+    box-sizing: content-box;
     display: block;
   }
   ol,
   ul {
+    box-sizing: content-box;
     list-style: none;
   }
   blockquote,
   q {
+    box-sizing: content-box;
     quotes: none;
   }
   blockquote:before,
   blockquote:after,
   q:before,
   q:after {
+    box-sizing: content-box;
     content: "";
     content: none;
   }
   table {
+    box-sizing: content-box;
     border-collapse: collapse;
     border-spacing: 0;
   }
 
   // custom
   button {
+    box-sizing: content-box;
     outline: none;
     border: none;
     background-color: inherit;
@@ -140,6 +150,23 @@ $base-font-size: 1rem;
     margin: 0;
     &:hover {
       background-color: inherit;
+    }
+  }
+
+  a {
+    text-decoration: underline;
+
+    &:link {
+      color: inherit;
+    }
+    &:visited {
+      color: inherit;
+    }
+    &:hover {
+      color: inherit;
+    }
+    &:active {
+      color: inherit;
     }
   }
 }

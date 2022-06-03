@@ -1,0 +1,11 @@
+@use "../../common/styles/scss" as *;
+
+:global(.keekijanai-reset) {
+  .collapse-core-root {
+    overflow: hidden;
+
+    .collapse-content-wrapper {
+      height: 0;
+    }
+  }
+}

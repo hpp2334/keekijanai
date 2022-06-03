@@ -15,6 +15,17 @@
       top: 50%;
       cursor: default;
       user-select: none;
+      transition: transform 0.5s;
+
+      &.from {
+        transform: translateX(-50%) translateY(50%);
+      }
+      &.enter {
+        transform: translateX(-50%) translateY(-50%);
+      }
+      &.leave {
+        transform: translateX(-50%) translateY(-150%);
+      }
     }
   }
 }

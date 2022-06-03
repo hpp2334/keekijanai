@@ -2,12 +2,14 @@ import React from "react";
 import NiceModal from "@ebay/nice-modal-react";
 import { i18n, I18nContext } from "../i18n";
 import { useLayoutEffect } from "react";
-import { AuthContext } from "@/views";
+import { AuthContext, CodeGlobalContext } from "@/views";
 import { EMPTY_LIST, once } from "../helper";
 import { keekijanaiConfig } from "@keekijanai/frontend-core";
+import { CodeContainer, TinyCodeContainer } from "@/components";
 
 interface KeekijanaiProviderProps {
   queryRoute?: boolean;
+  codeContainer?: CodeContainer;
 }
 
 const initialize = once(() => {
@@ -24,7 +26,7 @@ const initialize = once(() => {
   }
 });
 
-export const KeekijanaiProvider: React.FC<KeekijanaiProviderProps> = ({ queryRoute, children }) => {
+export const KeekijanaiProvider: React.FC<KeekijanaiProviderProps> = ({ queryRoute, codeContainer, children }) => {
   keekijanaiConfig.queryRoute = queryRoute ?? false;
 
   console.debug("[KeekijanaiProvider]", { i18n });
@@ -36,7 +38,9 @@ export const KeekijanaiProvider: React.FC<KeekijanaiProviderProps> = ({ queryRou
   return (
     <I18nContext instance={i18n as any}>
       <AuthContext>
-        <NiceModal.Provider>{children}</NiceModal.Provider>
+        <NiceModal.Provider>
+          <CodeGlobalContext container={codeContainer ?? TinyCodeContainer}>{children}</CodeGlobalContext>
+        </NiceModal.Provider>
       </AuthContext>
     </I18nContext>
   );

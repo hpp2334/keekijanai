@@ -11,14 +11,33 @@ $size: 35px;
     cursor: pointer;
     transition: box-shadow 0.1s;
     font-size: 1.1em;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, color 0.2s;
 
     &.active {
       background-color: $primary;
-      color: $primary-text;
+      color: $primary-contrast-text;
+
+      &:hover {
+        background-color: $primary-dark;
+      }
     }
 
     &:hover {
-      box-shadow: 1px 1px 5px #ccc;
+      background-color: $grey-bg;
+    }
+
+    &.outlined {
+      &.active {
+        background-color: $primary-x-light;
+        color: $primary;
+
+        &:hover {
+          background-color: $primary-light;
+        }
+      }
     }
   }
 }

@@ -6,8 +6,8 @@ import { CommentPost } from "./CommentPost";
 import { useObservableEagerState } from "observable-hooks";
 import { firstValueFrom } from "rxjs";
 import { InternalCommentContext, useInternalCommentContext } from "./provider";
-import { CommentEditor } from "./components/CommentEditor";
-import React, { useCallback, useContext, useImperativeHandle, useMemo, useState } from "react";
+import { CommentEditor, CommentEditorMode } from "./CommentEditor";
+import React, { useCallback, useContext, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { CommentTime } from "./CommentTime";
 import { useRemote } from "@/common/hooks/useRemote";
 import { StateType } from "@/common/state";
@@ -18,6 +18,8 @@ import { useAuthService } from "../Auth/logic";
 import { withCSSBaseline } from "@/common/hoc/withCSSBaseline";
 import { composeHOC } from "@/common/hoc/composeHOC";
 import { injectCSS } from "@/common/styles";
+import { useGlobalService } from "../Global";
+import { nextFrame } from "@/common/helper";
 
 interface CommentInnerProps {
   maxHeight?: number;
@@ -55,8 +57,9 @@ const CommentLoadMoreButton = ({ handler }: { handler: () => Promise<unknown> })
 };
 
 const CommentBlock = ({ comment }: { comment: TreeComment }) => {
-  const content = comment.content;
+  const globalService = useGlobalService();
   const { t } = useTranslation("Comment");
+  const content = comment.content;
   const hasLeaves = comment.child_count > 0;
 
   const { toReply } = useContext(commentInnerContext);
@@ -74,7 +77,7 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
   }, [comment.id, service]);
 
   return (
-    <Stack spacing={1.5}>
+    <Stack spacing={4}>
       <Stack direction="row" spacing={2} alignItems="flex-start">
         <Avatar src={comment.user?.avatar_url}></Avatar>
         <Stack spacing={2}>
@@ -82,7 +85,7 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
             <CommentUserText>{comment.user?.name}</CommentUserText>
             <CommentTime timestamp={comment.created_time} />
           </Stack>
-          <CommentEditor initialValue={content} mode="read" />
+          <CommentEditor initialValue={content} mode={CommentEditorMode.Read} />
           <Stack direction="row" spacing={3}>
             <CommentButton onClick={handleClickReply}>{t("block.panel.reply")}</CommentButton>
             {service.canRemove(comment) && (
@@ -165,7 +168,7 @@ const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
   return (
     <div>
       {hasComments && (
-        <Stack spacing={2}>
+        <Stack spacing={4}>
           {commentTree.data.map((comment) => (
             <CommentBlock key={comment.id} comment={comment} />
           ))}
@@ -183,7 +186,7 @@ const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
 
 const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   const { t } = useTranslation("Comment");
-  const { commentService } = useInternalCommentContext();
+  const { commentService, commentPostElRef, scrollToPost } = useInternalCommentContext();
   const authService = useAuthService();
 
   const commentTree = useObservableEagerState(commentService.commentTree$);
@@ -211,11 +214,12 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
           expand: true,
           refComment: params.refComment,
         });
+        scrollToPost();
       } else {
         showAuthModal();
       }
     },
-    [authService]
+    [authService, scrollToPost]
   );
 
   const ctxValue = useMemo(
@@ -259,6 +263,7 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
             expand={commentPostState.expand}
             onExpandChange={handleCommentPostExpandChange}
             refComment={commentPostState.refComment}
+            refRoot={commentPostElRef}
           />
         </Stack>
       </commentInnerContext.Provider>

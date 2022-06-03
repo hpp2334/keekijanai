@@ -8,5 +8,7 @@
   "loadmore": "Load more...",
   "remove.confirm.content": "Confirm to remove this comment?",
   "remove.confirm.button.cancel": "Cancel",
-  "remove.confirm.button.ok": "Confirm"
+  "remove.confirm.button.ok": "Confirm",
+  "editor.action.post": "Post",
+  "editor.action.cancel": "Cancel"
 }

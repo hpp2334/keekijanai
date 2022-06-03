@@ -5,6 +5,7 @@ import MenuItemUnstyled, { MenuItemUnstyledProps } from "@mui/base/MenuItemUnsty
 import PopperUnstyled, { PopperUnstyledProps } from "@mui/base/PopperUnstyled";
 import { injectCSS } from "@/common/styles";
 import React, { useMemo } from "react";
+import { CollapseCore } from "./transitions/CollapseCore";
 
 export interface MenuItemProps extends MenuItemUnstyledProps {}
 
@@ -26,7 +27,10 @@ export const MenuItem = React.forwardRef<any, MenuItemProps>(function MenuItem(p
   return <StyledMenuItem ref={ref} {...props} />;
 });
 
-export const Menu = React.forwardRef<any, MenuProps>(function Menu({ placement, children, ...leftProps }, ref) {
+export const Menu = React.forwardRef<any, MenuProps>(function Menu(
+  { placement, children, anchorEl, ...leftProps },
+  ref
+) {
   const componentsProps = useMemo(
     () => ({
       root: {
@@ -37,8 +41,14 @@ export const Menu = React.forwardRef<any, MenuProps>(function Menu({ placement, 
   );
 
   return (
-    <RootMenu ref={ref} {...leftProps} components={menuComponents} componentsProps={componentsProps}>
-      {children}
+    <RootMenu
+      ref={ref}
+      {...leftProps}
+      anchorEl={anchorEl}
+      components={menuComponents}
+      componentsProps={componentsProps}
+    >
+      <CollapseCore expand={Boolean(anchorEl)}>{children}</CollapseCore>
     </RootMenu>
   );
 });

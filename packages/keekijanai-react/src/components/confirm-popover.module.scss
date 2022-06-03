@@ -4,11 +4,16 @@
   &.confirm-popover-root {
     .confirm-popover-container {
       background-color: white;
-      box-shadow: 0 0 2px 2px $grey-300;
+      box-shadow: 0 0 4px 0px $grey-400;
       border-radius: 0.25em;
 
       .confirm-popover-content {
         padding: spacing(1.5);
+      }
+
+      .ok-button {
+        border-bottom-left-radius: 0;
+        border-top-right-radius: 0;
       }
     }
   }

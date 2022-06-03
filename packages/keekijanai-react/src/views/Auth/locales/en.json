@@ -1,6 +1,8 @@
 {
   "modal.title": "Continue With...",
   "oauth2.auth-with": "Continue with %s",
-  "oauth2.callback": "Login successfully. You will back to home after %d seconds.",
+  "oauth2.callback.title": "Login successfully",
+  "oauth2.callback.content": "You will back to home after %d seconds.",
+  "oauth2.callback.actions.go-now": "Go Now",
   "logout": "Sign Out"
 }
