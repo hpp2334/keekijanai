@@ -2,12 +2,18 @@ use sea_query::{Expr, PostgresQueryBuilder, Query};
 
 use super::model::{User, UserActiveModel, UserModel, UserModelColumns};
 use crate::{
-    core::{db::get_pool, ServeResult, Service},
+    core::{db::get_pool, di::DIComponent, ServeResult, Service},
     modules::user::model::UserRole,
 };
 
 #[derive(Debug)]
 pub struct UserService;
+
+impl DIComponent for UserService {
+    fn build(container: &crate::core::di::DIContainer) -> Self {
+        Self {}
+    }
+}
 
 impl Service for UserService {
     fn serve() -> Self {

@@ -54,12 +54,15 @@ impl<T: Clone> ActiveColumn<T> {
     }
 }
 
-impl<T> From<Option<T>> for ActiveColumn<T> {
+impl<T, U> From<Option<T>> for ActiveColumn<U>
+where
+    U: From<T>,
+{
     fn from(value: Option<T>) -> Self {
         return if value.is_none() {
             ActiveColumn::Unset
         } else {
-            ActiveColumn::Set(value.unwrap())
+            ActiveColumn::Set(value.unwrap().into())
         };
     }
 }

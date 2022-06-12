@@ -1,4 +1,4 @@
-use crate::core::{ServeError, Service};
+use crate::core::{di::DIContainer, ServeError, Service};
 use axum::{response::IntoResponse, routing, Json, Router};
 use serde::Serialize;
 
@@ -12,7 +12,7 @@ struct GetTimeResponse {
 }
 
 async fn time() -> Result<impl IntoResponse, ServeError> {
-    let time_service = TimeService::serve();
+    let time_service = DIContainer::get().resolve::<TimeService>();
     let timestamp = time_service.now().await?;
     let time = timestamp.as_millis();
     return Ok(Json(GetTimeResponse {

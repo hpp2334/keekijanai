@@ -69,7 +69,7 @@ pub struct User {
     pub email: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct UserVO {
     pub id: i64,
     pub name: String,

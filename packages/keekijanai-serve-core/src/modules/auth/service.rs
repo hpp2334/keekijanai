@@ -1,5 +1,5 @@
 use crate::{
-    core::{setting::SETTING, ServeResult, Service},
+    core::{di::DIContainer, setting::SETTING, ServeResult, Service},
     modules::{
         time::service::TimeService,
         user::{
@@ -64,7 +64,9 @@ impl AuthService {
         let user = UserService::serve()
             .get_by_provider(service, user_profile.id.to_string().as_str())
             .await?;
-        let time = TimeService::serve().now().await?.as_millis();
+
+        let time_service = DIContainer::get().resolve::<TimeService>();
+        let time = time_service.now().await?.as_millis();
         let id = user.as_ref().map(|u| u.id);
         let mut user_active_model: UserActiveModel = if user.is_none() {
             let model: UserActiveModel = UserActiveModel {
@@ -104,7 +106,7 @@ impl AuthService {
     }
 
     pub async fn encode_to_token(&self, user_id: i64) -> ServeResult<String> {
-        let time_service = TimeService::serve();
+        let time_service = DIContainer::get().resolve::<TimeService>();
         let secret = &SETTING.get().unwrap().auth.secret;
         let claims = Claims {
             exp: (time_service.now().await?.as_secs() as usize) + 86400,

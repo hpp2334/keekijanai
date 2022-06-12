@@ -30,7 +30,7 @@ pub async fn init() {
         return;
     }
 
-    crate::core::setting::Setting::init();
+    crate::core::setting::init_setting().unwrap();
     crate::core::db::init_pool().await.unwrap();
 }
 

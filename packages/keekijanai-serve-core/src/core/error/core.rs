@@ -85,5 +85,6 @@ macro_rules! impl_from_any_for_serve_err {
 impl_from_any_for_serve_err! {
     sqlx::Error,
     reqwest::Error,
-    jsonwebtoken::errors::Error
+    jsonwebtoken::errors::Error,
+    derive_builder::UninitializedFieldError
 }

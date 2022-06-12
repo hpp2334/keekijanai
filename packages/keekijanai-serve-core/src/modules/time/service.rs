@@ -1,15 +1,14 @@
 use std::time::Duration;
 
-use crate::core::{ServeResult, Service};
+use crate::core::{di::DIComponent, ServeResult, Service};
 
+#[derive(Debug)]
 pub struct TimeService;
 
-impl Service for TimeService {
-    fn serve() -> Self {
+impl DIComponent for TimeService {
+    fn build(container: &crate::core::di::DIContainer) -> Self {
         Self {}
     }
-
-    fn init() {}
 }
 
 impl TimeService {
