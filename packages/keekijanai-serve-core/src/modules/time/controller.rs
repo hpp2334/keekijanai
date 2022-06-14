@@ -13,7 +13,7 @@ struct GetTimeResponse {
 
 async fn time() -> Result<impl IntoResponse, ServeError> {
     let time_service = DIContainer::get().resolve::<TimeService>();
-    let timestamp = time_service.now().await?;
+    let timestamp = time_service.now_timestamp().await?;
     let time = timestamp.as_millis();
     return Ok(Json(GetTimeResponse {
         time: time.to_string(),

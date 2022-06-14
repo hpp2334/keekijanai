@@ -66,7 +66,7 @@ impl AuthService {
             .await?;
 
         let time_service = DIContainer::get().resolve::<TimeService>();
-        let time = time_service.now().await?.as_millis();
+        let time = time_service.now_timestamp().await?.as_millis();
         let id = user.as_ref().map(|u| u.id);
         let mut user_active_model: UserActiveModel = if user.is_none() {
             let model: UserActiveModel = UserActiveModel {
@@ -109,7 +109,7 @@ impl AuthService {
         let time_service = DIContainer::get().resolve::<TimeService>();
         let secret = &SETTING.get().unwrap().auth.secret;
         let claims = Claims {
-            exp: (time_service.now().await?.as_secs() as usize) + 86400,
+            exp: (time_service.now_timestamp().await?.as_secs() as usize) + 86400,
             user_id,
         };
         let token = jsonwebtoken::encode(

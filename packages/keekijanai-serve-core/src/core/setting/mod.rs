@@ -42,6 +42,10 @@ fn build_setting() -> Result<Setting, anyhow::Error> {
     anyhow::bail!("No config found in config file and env");
 }
 
+pub fn get_setting() -> anyhow::Result<&'static Setting> {
+    SETTING.get().ok_or(anyhow::anyhow!("setting not set"))
+}
+
 pub fn init_setting() -> anyhow::Result<()> {
     let setting = build_setting()?;
     SETTING

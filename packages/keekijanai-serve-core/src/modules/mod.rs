@@ -1,16 +1,13 @@
 pub mod auth;
 pub mod comment;
+pub mod notification;
 pub mod ping;
 pub mod star;
 pub mod stat;
 pub mod time;
 pub mod user;
 
-
-
 use axum::Router;
-
-
 
 pub(crate) fn get_router() -> Router {
     Router::new()

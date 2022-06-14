@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::time::{Duration, SystemTime};
 
 use crate::core::{di::DIComponent, ServeResult, Service};
 
@@ -12,7 +12,12 @@ impl DIComponent for TimeService {
 }
 
 impl TimeService {
-    pub async fn now(&self) -> ServeResult<Duration> {
+    pub fn now(&self) -> SystemTime {
+        let time = std::time::SystemTime::now();
+        time
+    }
+
+    pub async fn now_timestamp(&self) -> ServeResult<Duration> {
         let time = std::time::SystemTime::now();
         let timestamp = time
             .duration_since(std::time::SystemTime::UNIX_EPOCH)

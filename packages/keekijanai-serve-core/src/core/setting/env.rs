@@ -1,7 +1,9 @@
 use serde::Deserialize;
 
-use super::core::Github;
+use crate::modules::notification;
+
 pub use super::core::{Admin, AdminUser, AdminUsers, Auth, Database, Environment, Setting};
+use super::core::{Github, Notification, NotificationTelegram};
 
 #[derive(Debug, Deserialize)]
 pub struct EnvSetting {
@@ -13,6 +15,8 @@ pub struct EnvSetting {
     pub github_secret: Option<String>,
     pub redirect: Option<String>,
     pub admin_users: Option<EnvAdminUsers>,
+    pub telegram_token: Option<String>,
+    pub telegram_chat_id: Option<i64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -61,11 +65,27 @@ impl TryInto<Setting> for EnvSetting {
 
         let environment = Environment::parse(self.environment)?;
 
+        let mut notification = Notification::default();
+
+        #[cfg(feature = "telegram")]
+        if self.telegram_chat_id.is_some() || self.telegram_token.is_some() {
+            let token = self
+                .telegram_token
+                .ok_or(anyhow::anyhow!("telegram_token is null"))?;
+            let chat_id = self
+                .telegram_chat_id
+                .ok_or(anyhow::anyhow!("telegram_chat_id is null"))?;
+
+            let telegram = NotificationTelegram { token, chat_id };
+            notification.telegram = Some(telegram);
+        }
+
         Ok(Setting {
             auth,
             admin,
             environment,
             database,
+            notification,
         })
     }
 }

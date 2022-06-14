@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 
+use crate::modules::notification::enforcers::NotificationPayload;
+use crate::modules::notification::NotificationService;
+use crate::modules::user::model::User;
 use crate::{
     core::{
         build_cursor_list,
@@ -24,16 +27,20 @@ pub struct ListCommentCursorPagination {
     pub limit: i32,
 }
 
-#[derive(Debug)]
 pub struct CommentService {
     storage: CommentStorage,
+    notification_service: NotificationService,
 }
 
 impl DIComponent for CommentService {
     fn build(container: &DIContainer) -> Self {
         let storage = container.resolve::<CommentStorage>();
+        let notification_service = container.resolve::<NotificationService>();
 
-        Self { storage }
+        Self {
+            storage,
+            notification_service,
+        }
     }
 }
 
@@ -126,6 +133,9 @@ impl CommentService {
 
         let comment = self.storage.create(comment).await?;
 
+        self.notification_service
+            .notify(user_info, "create comment", &comment.content);
+
         Ok(comment)
     }
 
@@ -147,7 +157,7 @@ impl CommentService {
     pub async fn remove(&self, user_info: &UserInfo, id: CommentId) -> ServeResult<()> {
         let comment = self.get(id).await?;
         let authorization = DIContainer::get().resolve::<CommentAuthorization>();
-        authorization.check_remove(user_info, &comment);
+        authorization.check_remove(user_info, &comment).await?;
 
         self.storage.remove(comment).await?;
 

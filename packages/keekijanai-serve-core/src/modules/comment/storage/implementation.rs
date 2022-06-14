@@ -157,7 +157,7 @@ SELECT * from keekijanai_comment
     pub async fn create(&self, comment: CommentCreate) -> ServeResult<Comment> {
         let mut comment: CommentActiveModel = comment.into();
 
-        let now = self.time_service.now().await?.as_millis() as i64;
+        let now = self.time_service.now_timestamp().await?.as_millis() as i64;
         comment.created_time.set(now);
         comment.updated_time.set(now);
 
@@ -197,7 +197,7 @@ WHERE id = $1;
     pub async fn update(&self, id: CommentId, comment: CommentUpdate) -> ServeResult<Comment> {
         let mut comment: CommentActiveModel = comment.into();
 
-        let now = self.time_service.now().await?.as_millis() as i64;
+        let now = self.time_service.now_timestamp().await?.as_millis() as i64;
         comment.updated_time.set(now);
 
         let conn = get_pool();

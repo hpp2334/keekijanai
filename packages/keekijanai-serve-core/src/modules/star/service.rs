@@ -4,6 +4,8 @@ use num_traits::{FromPrimitive, ToPrimitive};
 
 use sea_query::PostgresQueryBuilder;
 
+use crate::core::di::{DIComponent, DIContainer};
+use crate::modules::notification::NotificationService;
 use crate::{
     core::{db::get_pool, ServeResult, Service},
     modules::{
@@ -37,19 +39,23 @@ pub struct StarGroupedDetail {
     total: i64,
 }
 
-pub struct StarService;
+pub struct StarService {
+    notification_service: NotificationService,
+}
 
-impl Service for StarService {
-    fn serve() -> Self {
-        StarService {}
+impl DIComponent for StarService {
+    fn build(container: &DIContainer) -> Self {
+        let notification_service = container.resolve::<NotificationService>();
+
+        Self {
+            notification_service,
+        }
     }
-
-    fn init() {}
 }
 
 impl StarService {
     pub async fn update_star_by_belong_and_star_type(
-        &mut self,
+        &self,
         user_info: &UserInfo,
         belong: &str,
         star_type: &i16,
@@ -64,7 +70,7 @@ impl StarService {
     }
 
     pub async fn update_star(
-        &mut self,
+        &self,
         user_info: &UserInfo,
         payload: &StarActiveModel,
     ) -> ServeResult<()> {
@@ -72,9 +78,9 @@ impl StarService {
 
         let conn = get_pool();
 
+        let star_type = payload.star_type.clone().unwrap();
         if payload.id.is_unset() {
             let (columns, values) = payload.get_set_columns();
-            let star_type = payload.star_type.clone().unwrap();
             let mut sql = sea_query::Query::insert()
                 .into_table(StarModelColumns::Table)
                 .columns(columns)
@@ -96,6 +102,9 @@ impl StarService {
             let result = sqlx::query(sql.as_str()).execute(&conn).await?;
             tracing::info!("{:?}", result);
         }
+
+        self.notification_service
+            .notify(user_info, "update star", format!("to {}", star_type));
 
         return Ok(());
     }

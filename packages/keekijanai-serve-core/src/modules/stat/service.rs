@@ -17,7 +17,7 @@ impl StatService {
     pub async fn visit(&self, belong: &str, uuid: &str) -> ServeResult<(i64, i64)> {
         let pool = get_pool();
         let time_service = DIContainer::get().resolve::<TimeService>();
-        let now = time_service.now().await?.as_millis() as i64;
+        let now = time_service.now_timestamp().await?.as_millis() as i64;
 
         let _sql_res = sqlx::query!(
             r#"

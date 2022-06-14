@@ -40,12 +40,26 @@ pub struct Admin {
     pub users: AdminUsers,
 }
 
+#[cfg(feature = "telegram")]
+#[derive(Debug)]
+pub struct NotificationTelegram {
+    pub token: String,
+    pub chat_id: i64,
+}
+
+#[derive(Debug, Default)]
+pub struct Notification {
+    #[cfg(feature = "telegram")]
+    pub telegram: Option<NotificationTelegram>,
+}
+
 #[derive(Debug)]
 pub struct Setting {
     pub environment: Environment,
     pub auth: Auth,
     pub database: Database,
     pub admin: Admin,
+    pub notification: Notification,
 }
 
 impl Environment {

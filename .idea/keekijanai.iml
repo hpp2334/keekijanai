@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="CPP_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/packages/keekijanai-serve-core/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/keekijanai-serve-macro/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/keekijanai-serve-node-wrapper/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/packages/keekijanai-serve-rust-server-demo/src" isTestSource="false" />
+      <excludeFolder url="file://$MODULE_DIR$/target" />
+      <excludeFolder url="file://$MODULE_DIR$/packages/keekijanai-serve-core/target" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

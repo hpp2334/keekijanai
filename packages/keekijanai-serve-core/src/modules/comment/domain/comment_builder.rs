@@ -12,7 +12,6 @@ use crate::{
 
 use super::CommentDomain;
 
-#[derive(Debug)]
 pub struct CommentDomainBuilder {
     comment_service: CommentService,
     user_service: UserService,

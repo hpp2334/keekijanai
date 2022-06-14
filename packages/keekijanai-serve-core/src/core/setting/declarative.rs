@@ -1,6 +1,7 @@
 use serde::Deserialize;
 
 pub use super::core::{Admin, AdminUser, AdminUsers, Auth, Database, Environment, Setting};
+use super::core::{Notification, NotificationTelegram};
 
 #[derive(Debug, Deserialize)]
 pub struct DeclarativeAdminUser(String);
@@ -14,12 +15,39 @@ pub struct DeclarativeAdmin {
     pub users: DeclarativeAdminUsers,
 }
 
+#[cfg(feature = "telegram")]
+#[derive(Debug, Deserialize)]
+pub struct DeclarativeNotificationTelegram {
+    token: String,
+    chat_id: i64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DeclarativeNotification {
+    #[cfg(feature = "telegram")]
+    pub telegram: Option<DeclarativeNotificationTelegram>,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct DeclarativeSetting {
     pub environment: Option<&'static str>,
     pub auth: Auth,
     pub database: Database,
     pub admin: Option<DeclarativeAdmin>,
+    pub notification: Option<DeclarativeNotification>,
+}
+
+#[cfg(feature = "telegram")]
+impl TryInto<NotificationTelegram> for DeclarativeNotificationTelegram {
+    type Error = anyhow::Error;
+
+    fn try_into(self) -> Result<NotificationTelegram, Self::Error> {
+        let res = NotificationTelegram {
+            token: self.token,
+            chat_id: self.chat_id,
+        };
+        Ok(res)
+    }
 }
 
 impl TryInto<AdminUser> for DeclarativeAdminUser {
@@ -45,6 +73,20 @@ impl TryInto<Admin> for DeclarativeAdmin {
     }
 }
 
+impl TryInto<Notification> for DeclarativeNotification {
+    type Error = anyhow::Error;
+
+    fn try_into(self) -> Result<Notification, Self::Error> {
+        #[cfg(feature = "telegram")]
+        let telegram = self.telegram.map(TryInto::try_into).transpose()?;
+
+        Ok(Notification {
+            #[cfg(feature = "telegram")]
+            telegram,
+        })
+    }
+}
+
 impl TryInto<Setting> for DeclarativeSetting {
     type Error = anyhow::Error;
 
@@ -56,11 +98,18 @@ impl TryInto<Setting> for DeclarativeSetting {
             Admin::default()
         };
 
+        let notification = if let Some(notification) = self.notification {
+            notification.try_into()?
+        } else {
+            Notification::default()
+        };
+
         Ok(Setting {
             environment,
             admin,
             auth: self.auth,
             database: self.database,
+            notification,
         })
     }
 }

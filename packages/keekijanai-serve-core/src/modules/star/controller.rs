@@ -3,7 +3,7 @@ use num_traits::ToPrimitive;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{ServeError, Service},
+    core::{di::DIContainer, ServeError, Service},
     modules::auth::UserInfo,
 };
 
@@ -35,18 +35,21 @@ async fn get_star(
     Query(GetStarQuery { belong }): Query<GetStarQuery>,
 ) -> Result<impl IntoResponse, ServeError> {
     tracing::debug!("before get_current");
+
+    let star_service = DIContainer::get().resolve::<StarService>();
+
     let current = if user_info.is_anonymous() {
         None
     } else {
-        StarService::serve()
+        star_service
             .get_current(&user_info, belong.clone())
             .await
             .map(|s| Some(s))?
     };
     let current = current.map(|s| ToPrimitive::to_i16(&s).unwrap());
-    tracing::debug!("get_current (curret = {:?})", current);
+    tracing::debug!("get_current (current = {:?})", current);
     tracing::debug!("before get_total");
-    let total = StarService::serve().get_total(belong.as_str()).await?;
+    let total = star_service.get_total(belong.as_str()).await?;
     tracing::debug!("get_total (total = {})", total);
 
     Ok(Json(GetStarResponse { current, total }))
@@ -57,7 +60,8 @@ async fn update_star(
     Query(UpdateStarQuery { belong }): Query<UpdateStarQuery>,
     Json(req_body): Json<UpdateStarReqPayload>,
 ) -> Result<impl IntoResponse, ServeError> {
-    StarService::serve()
+    let star_service = DIContainer::get().resolve::<StarService>();
+    star_service
         .update_star_by_belong_and_star_type(&user_info, belong.as_str(), &req_body.star_type)
         .await?;
 
