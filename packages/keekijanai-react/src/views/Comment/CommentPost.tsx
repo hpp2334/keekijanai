@@ -3,15 +3,17 @@ import React, { useCallback, useMemo, useRef } from "react";
 import { CommentEditor } from "./CommentEditor";
 import { useTranslation } from "@/common/i18n";
 import { nextFrame, useRefreshToken } from "@/common/helper";
-import { switchTap, TreeComment } from "@keekijanai/frontend-core";
+import { CommentTree, switchTap } from "@keekijanai/frontend-core";
 import { firstValueFrom } from "rxjs";
 import { sprintf } from "sprintf-js";
 import { useInternalCommentContext } from "./provider";
 import { injectCSS } from "@/common/styles";
 import { useGlobalService } from "../Global";
+import { deserializeToValue } from "./editor";
+import { toPlainText } from "./editor/util";
 
 export interface CommentPostProps {
-  refComment?: TreeComment;
+  refComment?: CommentTree;
   refRoot?: React.RefObject<HTMLDivElement>;
   defaultExpand?: boolean;
   expand?: boolean;
@@ -25,9 +27,14 @@ export const CommentPost = ({ ...props }: CommentPostProps) => {
   const [_token, refreshToken] = useRefreshToken();
   const { commentService: service, scrollToPost } = useInternalCommentContext();
 
-  const placeholder = props.refComment
-    ? sprintf(t("post.reply.placeholder"), props.refComment.user?.name)
-    : t("post.create.placeholder");
+  const placeholder = useMemo(() => {
+    if (!props.refComment) {
+      return t("post.create.placeholder");
+    }
+    const deValue = deserializeToValue(props.refComment.data.content);
+    const plainText = toPlainText(deValue);
+    return sprintf(t("post.reply.placeholder"), props.refComment.data.user?.name, plainText);
+  }, [props.refComment, t]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const isControlled = useMemo(() => props.expand !== undefined, []);
@@ -62,7 +69,8 @@ export const CommentPost = ({ ...props }: CommentPostProps) => {
           {
             content: value,
           },
-          props.refComment ?? null
+          props.refComment ?? null,
+          !props.refComment ? null : props.refComment.isRoot ? props.refComment : props.refComment.parent
         )
         .pipe(
           switchTap(() => {

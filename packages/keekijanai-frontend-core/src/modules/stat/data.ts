@@ -1,4 +1,4 @@
-export type { VisitRespPayload } from "@/generated/keekijanai-api";
+export type { VisitRespPayload } from "@/vos/keekijanai-api";
 
 export interface Visit {
   pv: number;

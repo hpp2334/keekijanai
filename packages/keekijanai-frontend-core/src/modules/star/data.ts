@@ -1,4 +1,4 @@
-import type * as ApiTypes from "@/generated/keekijanai-api";
+import type * as ApiTypes from "@/vos/keekijanai-api";
 import type { O } from "ts-toolbelt";
 
 export const enum StarType {
@@ -19,4 +19,4 @@ export type UpdateStarReqPayload = O.Overwrite<
   }
 >;
 
-export type { GetStarResponse } from "@/generated/keekijanai-api";
+export type { GetStarResponse } from "@/vos/keekijanai-api";

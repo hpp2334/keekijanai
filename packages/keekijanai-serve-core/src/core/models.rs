@@ -7,7 +7,7 @@ pub enum CursorDirection {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-struct _SerdeCursorPaginationListItem<T: Clone, C: Clone> {
+pub struct SerdeCursorPaginationListItem<T: Clone, C: Clone> {
     pub payload: T,
     pub cursor: C,
 }
@@ -19,7 +19,7 @@ pub struct CursorPaginationListItem<T: Clone, C: Clone> {
 }
 
 impl<T: Clone, C: Clone> From<CursorPaginationListItem<T, C>>
-    for _SerdeCursorPaginationListItem<T, C>
+    for SerdeCursorPaginationListItem<T, C>
 {
     fn from(v: CursorPaginationListItem<T, C>) -> Self {
         Self {
@@ -29,10 +29,10 @@ impl<T: Clone, C: Clone> From<CursorPaginationListItem<T, C>>
     }
 }
 
-impl<T: Clone, C: Clone> From<_SerdeCursorPaginationListItem<T, C>>
+impl<T: Clone, C: Clone> From<SerdeCursorPaginationListItem<T, C>>
     for CursorPaginationListItem<T, C>
 {
-    fn from(v: _SerdeCursorPaginationListItem<T, C>) -> Self {
+    fn from(v: SerdeCursorPaginationListItem<T, C>) -> Self {
         Self {
             payload: v.payload,
             cursor: v.cursor,
@@ -42,7 +42,7 @@ impl<T: Clone, C: Clone> From<_SerdeCursorPaginationListItem<T, C>>
 
 #[derive(Debug, Serialize, Deserialize)]
 struct _SerdeCursorPagination<T: Clone, C: Clone> {
-    pub list: Vec<_SerdeCursorPaginationListItem<T, C>>,
+    pub list: Vec<SerdeCursorPaginationListItem<T, C>>,
     pub end_cursor: Option<C>,
     pub has_more: bool,
     pub total: i64,

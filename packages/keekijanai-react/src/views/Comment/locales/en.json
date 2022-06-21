@@ -2,7 +2,7 @@
   "header": "Comment",
   "empty.title": "No comment yet",
   "post.create.placeholder": "Write some comment...",
-  "post.reply.placeholder": "Reply user \"%s\" with...",
+  "post.reply.placeholder": "user \"%s\":\n%s",
   "block.panel.reply": "Reply",
   "block.panel.remove": "Remove",
   "loadmore": "Load more...",

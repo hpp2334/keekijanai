@@ -49,7 +49,7 @@ impl IntoResponse for ServeError {
     fn into_response(mut self) -> axum::response::Response {
         if self.source.is_some() {
             let native_err = self.source.take().unwrap();
-            tracing::error!("source error {}", native_err);
+            tracing::error!("{:?}", native_err);
         }
         let status = self.status.clone();
         let code = self.code.clone();

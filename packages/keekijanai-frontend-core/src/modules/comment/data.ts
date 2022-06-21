@@ -1,41 +1,72 @@
-import { CursorListParams, CursorListRespPayload } from "@/core/request";
-export type {
-  CreateCommentParams,
-  CreateCommentRespPayload,
-  CommentVO,
-  CommentActiveModel,
-  GetCommentTreeRespPayload,
-  ListCommentRespPayload,
-} from "@/generated/keekijanai-api";
+import { CursorDirection, CursorPagination, CursorPaginationListItem, UserVO } from "@/vos";
 
-import type { CommentVO, UserVO } from "@/generated/keekijanai-api";
-
-export type StyledCommentVO = CommentVO & { user: UserVO | null };
-
-export type ListCommentQuery = CursorListParams<{
-  user_id?: number;
-  parent_id?: number;
+export interface ReferenceCommentVO {
+  id: number;
   belong: string;
-}>;
+  user: UserVO;
+  content: string;
+}
 
-export type GetTreeCommentQuery = {
+export interface CommentVO {
+  id: number;
+  belong: string;
+  user: UserVO;
+  content: string;
+  reference_comment: ReferenceCommentVO | null;
+  parent_id: number | null;
+  child_count: number;
+  can_remove: boolean;
+
+  created_time: number;
+  updated_time: number;
+}
+
+export interface CommentCreateVO {
+  belong: string;
+  content: string;
+  reference_id: number | null;
+  parent_id: number | null;
+}
+
+export interface CommentUpdateVO {
+  content: string;
+}
+
+export interface CreateCommentParams {
+  payload: CommentCreateVO;
+}
+
+export interface CreateCommentRespPayload {
+  payload: CursorPaginationListItem<CommentVO, number>;
+}
+
+export interface UpdateCommentParams {
+  payload: CommentUpdateVO;
+}
+
+export interface UpdateCommentRespPayload {
+  payload: CursorPaginationListItem<CommentVO, number>;
+}
+
+export interface ListCommentQuery {
+  belong: string;
+  parent_id: number | null;
+  cursor_id: number | null;
+  cursor_direction: CursorDirection;
+  limit: number;
+}
+
+export interface GetCommentTreeQuery {
   belong: string;
   roots_limit: number;
   leaves_limit: number;
-  cursor: number | null;
-};
-
-export type TreeComment = Omit<StyledCommentVO, "parent_id"> & {
-  parent: TreeComment | null;
-  children: CommentTree;
-};
-export type CommentTree = CursorListRespPayload<TreeComment>;
-
-export interface CommentToCreate {
-  belong: string;
-  content: string;
-  reference_id?: number;
-  parent_id: number;
+  cursor_id: number | null;
 }
 
-export const NONE_ROOT_PARENT_ID = -1;
+export interface GetCommentTreeRespPayload {
+  payload: CursorPagination<CommentVO, number>;
+}
+
+export interface ListCommentRespPayload {
+  payload: CursorPagination<CommentVO, number>;
+}

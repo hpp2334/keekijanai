@@ -75,4 +75,18 @@
   .comment-remove-content-container {
     padding: #{spacing(1)} #{spacing(2)};
   }
+
+  .reference-comment-root {
+    padding-left: spacing(2);
+    border-left: 3px solid $grey-400;
+    color: $grey-400;
+
+    .user-name {
+      margin-bottom: spacing(2);
+      font-weight: 700;
+    }
+
+    .content {
+    }
+  }
 }

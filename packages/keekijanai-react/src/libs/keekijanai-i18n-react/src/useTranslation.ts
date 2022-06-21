@@ -4,7 +4,7 @@ import { useRefresh } from "./util";
 
 export function useTranslation(namespace: string) {
   const instance = useInternalI18nInstance();
-  const [, refresh] = useRefresh();
+  const [token, refresh] = useRefresh();
   console.debug("[useTranslation]", { namespace, instance });
 
   const t = useCallback(
@@ -12,7 +12,8 @@ export function useTranslation(namespace: string) {
       const content = instance.getContent(namespace, key);
       return content;
     },
-    [instance, namespace]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [instance, namespace, token]
   );
 
   useEffect(() => {

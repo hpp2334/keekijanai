@@ -27,6 +27,7 @@ export const useRemote = <ARGS extends any[], R>(remoteFn: (...args: ARGS) => Pr
         });
       })
       .catch((err) => {
+        console.error(err);
         setState({
           type: StateType.Failed,
           data: null,

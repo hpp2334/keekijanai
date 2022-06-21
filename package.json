@@ -8,6 +8,7 @@
     "prepare": "husky install",
     "build:fe": "turbo run build:prod",
     "build:node-wrapper": "sh ./scripts/build-node-wrapper/run.sh",
+    "build:serve-core": "cargo build -p keekijanai-serve-core",
     "test:build-ssr": "cd ./packages/keekijanai-gatsby-vercel-demo && pnpm run build",
     "run:node-server": "node ./packages/keekijanai-serve-node-server-demo/src/index.js",
     "run:rust-server": "cargo run -p keekijanai-serve-rust-server-demo",

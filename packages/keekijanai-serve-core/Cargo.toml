@@ -8,7 +8,7 @@ license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sqlx = { version = "0.5", features = [ "runtime-tokio-native-tls", "macros", "postgres", "time", "offline" ] }
+sqlx = { version = "0.5", features = ["runtime-tokio-native-tls", "macros", "postgres", "time", "offline"] }
 rustls = "0.20.2"
 tokio = { version = "1", features = ["full"] }
 sea-query = "^0"
@@ -19,7 +19,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 qstring = "0.7.2"
 url = "2.2.2"
-anyhow = { version = "1.0", features = [ "backtrace" ] }
+anyhow = { version = "1.0", features = ["backtrace"] }
 async-trait = "0.1"
 chrono = "0.4"
 hyper = { version = "0.14", features = ["full"] }
@@ -41,6 +41,8 @@ tower-http = { version = "0.2", features = ["trace"] }
 derive_builder = "0.11.2"
 teloxide = { version = "0.9.2", optional = true }
 keekijanai-serve-macro = { version = "0.1.0-alpha.0", path = "../keekijanai-serve-macro" }
+
+
 
 [features]
 default = ["telegram"]

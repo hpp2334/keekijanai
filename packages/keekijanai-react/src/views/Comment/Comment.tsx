@@ -1,5 +1,12 @@
 import styles from "./comment.module.scss";
-import { CommentService, CommentTree, CommentVO, noop, TreeComment } from "@keekijanai/frontend-core";
+import {
+  CommentService,
+  CommentVO,
+  CommentTree,
+  CommentTreeRoot,
+  noop,
+  ReferenceCommentVO,
+} from "@keekijanai/frontend-core";
 import { Typography, Avatar, Button, Stack } from "@/components";
 import { useAutoUpdateResource, useTranslation } from "@/common/i18n";
 import { CommentPost } from "./CommentPost";
@@ -20,6 +27,8 @@ import { composeHOC } from "@/common/hoc/composeHOC";
 import { injectCSS } from "@/common/styles";
 import { useGlobalService } from "../Global";
 import { nextFrame } from "@/common/helper";
+import { useUncachedObservableEagerState } from "@/common/hooks/useObservable";
+import clsx from "clsx";
 
 interface CommentInnerProps {
   maxHeight?: number;
@@ -40,7 +49,7 @@ const CommentButton = injectCSS("button", styles.commentButton);
 const RemoveCommentContentContainer = injectCSS("div", styles.commentRemoveContentContainer);
 
 const commentInnerContext = React.createContext<{
-  toReply: (params: { refComment?: TreeComment }) => void;
+  toReply: (params: { refComment?: CommentTree }) => void;
 }>({
   toReply: noop,
 });
@@ -56,9 +65,28 @@ const CommentLoadMoreButton = ({ handler }: { handler: () => Promise<unknown> })
   );
 };
 
-const CommentBlock = ({ comment }: { comment: TreeComment }) => {
-  const globalService = useGlobalService();
+const ReferenceCommentBlock = ({
+  referenceComment,
+  className,
+}: {
+  referenceComment: ReferenceCommentVO;
+  className?: string;
+}) => {
+  return (
+    <div className={clsx(styles.referenceCommentRoot, className)}>
+      <Typography className={styles.userName}>{referenceComment.user.name}</Typography>
+      <CommentEditor
+        classes={{ root: styles.content }}
+        initialValue={referenceComment.content}
+        mode={CommentEditorMode.Read}
+      />
+    </div>
+  );
+};
+
+const CommentBlock = ({ commentTree }: { commentTree: CommentTree }) => {
   const { t } = useTranslation("Comment");
+  const comment = commentTree.data;
   const content = comment.content;
   const hasLeaves = comment.child_count > 0;
 
@@ -67,28 +95,30 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
 
   const handleClickReply = useCallback(() => {
     toReply({
-      refComment: comment,
+      refComment: commentTree,
     });
-  }, [comment, toReply]);
+  }, [commentTree, toReply]);
 
   const handleClickRemove = useCallback(() => {
-    const id = comment.id;
-    return firstValueFrom(service.remove(id));
-  }, [comment.id, service]);
+    return firstValueFrom(service.remove(commentTree));
+  }, [commentTree, service]);
 
   return (
     <Stack spacing={4}>
       <Stack direction="row" spacing={2} alignItems="flex-start">
         <Avatar src={comment.user?.avatar_url}></Avatar>
-        <Stack spacing={2}>
+        <Stack spacing={3}>
           <Stack direction="row" spacing={3}>
             <CommentUserText>{comment.user?.name}</CommentUserText>
             <CommentTime timestamp={comment.created_time} />
           </Stack>
+          {comment.reference_comment && comment.reference_comment.id !== comment.parent_id && (
+            <ReferenceCommentBlock referenceComment={comment.reference_comment} />
+          )}
           <CommentEditor initialValue={content} mode={CommentEditorMode.Read} />
           <Stack direction="row" spacing={3}>
             <CommentButton onClick={handleClickReply}>{t("block.panel.reply")}</CommentButton>
-            {service.canRemove(comment) && (
+            {comment.can_remove && (
               <ConfirmPopover
                 trigger={(openPopover) => (
                   <CommentButton onClick={(ev) => openPopover(ev.currentTarget)}>
@@ -113,7 +143,7 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
       {hasLeaves && (
         <div>
           <CommentLeavesWrapper>
-            <CommentLeaves commentTree={comment.children} root={comment} />
+            <CommentLeaves commentTree={commentTree} />
           </CommentLeavesWrapper>
         </div>
       )}
@@ -121,26 +151,22 @@ const CommentBlock = ({ comment }: { comment: TreeComment }) => {
   );
 };
 
-function CommentLeaves({ commentTree, root }: { commentTree: CommentTree; root: TreeComment }) {
-  const comments = commentTree.data;
+function CommentLeaves({ commentTree }: { commentTree: CommentTree }) {
+  const subCommentTrees = commentTree.children;
   const { commentService: service } = useInternalCommentContext();
 
   const loadMore = useCallback(() => {
-    return firstValueFrom(service.loadMoreLeaves(root));
-  }, [root, service]);
+    return firstValueFrom(service.loadMoreLeaves(commentTree));
+  }, [commentTree, service]);
 
   return (
     <div>
-      <Stack spacing={2}>
-        {comments.map((comment) => (
-          <CommentBlock key={comment.id} comment={comment} />
+      <Stack spacing={4}>
+        {subCommentTrees.map((commentTree, index) => (
+          <CommentBlock key={index} commentTree={commentTree} />
         ))}
+        {commentTree.paginationQuery.hasUnloadForwardChildren && <CommentLoadMoreButton handler={loadMore} />}
       </Stack>
-      {commentTree.pagination.has_more && (
-        <div>
-          <CommentLoadMoreButton handler={loadMore} />
-        </div>
-      )}
     </div>
   );
 }
@@ -158,28 +184,25 @@ function CommentEmpty() {
   );
 }
 
-const CommentRoots = ({ commentTree }: { commentTree: CommentTree }) => {
-  const hasComments = commentTree.data.length > 0;
+const CommentRoots = ({ commentTreeRoot }: { commentTreeRoot: CommentTreeRoot }) => {
+  const hasComments = commentTreeRoot.roots.length > 0;
   const { commentService: service } = useInternalCommentContext();
+
   const loadMore = useCallback(() => {
-    return firstValueFrom(service.loadMoreRoot());
+    return firstValueFrom(service.loadMoreTree());
   }, [service]);
 
   return (
     <div>
       {hasComments && (
         <Stack spacing={4}>
-          {commentTree.data.map((comment) => (
-            <CommentBlock key={comment.id} comment={comment} />
+          {commentTreeRoot.roots.map((comment) => (
+            <CommentBlock key={comment.id} commentTree={comment} />
           ))}
+          {commentTreeRoot.hasUnloadRoots && <CommentLoadMoreButton handler={loadMore} />}
         </Stack>
       )}
       {!hasComments && <CommentEmpty />}
-      {commentTree.pagination.has_more && (
-        <div>
-          <CommentLoadMoreButton handler={loadMore} />
-        </div>
-      )}
     </div>
   );
 };
@@ -189,9 +212,12 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   const { commentService, commentPostElRef, scrollToPost } = useInternalCommentContext();
   const authService = useAuthService();
 
-  const commentTree = useObservableEagerState(commentService.commentTree$);
+  const commentTreeRoot = useUncachedObservableEagerState(commentService.commentTreeRoot$);
 
-  const [commentPostState, setCommentPostState] = useState<{ expand: boolean; refComment: TreeComment | undefined }>({
+  const [commentPostState, setCommentPostState] = useState<{
+    expand: boolean;
+    refComment: CommentTree | undefined;
+  }>({
     expand: false,
     refComment: undefined,
   });
@@ -208,7 +234,7 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   );
 
   const toReply = useCallback(
-    (params: { refComment?: TreeComment }) => {
+    (params: { refComment?: CommentTree }) => {
       if (authService.isLogin()) {
         setCommentPostState({
           expand: true,
@@ -239,7 +265,7 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
   }, [maxHeight]);
 
   console.debug("[React][Comment]", {
-    commentTree,
+    commentTree: commentTreeRoot,
   });
 
   return (
@@ -250,14 +276,14 @@ const CommentInner = ({ maxHeight, headerSuffix }: CommentInnerProps) => {
             <CommentHeaderRoot>
               <Stack direction="row" spacing={1} alignItems="center">
                 <CommentHeaderText>{t("header")}</CommentHeaderText>
-                <CommentHeaderCount>{commentTree?.pagination.total ?? "-"}</CommentHeaderCount>
+                <CommentHeaderCount>{commentTreeRoot?.total ?? "-"}</CommentHeaderCount>
               </Stack>
             </CommentHeaderRoot>
             {headerSuffix}
           </Stack>
           <CommentBodyRoot style={commentBodyStyle}>
-            {!commentTree && <CommentLoading />}
-            {commentTree && <CommentRoots commentTree={commentTree} />}
+            {!commentTreeRoot && <CommentLoading />}
+            {commentTreeRoot && <CommentRoots commentTreeRoot={commentTreeRoot} />}
           </CommentBodyRoot>
           <CommentPost
             expand={commentPostState.expand}

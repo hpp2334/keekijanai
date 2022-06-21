@@ -33,7 +33,7 @@ impl CommentAuthorization {
     }
     pub async fn check_remove(&self, user_info: &UserInfo, comment: &Comment) -> ServeResult<()> {
         let comment_domain = CommentDomainBuilder::new().build(comment.clone()).await?;
-        if comment_domain.like_own(user_info) {
+        if !comment_domain.like_own(user_info) {
             return Err(InsufficientPrivilege(
                 user_info.id,
                 "comment",
@@ -45,7 +45,7 @@ impl CommentAuthorization {
     }
     pub async fn check_update(&self, user_info: &UserInfo, comment: &Comment) -> ServeResult<()> {
         let comment_domain = CommentDomainBuilder::new().build(comment.clone()).await?;
-        if comment_domain.like_own(user_info) {
+        if !comment_domain.like_own(user_info) {
             return Err(InsufficientPrivilege(
                 user_info.id,
                 "comment",

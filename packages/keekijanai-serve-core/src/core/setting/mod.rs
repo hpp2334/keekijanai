@@ -48,6 +48,7 @@ pub fn get_setting() -> anyhow::Result<&'static Setting> {
 
 pub fn init_setting() -> anyhow::Result<()> {
     let setting = build_setting()?;
+    tracing::info!("setting: {:?}", setting);
     SETTING
         .set(setting)
         .map_err(|e| anyhow::anyhow!("set setting OnceCell fail: {:?}", e))?;

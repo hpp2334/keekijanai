@@ -4,7 +4,8 @@ use derive_builder::Builder;
 use serde::Serialize;
 
 use crate::{
-    core::{build_cursor_list, CursorPagination, ServeResult},
+    core::{build_cursor_list, CursorPagination, CursorPaginationListItem, ServeResult},
+    helpers::VecHelper,
     modules::{
         comment::{
             domain::{CommentDomain, CommentDomainBuilder},
@@ -72,6 +73,20 @@ impl CommentVOMapper {
             left_total: cursor_comments.left_total,
         };
         Ok(cursor_comments)
+    }
+
+    pub async fn map_from_cursor_comment(
+        &self,
+        comment: Comment,
+        cursor: CommentCursorId,
+    ) -> ServeResult<CursorPaginationListItem<CommentVO, i64>> {
+        let comment_vec = [comment].to_vec();
+        let vo = self.map_from_comments(comment_vec).await?.strict_single()?;
+
+        Ok(CursorPaginationListItem {
+            payload: vo,
+            cursor: cursor.primitive_value(),
+        })
     }
 
     pub async fn map_from_comments(&self, comments: Vec<Comment>) -> ServeResult<Vec<CommentVO>> {

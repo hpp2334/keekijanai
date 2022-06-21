@@ -1,27 +1,62 @@
-import { CursorPagination } from "@/generated/keekijanai-api";
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { assert } from "@/utils/assert";
 import { switchTap } from "@/utils/rxjs-helper";
-import { omit, noop } from "@/utils/common";
-import { BehaviorSubject, catchError, Observable, of, switchMap, switchMapTo } from "rxjs";
-import { AuthService, UserRole } from "../auth";
+import { noop } from "@/utils/common";
+import { BehaviorSubject, Observable } from "rxjs";
+import { AuthService } from "../auth";
 import { CommentApi } from "./api";
 import * as Data from "./data";
 import { container } from "@/core/container";
 import { Service, ServiceFactory, setServiceFactory } from "@/core/service";
+import { CommentTree, CommentTreeContext, CommentTreeRoot } from "./model";
+import { CursorDirection, CursorPaginationListItem } from "@/vos";
 
-const DEFAULT_PAGINATION = {
-  limit: 0,
-  cursor: null,
-  total: 0,
-  has_more: false,
-};
+function mergeCommentsInRoot(
+  root: CommentTreeRoot,
+  params: {
+    cursorItemComments: CursorPaginationListItem<Data.CommentVO, number>[];
+    hasMore: boolean;
+    endCursor: number | null;
+    total?: number;
+  }
+) {
+  root.endCursor = params.endCursor;
+  root.hasUnloadRoots = params.hasMore;
+  if (params.total !== undefined) {
+    root.total = params.total;
+  }
+
+  const ctx: CommentTreeContext = {
+    root,
+  };
+  params.cursorItemComments.forEach((item) => {
+    const vo = item.payload;
+    if (vo.parent_id !== null && !root.getById(vo.parent_id)) {
+      return;
+    }
+    const comment = CommentTree.create(ctx, vo, item.cursor);
+    const parent = vo.parent_id === null ? null : root.getById(vo.parent_id);
+    root.append(comment, parent);
+  });
+}
 
 export class CommentService implements Service {
   private rootsLimit: number;
   private leavesLimit: number;
+  private _commentTreeContext: CommentTreeContext | null = null;
 
-  public commentTree$: BehaviorSubject<Data.CommentTree | null> = new BehaviorSubject<Data.CommentTree | null>(null);
-  private idMapComment: Map<number, Data.TreeComment> = new Map();
+  public commentTreeRoot$ = new BehaviorSubject<CommentTreeRoot | null>(null);
+
+  private get commentTreeContext(): CommentTreeContext {
+    assert(this._commentTreeContext !== null, "should call initializeTree first");
+    return this._commentTreeContext;
+  }
+
+  private get commentTreeRoot(): CommentTreeRoot {
+    const tree = this.commentTreeRoot$.value;
+    assert(tree, 'tree is null. "initializeTree" should be call first');
+    return tree;
+  }
 
   public constructor(private authService: AuthService, private api: CommentApi, public belong: string) {
     this.rootsLimit = 20;
@@ -29,34 +64,73 @@ export class CommentService implements Service {
   }
 
   public destroy() {
-    this.commentTree$.next(null);
-    this.idMapComment.clear();
+    this.commentTreeRoot$.next(null);
   }
 
-  public updateTree(): Observable<unknown> {
-    this.commentTree$.next(null);
-    this.idMapComment.clear();
+  public initializeTree(): Observable<unknown> {
+    this.commentTreeRoot$.next(null);
     return this.api
       .getTree({
         belong: this.belong,
         roots_limit: this.rootsLimit,
         leaves_limit: this.leavesLimit,
-        cursor: null,
+        cursor_id: null,
       })
       .pipe(
         switchTap((resp) => {
-          this.mergeCommentTree(resp.data.comments, resp.data.pagination);
+          const payload = resp.data.payload;
+
+          const root = CommentTreeRoot.create();
+          this._commentTreeContext = {
+            root,
+          };
+          mergeCommentsInRoot(root, {
+            cursorItemComments: payload.list,
+            hasMore: payload.has_more,
+            endCursor: payload.end_cursor,
+            total: payload.left_total,
+          });
+
+          this.commentTreeRoot$.next(root);
         })
       );
   }
 
-  public create(payload: { content: string }, reference: Data.TreeComment | null): Observable<unknown> {
-    const toCreate: Data.CommentToCreate = {
+  public loadMoreTree(): Observable<unknown> {
+    const root = this.commentTreeRoot;
+    return this.api
+      .getTree({
+        belong: this.belong,
+        roots_limit: this.rootsLimit,
+        leaves_limit: this.leavesLimit,
+        cursor_id: root.endCursor,
+      })
+      .pipe(
+        switchTap((resp) => {
+          const payload = resp.data.payload;
+
+          mergeCommentsInRoot(root, {
+            cursorItemComments: payload.list,
+            hasMore: payload.has_more,
+            endCursor: payload.end_cursor,
+          });
+
+          this.commentTreeRoot$.next(root);
+        })
+      );
+  }
+
+  public create(
+    payload: { content: string },
+    reference: CommentTree | null,
+    parent: CommentTree | null
+  ): Observable<unknown> {
+    const root = this.commentTreeRoot;
+    const toCreate: Data.CommentCreateVO = {
       belong: this.belong,
       content: payload.content,
-      reference_id: reference?.id,
-      parent_id:
-        reference === null ? Data.NONE_ROOT_PARENT_ID : reference.parent === null ? reference.id : reference.parent.id,
+      reference_id: reference?.id ?? null,
+      parent_id: parent?.id ?? null,
     };
     return this.api
       .create({
@@ -64,201 +138,107 @@ export class CommentService implements Service {
       })
       .pipe(
         switchTap((resp) => {
-          const payload = resp.data.payload;
-          this.insertIntoCommentTree(payload);
+          const { payload, cursor } = resp.data.payload;
+          const comment = CommentTree.create(this.commentTreeContext, payload, cursor);
+          root.append(comment, parent);
+
+          this.commentTreeRoot$.next(root);
         })
       );
   }
 
-  public remove(id: number): Observable<unknown> {
-    return this.api.remove(id).pipe(
+  public remove(comment: CommentTree): Observable<unknown> {
+    const root = this.commentTreeRoot;
+    return this.api.remove(comment.id).pipe(
       switchTap(() => {
-        const commentTree = this.commentTree$.value;
-        if (commentTree === null) {
-          return;
-        }
+        root.remove(comment);
 
-        const comment = this.idMapComment.get(id) ?? null;
-        if (!comment) {
-          return;
-        }
-
-        this.idMapComment.delete(id);
-        commentTree.data = [...commentTree.data];
-        comment.children.data.forEach((tc) => {
-          this.idMapComment.delete(tc.id);
-        });
-
-        const parent = comment.parent;
-        if (!parent) {
-          const index = commentTree.data.findIndex((comment) => comment.id === id);
-          if (index >= 0) {
-            commentTree.data.splice(index, 1);
-            commentTree.pagination.total -= 1;
-          }
-        } else {
-          const index = parent.children.data.findIndex((comment) => comment.id === id);
-          parent.children.data.splice(index, 1);
-          parent.child_count -= 1;
-          parent.children.pagination.total -= 1;
-          commentTree.pagination.total -= 1;
-        }
-        this.commentTree$.next({ ...commentTree });
+        this.commentTreeRoot$.next(root);
       })
     );
   }
 
-  public loadMoreRoot(): Observable<unknown> {
-    const ct = this.commentTree$.value;
-    assert(ct, "comment tree is null");
+  public loadLeaves(
+    parent: CommentTree,
+    params: {
+      cursorDirection?: CursorDirection;
+      cursorId?: number;
+    } = {}
+  ): Observable<unknown> {
+    const root = this.commentTreeRoot;
+    const normalizedParams = {
+      cursorDirection: params.cursorDirection ?? CursorDirection.Forward,
+      cursorId: params.cursorId ?? null,
+    };
 
-    return this.api
-      .getTree({
-        belong: this.belong,
-        roots_limit: this.rootsLimit,
-        leaves_limit: this.leavesLimit,
-        cursor: ct.pagination.cursor,
-      })
-      .pipe(
-        switchTap((resp) => {
-          this.mergeCommentTree(resp.data.comments, resp.data.pagination);
-        })
-      );
-  }
-
-  public loadMoreLeaves(comment: Data.TreeComment): Observable<unknown> {
     return this.api
       .list({
         belong: this.belong,
         limit: this.leavesLimit,
-        cursor: comment.children.pagination.cursor ?? undefined,
-        parent_id: comment.id,
+        parent_id: parent.id,
+        cursor_id: normalizedParams.cursorId,
+        cursor_direction: normalizedParams.cursorDirection,
       })
       .pipe(
         switchTap((resp) => {
-          const ct = this.commentTree$.value;
-          assert(ct, "comment tree is null");
+          const incomingChildren = resp.data.payload.list.map((item) =>
+            CommentTree.create({ root }, item.payload, item.cursor)
+          );
+          parent.replaceChildren(incomingChildren);
 
-          const treeComments = resp.data.comments.map((comment) => CommentService.buildInitialTreeComment(comment));
-          treeComments.forEach((tc) => (tc.parent = comment));
-          comment.children.data.push(...treeComments);
-          comment.children.pagination = {
-            ...resp.data.pagination,
-            cursor: treeComments[treeComments.length - 1].id ?? null,
-          };
-          this.commentTree$.next({ ...ct });
+          if (normalizedParams.cursorDirection === CursorDirection.Forward) {
+            parent.paginationQuery.forwardEndCursor = resp.data.payload.end_cursor;
+            parent.paginationQuery.hasUnloadForwardChildren = resp.data.payload.has_more;
+          } else {
+            parent.paginationQuery.forwardEndCursor = resp.data.payload.end_cursor;
+            parent.paginationQuery.hasUnloadBackwardChildren = resp.data.payload.has_more;
+          }
+
+          this.commentTreeRoot$.next(root);
         })
       );
   }
 
-  private mergeCommentTree(comments: Data.StyledCommentVO[], pagination: CursorPagination) {
-    const prevCt = this.commentTree$.value;
-    const [ct, map] = CommentService.buildCommentTree(comments, pagination);
-    if (prevCt) {
-      ct.data.splice(0, 0, ...prevCt.data);
-    }
-    this.commentTree$.next(ct);
-    for (const [key, value] of map) {
-      this.idMapComment.set(key, value);
-    }
-  }
+  public loadMoreLeaves(
+    parent: CommentTree,
+    params: {
+      cursorDirection?: CursorDirection;
+    } = {}
+  ): Observable<unknown> {
+    const root = this.commentTreeRoot;
+    const paramCursorDirection = params.cursorDirection ?? CursorDirection.Forward;
 
-  private insertIntoCommentTree(comment: Data.StyledCommentVO) {
-    const commentTree = this.commentTree$.value;
-    const _created = comment;
-    if (commentTree === null) {
-      return;
-    }
-    if (_created.id !== Data.NONE_ROOT_PARENT_ID && this.idMapComment.has(_created.id)) {
-      return;
-    }
+    return this.api
+      .list({
+        belong: this.belong,
+        limit: this.leavesLimit,
+        parent_id: parent.id,
+        cursor_id: paramCursorDirection === CursorDirection.Forward ? this.commentTreeRoot.endCursor : null,
+        cursor_direction: paramCursorDirection,
+      })
+      .pipe(
+        switchTap((resp) => {
+          const currentChildren = [...parent.children];
+          const incomingChildren = resp.data.payload.list.map((item) =>
+            CommentTree.create({ root }, item.payload, item.cursor)
+          );
 
-    const parent = this.idMapComment.get(_created.parent_id) ?? null;
-    const created = CommentService.buildInitialTreeComment(_created);
-    created.parent = parent;
+          if (paramCursorDirection === CursorDirection.Forward) {
+            parent.replaceChildren([...currentChildren, ...incomingChildren]);
+          } else {
+            parent.replaceChildren([...incomingChildren, ...currentChildren]);
+          }
+          if (paramCursorDirection === CursorDirection.Forward) {
+            parent.paginationQuery.forwardEndCursor = resp.data.payload.end_cursor;
+            parent.paginationQuery.hasUnloadForwardChildren = resp.data.payload.has_more;
+          } else {
+            parent.paginationQuery.forwardEndCursor = resp.data.payload.end_cursor;
+            parent.paginationQuery.hasUnloadBackwardChildren = resp.data.payload.has_more;
+          }
 
-    commentTree.data = [...commentTree.data];
-    this.idMapComment.set(created.id, created);
-    if (parent === null) {
-      commentTree.data.unshift(created);
-      commentTree.pagination.total += 1;
-    } else {
-      const pagination = parent.children.pagination;
-      parent.child_count += 1;
-      parent.children.data = [created, ...parent.children.data];
-      pagination.total += 1;
-      if (pagination.cursor === null) {
-        pagination.cursor = created.id;
-      }
-
-      commentTree.pagination.total += 1;
-    }
-    this.commentTree$.next({ ...commentTree });
-  }
-
-  public canRemove(comment: { user_id: number }) {
-    const current = this.authService.current$.value;
-    return current?.role === UserRole.Admin || current?.id === comment.user_id;
-  }
-
-  public static buildInitialTreeComment(comment: Data.StyledCommentVO): Data.TreeComment {
-    return {
-      ...omit(comment, ["parent_id"]),
-      parent: null,
-      children: {
-        data: [],
-        pagination: DEFAULT_PAGINATION,
-      },
-    };
-  }
-
-  public static buildCommentTree(
-    data: Data.StyledCommentVO[],
-    pagination: CursorPagination
-  ): [Data.CommentTree, Map<number, Data.TreeComment>] {
-    const map: Map<number, Data.TreeComment> = new Map();
-    const roots = data
-      .filter((comment) => comment.parent_id === Data.NONE_ROOT_PARENT_ID)
-      .map(CommentService.buildInitialTreeComment);
-    roots.forEach((tc) => map.set(tc.id, tc));
-
-    data
-      .filter((comment) => comment.parent_id !== Data.NONE_ROOT_PARENT_ID)
-      .forEach((comment) => {
-        const parent = map.get(comment.parent_id);
-        if (!parent) {
-          // Dirty data, don't return it
-          return;
-        }
-        const tc = CommentService.buildInitialTreeComment(comment);
-        tc.parent = parent;
-        parent.children.data.push(tc);
-        map.set(tc.id, tc);
-      });
-
-    roots.forEach((tc) => {
-      const data = tc.children.data;
-
-      tc.children.pagination = {
-        cursor: data.length > 0 ? data[data.length - 1].id : null,
-        total: data.length,
-        limit: data.length,
-        has_more: tc.child_count > data.length,
-      };
-    });
-
-    return [
-      {
-        data: roots,
-        pagination: {
-          cursor: roots.length > 0 ? roots[roots.length - 1].id : null,
-          limit: pagination.limit,
-          total: pagination.total,
-          has_more: pagination.has_more,
-        },
-      },
-      map,
-    ];
+          this.commentTreeRoot$.next(root);
+        })
+      );
   }
 }
 
@@ -267,7 +247,7 @@ export class CommentServiceFactory implements ServiceFactory<[string], CommentSe
 
   public factory(belong: string) {
     const service = new CommentService(this.authService, this.api, belong);
-    service.updateTree().subscribe(noop);
+    service.initializeTree().subscribe(noop);
     return service;
   }
 }

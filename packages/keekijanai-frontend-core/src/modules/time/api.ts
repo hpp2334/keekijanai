@@ -1,4 +1,4 @@
-import type * as ApiTypes from "@/generated/keekijanai-api";
+import type * as ApiTypes from "@/vos/keekijanai-api";
 import { ajax } from "@/core/request";
 import { container } from "@/core/container";
 

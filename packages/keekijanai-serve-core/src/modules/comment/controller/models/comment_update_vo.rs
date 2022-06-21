@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use derive_builder::Builder;
 use serde::{Deserialize, Serialize};
 
@@ -32,7 +34,7 @@ pub struct CommentCreateVO {
 
 #[derive(Debug, Builder)]
 pub struct CommentCreateVOMapper {
-    user: User,
+    user: Arc<User>,
 }
 
 impl CommentCreateVOMapper {

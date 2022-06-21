@@ -105,18 +105,22 @@ SELECT * from keekijanai_comment
             let mut sql_builder = sea_query::Query::select();
             sql_builder.from(CommentModelColumns::Table);
 
-            sql_builder.expr_as(
-                Expr::col(CommentModelColumns::Id).count(),
-                Alias::new("_cnt"),
-            );
             sql_builder.expr(Expr::cust("*"));
-            sql_builder.and_where(Expr::col(CommentModelColumns::ParentId).eq(parent_id));
+            sql_builder.expr_as(Expr::cust("COUNT(*)"), Alias::new("_cnt"));
+            if (parent_id.is_some()) {
+                sql_builder.and_where(Expr::col(CommentModelColumns::ParentId).eq(parent_id));
+            } else {
+                sql_builder.and_where(Expr::col(CommentModelColumns::ParentId).is_null());
+            }
 
             sql_builder.and_where(Expr::col(CommentModelColumns::Belong).eq(belong));
-            let col_id = Expr::col(CommentModelColumns::Id);
             if let Some(id) = id {
+                let col_id = Expr::col(CommentModelColumns::Id);
                 sql_builder.and_where(if less { col_id.lt(id) } else { col_id.gt(id) });
             }
+
+            sql_builder.group_by_col(CommentModelColumns::Id);
+
             sql_builder.limit(limit as u64 + 1);
             sql_builder.order_by(CommentModelColumns::CreatedTime, sea_query::Order::Desc);
 
@@ -125,8 +129,10 @@ SELECT * from keekijanai_comment
 
         let pool = get_pool();
         let mut res_rows = sqlx::query(&sql).fetch_all(&pool).await?;
-        let res_rows_prev_len = res_rows.len();
-        res_rows.pop();
+        let has_more = res_rows.len() > limit as usize;
+        if has_more {
+            res_rows.pop();
+        }
 
         let total = if res_rows.len() == 0 {
             0
@@ -134,7 +140,6 @@ SELECT * from keekijanai_comment
             // "_cnt" column
             res_rows[0].try_get::<i64, _>(0)?
         };
-        let has_more = res_rows.len() > limit as usize;
         let comments = res_rows
             .into_iter()
             .map(|row| FromRow::from_row(&row))

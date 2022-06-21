@@ -6,7 +6,10 @@ use axum::{
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    core::{di::DIContainer, CursorDirection, CursorPagination, ServeError, Service},
+    core::{
+        di::DIContainer, CursorDirection, CursorPagination, CursorPaginationListItem,
+        SerdeCursorPaginationListItem, ServeError, Service,
+    },
     helpers::VecHelper,
     modules::{
         auth::UserInfo,
@@ -37,7 +40,7 @@ struct CreateCommentParams {
 
 #[derive(Serialize)]
 struct CreateCommentRespPayload {
-    pub payload: CommentVO,
+    pub payload: SerdeCursorPaginationListItem<CommentVO, i64>,
 }
 
 #[derive(Deserialize, Clone)]
@@ -47,7 +50,7 @@ struct UpdateCommentParams {
 
 #[derive(Serialize, Debug)]
 struct UpdateCommentRespPayload {
-    pub payload: CommentVO,
+    pub payload: SerdeCursorPaginationListItem<CommentVO, i64>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -140,6 +143,7 @@ async fn create_comment(
     let comment_service = DIContainer::get().resolve::<CommentService>();
 
     let mapper_create = CommentCreateVOMapperBuilder::default()
+        .user(user_info.clone())
         .build()
         .map_err(anyhow::Error::from)?;
     let comment_create = mapper_create.map(params.payload);
@@ -149,12 +153,12 @@ async fn create_comment(
     let mapper = CommentVOMapperBuilder::default()
         .build()
         .map_err(anyhow::Error::from)?;
-    let payload = mapper
-        .map_from_comments(vec![created])
-        .await?
-        .strict_single()?;
+    let cursor = CommentCursorId::from_comment(&created);
+    let payload = mapper.map_from_cursor_comment(created, cursor).await?;
 
-    let resp_payload = CreateCommentRespPayload { payload };
+    let resp_payload = UpdateCommentRespPayload {
+        payload: payload.into(),
+    };
 
     Ok(Json(resp_payload))
 }
@@ -179,12 +183,12 @@ async fn update_comment(
     let mapper = CommentVOMapperBuilder::default()
         .build()
         .map_err(anyhow::Error::from)?;
-    let payload = mapper
-        .map_from_comments(vec![updated])
-        .await?
-        .strict_single()?;
+    let cursor = CommentCursorId::from_comment(&updated);
+    let payload = mapper.map_from_cursor_comment(updated, cursor).await?;
 
-    let resp_payload = UpdateCommentRespPayload { payload };
+    let resp_payload = CreateCommentRespPayload {
+        payload: payload.into(),
+    };
 
     Ok(Json(resp_payload))
 }
